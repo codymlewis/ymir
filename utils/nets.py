@@ -23,5 +23,5 @@ def lenet(get_acts=False):
         ])
         return mlp(x)
     if get_acts:
-        return net_fn, net_act
-    return net_fn
+        return hk.without_apply_rng(hk.transform(net_fn)), hk.without_apply_rng(hk.transform(net_act))
+    return hk.without_apply_rng(hk.transform(net_fn))

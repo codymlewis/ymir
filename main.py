@@ -1,9 +1,9 @@
-from dataclasses import dataclass
-from typing import Mapping
 import pickle
+from math import ceil
 
 import haiku as hk
 import jax
+from jax._src.tree_util import tree_structure, tree_unflatten
 import jax.flatten_util
 import jax.numpy as jnp
 import optax
@@ -11,15 +11,14 @@ import optax
 from tqdm import trange, tqdm
 
 import chief
-from chief.aggregations import foolsgold
+from chief.aggregation import foolsgold
 import endpoints
 import utils
 
 
+
 if __name__ == "__main__":
-    net_fn, net_act = utils.nets.lenet(get_acts=True)
-    net = hk.without_apply_rng(hk.transform(net_fn))
-    neta = hk.without_apply_rng(hk.transform(net_act))
+    net, neta = utils.nets.lenet(get_acts=True)
     opt = optax.sgd(0.01)
     server_update = chief.update(opt)
     client_update = endpoints.update(opt, utils.losses.fedmax_loss(net, neta))
@@ -54,9 +53,11 @@ if __name__ == "__main__":
         all_grads = []
         for client in clients:
             grads, client.opt_state = client_update(params, client.opt_state, next(client.data))
+            grads = endpoints.compression.fedzip.encode(grads, compress=False)
             all_grads.append(grads)
 
         # Server side collection of gradients
+        # all_grads = chief.compression.fedzip.decode(params, all_grads)
         server.histories = foolsgold.update(server.histories, all_grads)
         alpha = foolsgold.scale(server.histories, server.kappa)
         all_grads = chief.apply_scale(alpha, all_grads)

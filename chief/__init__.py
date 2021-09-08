@@ -2,7 +2,8 @@ import jax
 import optax
 import tensorflow_datasets as tfds
 
-from . import aggregations
+from . import aggregation
+from . import compression
 
 def load_dataset(split, batch_size, cache=True):
     """Loads the dataset as a generator of batches."""

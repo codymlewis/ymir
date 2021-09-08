@@ -7,6 +7,7 @@ import optax
 
 from . import adversaries
 from . import datasets
+from . import compression
 
 
 def update(opt, loss):

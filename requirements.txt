@@ -1,0 +1,6 @@
+jax
+jaxlib
+optax
+dm-haiku
+tensorflow-datasets
+tqdm
