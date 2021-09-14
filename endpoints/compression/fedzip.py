@@ -1,11 +1,12 @@
 import jax
 import jax.numpy as jnp
+import numpy as np
 from sklearn import cluster
 
 
 def encode(grads, compress=True):
     usable_grads = jax.tree_leaves(jax.tree_map(lambda x: x.flatten(), grads))
-    sparse_grads = [top_z(0.3, g) for g in usable_grads]
+    sparse_grads = [top_z(0.3, np.array(g)) for g in usable_grads]
     quantized_grads = [k_means(g) for g in sparse_grads]
     if compress:
         encoded_grads = []
@@ -17,19 +18,19 @@ def encode(grads, compress=True):
         return encoded_grads, codings
     return jax.tree_multimap(lambda x, y: x.reshape(y.shape), jax.tree_unflatten(jax.tree_structure(grads), quantized_grads), grads)
 
-@jax.jit
+
 def top_z(z, grads):
-    z_index = jnp.ceil(z * grads.shape[0]).astype(jnp.int32)
-    abs_grads = abs(grads)
-    top_z = abs_grads.sort()[-z_index]
-    return jnp.where(abs_grads >= top_z, grads, 0.0)
+    z_index = np.ceil(z * grads.shape[0]).astype(np.int32)
+    grads[np.argpartition(abs(grads), -z_index)[:-z_index]] = 0
+    return grads
 
 def k_means(grads):
-    model = cluster.KMeans(n_clusters=3, max_iter=4, n_init=1)
-    labels = model.fit_predict(grads.reshape((-1, 1)))
+    model = cluster.KMeans(init='random', n_clusters=3, max_iter=4, n_init=1, random_state=0)
+    model.fit(np.unique(grads).reshape((-1, 1)))
+    labels = model.predict(grads.reshape((-1, 1)))
     centroids = model.cluster_centers_
     for i, c in enumerate(centroids):
-        grads = jnp.where(labels == i, c[0], grads)
+        grads[labels == i] = c[0]
     return grads
 
 def encoding(grads):
