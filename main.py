@@ -1,31 +1,32 @@
 import pickle
-from math import ceil
 
-import haiku as hk
 import jax
-from jax._src.tree_util import tree_structure, tree_unflatten
 import jax.flatten_util
 import jax.numpy as jnp
 import optax
+import haiku as hk
 
 from tqdm import trange, tqdm
 
 import chief
 from chief.aggregation import foolsgold
+from chief.aggregation import std_dagmm
 import endpoints
 import utils
 
 
 
 if __name__ == "__main__":
-    net, neta = utils.nets.lenet(get_acts=True)
+    net = hk.without_apply_rng(hk.transform(lambda x: utils.nets.LeNet()(x)))
+    # neta = hk.without_apply_rng(hk.transform(lambda x: utils.nets.LeNet().act(x)))
     opt = optax.sgd(0.01)
     server_update = chief.update(opt)
-    client_update = endpoints.update(opt, utils.losses.fedmax_loss(net, neta))
+    client_update = endpoints.update(opt, utils.losses.cross_entropy_loss(net))
+    # client_update = endpoints.update(opt, utils.losses.fedmax_loss(net, neta))
     evaluator = utils.metrics.measurer(net)
 
-    N = 7
-    A = 3
+    N = 8
+    A = 2
     ATTACK_FROM = 8
     ATTACK_TO = 2
 
@@ -53,7 +54,7 @@ if __name__ == "__main__":
         all_grads = []
         for client in clients:
             grads, client.opt_state = client_update(params, client.opt_state, next(client.data))
-            grads = endpoints.compression.fedzip.encode(grads, compress=False)
+            # grads = endpoints.compression.fedzip.encode(grads, compress=False)
             all_grads.append(grads)
 
         # Server side collection of gradients
