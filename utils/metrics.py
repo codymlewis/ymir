@@ -10,8 +10,8 @@ def measurer(net):
     @jax.jit
     def attack_success_rate(params, batch, attack_from, attack_to):
         preds = jnp.argmax(net.apply(params, batch), axis=-1)
-        mask = jnp.where(batch['label'] == attack_from, 1, 0)
-        return jnp.sum((preds * mask) == attack_to) / jnp.sum(mask)
+        idx = batch['label'] == attack_from
+        return jnp.sum(jnp.where(idx, preds, -1) == attack_to) / jnp.sum(idx)
     return {'acc': accuracy, 'asr': attack_success_rate}
 
 def create_recorder(evals, train=False, test=False, add_evals=None):
@@ -33,3 +33,21 @@ def record(results, evaluator, params, train_ds=None, test_ds=None, add_recs=Non
             v.append(evaluator['asr'](params, next(ds), kwargs['attack_from'], kwargs['attack_to']))
     for k, v in add_recs.items():
         results[k].append(v)
+
+def finalize(results):
+    for k, v in results.items():
+        results[k] = jnp.array(v)
+    return results
+
+
+def tabulate(results, total_rounds, ri=10):
+    halftime = int((total_rounds / 2) / ri)
+    table = ""
+    for k, v in results.items():
+        table += f"[{k}] mean: {v.mean()}, std: {v.std()} [after {halftime * ri} rounds] mean {v[halftime:].mean()}, std: {v[halftime:].std()}\n"
+    return table[:-1]
+
+def csvline(ds_name, alg, adv, results, total_rounds, ri=10):
+    halftime = int((total_rounds / 2) / ri)
+    asr = results['test asr']
+    return f"{ds_name},{alg},{adv:.2%},{results['test accuracy'][-1]},{asr.mean()},{asr.std()},{asr[halftime:].mean()},{asr[halftime:].std()}\n"

@@ -13,6 +13,10 @@ class Server:
     histories: jaxlib.xla_extension.DeviceArray
     kappa: float
 
+    def __init__(self, n_clients, params, kappa):
+        self.histories = jnp.zeros((n_clients, jax.flatten_util.ravel_pytree(params)[0].shape[0]))
+        self.kappa = kappa
+
 
 @jax.jit
 def update(histories, all_grads):

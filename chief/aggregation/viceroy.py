@@ -26,18 +26,18 @@ def init(all_grads):
     return jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads])
 
 @jax.jit
-def update(histories, rep, all_grads, omega=0.85, eta=0.3, epsilon=-0.0001):
+def update(histories, rep, all_grads, omega=0.85, eta=0.25, epsilon=-0.0001):
     """Performed after a scale"""
     X = jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads])
     r = abs(optax.cosine_similarity(histories + sys.float_info.epsilon, X))
     idx = rep >= epsilon
     rep = jnp.where(
         idx,
-        jnp.minimum(omega * rep + eta * jnp.tanh(2 * r - 1), 1),
-        omega**(1 - r) * rep
+        jnp.clip(omega * rep + eta * jnp.tanh(2 * r - 1), -1, 1),
+        omega**r * rep
     )
     histories = omega * histories + (X.T * (rep >= 0)).T
-    rep = jnp.where(idx * ((r + rep) < 0.5), -1, rep)
+    rep = jnp.where(idx * ((r + (rep / 2)) < 0.5), -1, rep)
     return histories, rep
 
 @jax.jit
@@ -46,6 +46,8 @@ def scale(grads, histories, reps, T):
     X = jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in grads])
     G = jnp.sum(X, axis=0) / n
     S = jnp.sum(histories, axis=0) / (T * n)
-    alpha = jnp.exp(-jnp.where(T == 1, optax.cosine_similarity(X, G), optax.cosine_similarity(X, S) - optax.cosine_similarity(X, G))**2) * jnp.maximum(reps, 0)
+    alpha = jnp.exp(
+        -jnp.where(T == 1, optax.cosine_similarity(X, G), (optax.cosine_similarity(X, S) - (optax.cosine_similarity(X, G) / 2)))**2
+    ) * jnp.maximum(reps, 0)
     alpha = jnp.where(alpha > 0, alpha / jnp.sum(alpha), 0)
     return alpha

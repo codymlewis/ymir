@@ -6,7 +6,6 @@ import jax
 import optax
 
 from . import adversaries
-from . import datasets
 from . import compression
 
 
@@ -24,7 +23,7 @@ class Client:
     data: Mapping[str, np.ndarray]
     batch_size: int
 
-    def __init__(self, i, opt_state, batch_size):
-        self.opt_state = opt_state
-        self.data = datasets.load_dataset("train", batch_size=batch_size, filter=lambda x: x['label'] == i)
-        self.batch_size = batch_size
+    # def __init__(self, opt_state, data, batch_size):
+    #     self.opt_state = opt_state
+    #     self.data = data
+    #     self.batch_size = batch_size

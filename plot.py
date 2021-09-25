@@ -4,8 +4,9 @@ from matplotlib.patches import Rectangle
 
 
 def make_plot(filename, results, attacking=None):
-    rounds = range(0, 10_001, 10)
+    rounds = range(0, 5_001, 10)
     fig, ax = plt.subplots()
+    ax.set_ylim(0, 1)
     if attacking is not None:
         for (start, width) in attacking:
             ax.add_patch(
@@ -48,6 +49,6 @@ def attack_points(attacking):
 if __name__ == "__main__":
     with open('results.pkl', 'rb') as f:
         results = pickle.load(f)
-    fn = "plot.png"
+    fn = "plot.pdf"
     make_plot(fn, results, attacking=attack_points(results['attacking']))
     print(f"Save plot to {fn}")

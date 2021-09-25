@@ -1,17 +1,9 @@
 import jax
 import optax
-import tensorflow_datasets as tfds
 
 from . import aggregation
 from . import compression
 
-def load_dataset(split, batch_size, cache=True):
-    """Loads the dataset as a generator of batches."""
-    ds = tfds.load("mnist:3.*.*", split=split)
-    if cache:
-        ds = ds.cache().repeat()
-    ds = ds.batch(batch_size)
-    return iter(tfds.as_numpy(ds))
 
 @jax.jit
 def tree_mul(tree, scale):
