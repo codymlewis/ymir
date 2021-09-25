@@ -2,7 +2,6 @@ import sklearn.datasets as skds
 import sklearn.preprocessing as skp
 import numpy as np
 
-from functools import partial
 import abc
 
 
@@ -18,7 +17,7 @@ class DataIter:
 
     def __next__(self):
         idx = np.random.choice(self.idx, self.batch_size, replace=False)
-        return {'data': self.X[idx], 'label': self.y[idx]}
+        return self.X[idx], self.y[idx]
 
 
 class Dataset:

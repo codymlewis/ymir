@@ -13,14 +13,10 @@ class LeNet(hk.Module):
             hk.Linear(classes)
         ]
 
-    def __call__(self, batch):
-        x = batch['data']
-        # x = batch["image"].astype(jnp.float32) / 255.
+    def __call__(self, x):
         return hk.Sequential(self.layers)(x)
     
-    def act(self, batch):
-        x = batch['data']
-        # x = batch["image"].astype(jnp.float32) / 255.
+    def act(self, x):
         return hk.Sequential(self.layers[:-1])(x)
 
 
@@ -36,6 +32,5 @@ class ConvLeNet(hk.Module):
             hk.Linear(10)
         ]
 
-    def __call__(self, batch):
-        x = batch["image"].astype(jnp.float32) / 255.
+    def __call__(self, x):
         return hk.Sequential(self.layers)(x)

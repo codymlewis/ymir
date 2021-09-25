@@ -11,8 +11,8 @@ from . import compression
 
 def update(opt, loss):
     @jax.jit
-    def _apply(params, opt_state, batch):
-        grads = jax.grad(loss)(params, batch)
+    def _apply(params, opt_state, X, y):
+        grads = jax.grad(loss)(params, X, y)
         _, opt_state = opt.update(grads, opt_state)
         return grads, opt_state
     return _apply
@@ -22,8 +22,3 @@ class Client:
     opt_state: optax.OptState
     data: Mapping[str, np.ndarray]
     batch_size: int
-
-    # def __init__(self, opt_state, data, batch_size):
-    #     self.opt_state = opt_state
-    #     self.data = data
-    #     self.batch_size = batch_size

@@ -1,8 +1,6 @@
 import pickle
-from functools import partial
 
 import jax
-from jax._src.numpy.lax_numpy import std
 import jax.flatten_util
 import jax.numpy as jnp
 import optax
@@ -38,7 +36,7 @@ def update_and_scale(alg, server, all_grads, round):
 
 if __name__ == "__main__":
     ALG = "foolsgold"
-    DATASET = utils.datasets.MNIST()
+    DATASET = utils.datasets.KDDCup99()
     IID = False
     if type(DATASET).__name__ == 'KDDCup99':
         T = 20
@@ -70,16 +68,17 @@ if __name__ == "__main__":
 
         A = int(T * acal)
         N = T - A
-        data = DATASET.fed_split([8 for _ in range(N + A)], IID)
+        batch_sizes = [8 for _ in range(N + A)]
+        data = DATASET.fed_split(batch_sizes, IID)
 
         train_eval = DATASET.get_iter("train", 10_000)
         test_eval = DATASET.get_iter("test")
 
-        params = net.init(jax.random.PRNGKey(42), next(test_eval))
+        params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
         opt_state = opt.init(params)
 
-        clients = [endpoints.Client(opt_state, data[i],  8) for i in range(N)]
-        clients += [ADV_CLASS(opt_state, data[i + N], 8) for i in range(A)]
+        clients = [endpoints.Client(opt_state, data[i],  batch_sizes[i]) for i in range(N)]
+        clients += [ADV_CLASS(opt_state, data[i + N], batch_sizes[i + N]) for i in range(A)]
         server = SERVER_CLASS()
 
         attacking = "on off" not in ADV
@@ -99,7 +98,7 @@ if __name__ == "__main__":
             # Client side training
             all_grads = []
             for client in clients:
-                grads, client.opt_state = client_update(params, client.opt_state, next(client.data))
+                grads, client.opt_state = client_update(params, client.opt_state, *next(client.data))
                 all_grads.append(grads)
 
             # Server side collection of gradients
