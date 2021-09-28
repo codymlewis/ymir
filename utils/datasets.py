@@ -23,7 +23,7 @@ class DataIter:
 class Dataset:
     def __init__(self, X, y):
         self.X, self.y = X, y
-        self.classes = np.unique(y).shape[0]
+        self.classes = np.unique(self.y).shape[0]
 
     @abc.abstractmethod
     def train(self) -> tuple[np.ndarray, np.ndarray]:
@@ -35,6 +35,7 @@ class Dataset:
 
     def get_iter(self, split, batch_size=None, filter=None, map=None) -> DataIter:
         X, y = self.train() if split == 'train' else self.test()
+        X, y = X.copy(), y.copy()
         if filter is not None:
             idx = filter(y)
             X, y = X[idx], y[idx]

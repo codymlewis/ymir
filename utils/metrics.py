@@ -18,7 +18,7 @@ def measurer(net):
 
 def create_recorder(evals, train=False, test=False, add_evals=None):
     results = dict()
-    if train:    
+    if train:
         results.update({f"train {e}": [] for e in evals})
     if test:
         results.update({f"test {e}": [] for e in evals})
@@ -32,7 +32,7 @@ def record(results, evaluator, params, train_ds=None, test_ds=None, add_recs=Non
         ds = train_ds if "train" in k else test_ds
         if "acc" in k:
             v.append(evaluator['acc'](params, *next(ds)))
-        if "asr" in k:
+        if ("test" in k or "train" in k) and ("asr" in k):
             v.append(evaluator['asr'](params, *next(ds), kwargs['attack_from'], kwargs['attack_to']))
     for k, v in add_recs.items():
         results[k].append(v)

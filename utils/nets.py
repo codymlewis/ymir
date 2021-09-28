@@ -21,7 +21,7 @@ class LeNet(hk.Module):
 
 
 class ConvLeNet(hk.Module):
-    def __init__(self, name=None):
+    def __init__(self, classes, name=None):
         super().__init__(name=name)
         self.layers = [
             hk.Conv2D(64, kernel_shape=11, stride=4), jax.nn.relu,
@@ -29,7 +29,7 @@ class ConvLeNet(hk.Module):
             hk.Flatten(),
             hk.Linear(300), jax.nn.relu,
             hk.Linear(100), jax.nn.relu,
-            hk.Linear(10)
+            hk.Linear(classes)
         ]
 
     def __call__(self, x):
