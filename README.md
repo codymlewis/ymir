@@ -24,7 +24,7 @@ git clone git@github.com:codymlewis/ymir.git && cd ymir && pip install -r requir
 
 ## Usage
 We provide examples of the library's usage in the `samples` folder. Though, generally
-the a program involves initializing shared values, then initialization of our `Coordinate`
+a program involves initializing shared values, then initialization of our `Coordinate`
 object, and finally calling fit from that object.
 
 The following is a generic example snippet
