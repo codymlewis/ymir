@@ -2,7 +2,13 @@ import jax
 import jax.numpy as jnp
 import optax
 
+"""
+Loss functions for ML models
+"""
+
+
 def cross_entropy_loss(net, classes):
+    """Cross entropy/log loss, best suited for softmax models"""
     @jax.jit
     def _apply(params, X, y):
         logits = net.apply(params, X)
@@ -12,6 +18,7 @@ def cross_entropy_loss(net, classes):
 
 
 def fedmax_loss(net, net_act, classes):
+    """Loss function used for the FedMAX algorithm proposed in https://arxiv.org/abs/2004.03657"""
     @jax.jit
     def _apply(params, X, y):
         logits = net.apply(params, X)

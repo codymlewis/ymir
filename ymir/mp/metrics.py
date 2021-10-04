@@ -1,6 +1,11 @@
 import jax
 import jax.numpy as jnp
 
+"""
+Measure performance during experiments
+TODO: NEEDS REWORK
+"""
+
 
 def measurer(net):
     @jax.jit

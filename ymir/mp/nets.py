@@ -1,9 +1,13 @@
 import jax
-from jax._src.numpy.lax_numpy import pad
-import jax.numpy as jnp
 import haiku as hk
 
+"""
+Neural networks to be used with FL
+"""
+
+
 class LeNet(hk.Module):
+    """LeNet 300-100 network"""
     def __init__(self, classes, name=None):
         super().__init__(name=name)
         self.layers = [
@@ -21,6 +25,7 @@ class LeNet(hk.Module):
 
 
 class ConvLeNet(hk.Module):
+    """LeNet 300-100 network with a convolutional layer and max pooling layer prepended"""
     def __init__(self, classes, name=None):
         super().__init__(name=name)
         self.layers = [
