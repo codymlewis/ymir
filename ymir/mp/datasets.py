@@ -54,7 +54,7 @@ class Dataset:
         return DataIter(X, y, batch_size)
     
     @abc.abstractmethod
-    def fed_split(self, batch_sizes: np.ndarray, iid: bool) -> dict[int, DataIter]:
+    def fed_split(self, batch_sizes: np.ndarray, iid: bool) -> list[DataIter]:
         """Divide the dataset for federated learning"""
         pass
 
@@ -78,7 +78,7 @@ class MNIST(Dataset):
     def fed_split(self, batch_sizes, iid):
         """Split as one class per endpoint of not iid otherwise everyone gets a copy of the full set"""
         filter = (lambda i: lambda y: y == i % self.classes) if not iid else (lambda _: None)
-        return {i: self.get_iter("train", b, filter=filter(i)) for i, b in enumerate(batch_sizes)}
+        return [self.get_iter("train", b, filter=filter(i)) for i, b in enumerate(batch_sizes)]
 
 
 class CIFAR10(Dataset):
@@ -100,7 +100,7 @@ class CIFAR10(Dataset):
     def fed_split(self, batch_sizes, iid):
         """Split as one class per endpoint of not iid otherwise everyone gets a copy of the full set"""
         filter = (lambda i: lambda y: y == i % self.classes) if not iid else (lambda _: None)
-        return {i: self.get_iter("train", b, filter=filter(i)) for i, b in enumerate(batch_sizes)}
+        return [self.get_iter("train", b, filter=filter(i)) for i, b in enumerate(batch_sizes)]
 
 
 class KDDCup99(Dataset):
@@ -126,4 +126,4 @@ class KDDCup99(Dataset):
     def fed_split(self, batch_sizes, iid):
         """Give everyone normal class data and one other classed data if non iid otherwise everyone gets a copy of the full set"""
         filter = (lambda i: lambda y: (y == (i + 1 if i >= 11 else i) % self.classes) | (y == 11)) if not iid else (lambda _: None)
-        return {i: self.get_iter("train", b, filter=filter(i)) for i, b in enumerate(batch_sizes)}
+        return [self.get_iter("train", b, filter=filter(i)) for i, b in enumerate(batch_sizes)]

@@ -7,6 +7,7 @@ import optax
 
 from . import adversaries
 from . import compression
+from .. import mp
 
 
 """
@@ -28,5 +29,10 @@ def update(opt, loss):
 class Client:
     """Store client-based data"""
     opt_state: optax.OptState
-    data: Mapping[str, np.ndarray]
+    data: mp.datasets.DataIter
     batch_size: int
+
+    def __init__(self, opt_state, data):
+        self.opt_state = opt_state
+        self.data = data
+        self.batch_size = data.batch_size

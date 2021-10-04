@@ -39,8 +39,9 @@ def record(results, evaluator, params, train_ds=None, test_ds=None, add_recs=Non
             v.append(evaluator['acc'](params, *next(ds)))
         if ("test" in k or "train" in k) and ("asr" in k):
             v.append(evaluator['asr'](params, *next(ds), kwargs['attack_from'], kwargs['attack_to']))
-    for k, v in add_recs.items():
-        results[k].append(v)
+    if add_recs is not None:
+        for k, v in add_recs.items():
+            results[k].append(v)
 
 
 def finalize(results):
