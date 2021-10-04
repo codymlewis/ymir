@@ -12,8 +12,17 @@ import jaxlib
 
 from sklearn import mixture
 
+"""
+STD-DAGMM algorithm proposed in https://arxiv.org/abs/1911.12560
+
+Call order: server init -> update -> scale
+"""
+
+# Utility functions/classes
+
 class DA(hk.Module):
-    def __init__(self, in_len, n_gmm=2, latent_dim=4, name=None):
+    """Deep autoencoder"""
+    def __init__(self, in_len, name=None):
         super().__init__(name=name)
         self.encoder = hk.Sequential([
             hk.Linear(60), jax.nn.relu,
@@ -34,13 +43,16 @@ class DA(hk.Module):
 
 
 def loss(net):
+    """Deep autoencoder MSE loss"""
     @jax.jit
     def _apply(params, x):
         _, z = net.apply(params, x)
         return jnp.mean(optax.l2_loss(z, x))
     return _apply
 
+
 def da_update(opt, loss):
+    """Update function for the autoencoder"""
     @jax.jit
     def _apply(params, opt_state, batch):
         grads = jax.grad(loss)(params, batch)
@@ -53,6 +65,20 @@ def da_update(opt, loss):
 @jax.jit
 def relative_euclidean_distance(a, b):
     return jnp.linalg.norm(a - b, ord=2) / jnp.clip(jnp.linalg.norm(a, ord=2), a_min=1e-10)
+
+
+def predict(params, net, gmm, X):
+    enc, dec = net.apply(params, X)
+    z = jnp.array([[
+        jnp.squeeze(e),
+        relative_euclidean_distance(x, d),
+        optax.cosine_similarity(x, d),
+        jnp.std(x)
+    ] for x, e, d in zip(X, enc, dec)])
+    return gmm.score_samples(z)
+
+
+# Algorithm functions/classes
 
 class Server:
     def __init__(self, batch_sizes, x):
@@ -81,16 +107,6 @@ def update(server, grads):
     server.gmm = server.gmm.fit(z)
     return params, opt_state
 
-
-def predict(params, net, gmm, X):
-    enc, dec = net.apply(params, X)
-    z = jnp.array([[
-        jnp.squeeze(e),
-        relative_euclidean_distance(x, d),
-        optax.cosine_similarity(x, d),
-        jnp.std(x)
-    ] for x, e, d in zip(X, enc, dec)])
-    return gmm.score_samples(z)
 
 def scale(batch_sizes, grads, server):
     grads = jnp.array([jax.flatten_util.ravel_pytree(g)[0].tolist() for g in grads])

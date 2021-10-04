@@ -68,7 +68,7 @@ def scale(alg, server, all_grads, round):
 if __name__ == "__main__":
     print("Starting up...")
     ALG = "foolsgold"
-    DATASET = utils.datasets.MNIST()
+    DATASET = utils.datasets.CIFAR10()
     grid_results = pd.DataFrame(columns=["beta", "gamma", "0.3 mean asr", "0.3 std asr", "0.5 mean asr", "0.5 std asr"])
 
     T = 10
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         'viceroy': lambda: viceroy.Server(len(clients), params),
         'std_dagmm': lambda: std_dagmm.Server(jnp.array([c.batch_size for c in clients]), params)
     }[ALG]
-    IID = True
+    IID = False
     for beta, gamma in itertools.product(np.arange(0.0, 1.1, 0.1), np.arange(0.0, 1.1, 0.1)):
         print(f"beta: {beta}, gamma: {gamma}")
         cur = {"beta": beta, "gamma": gamma}
@@ -147,7 +147,7 @@ if __name__ == "__main__":
                 alpha = scale(ALG, server, all_grads, round)
 
                 # Adversary interception and decision
-                controller.intercept(alpha, all_grads)
+                controller.intercept(alpha, all_grads, beta, gamma)
 
                 if ADV.split()[0] == "scaling":
                     alpha = scale(ALG, server, all_grads, round)

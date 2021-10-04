@@ -54,6 +54,7 @@ class MNIST(Dataset):
         X, y = X.to_numpy(), y.to_numpy()
         X = skp.MinMaxScaler().fit_transform(X)
         X = X.astype(np.float32)
+        # X = X.reshape(-1, 28, 28, 1).astype(np.float32)
         y = skp.LabelEncoder().fit_transform(y).astype(np.int8)
         super().__init__(X, y)
         
@@ -73,7 +74,7 @@ class CIFAR10(Dataset):
         X, y = skds.fetch_openml('CIFAR_10', return_X_y=True)
         X, y = X.to_numpy(), y.to_numpy()
         X = skp.MinMaxScaler().fit_transform(X)
-        X = X.astype(np.float32)
+        X = X.reshape(-1, 32, 32, 3).astype(np.float32)
         y = skp.LabelEncoder().fit_transform(y).astype(np.int8)
         super().__init__(X, y)
         

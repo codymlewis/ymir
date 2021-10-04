@@ -2,6 +2,12 @@ import jax
 import jax.numpy as jnp
 
 
+"""
+Server-side FedZip functionality
+FedZip is from https://arxiv.org/abs/2102.01593
+"""
+
+
 def decode(params, all_grads):
     return [huffman_decode(params, g, e) for (g, e) in all_grads]
 

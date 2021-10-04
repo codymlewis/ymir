@@ -1,3 +1,7 @@
+"""
+Export the various aggregation algorithms
+"""
+
 from . import fed_avg
 from . import foolsgold
 from . import krum

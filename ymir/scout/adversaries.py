@@ -30,7 +30,7 @@ class OnOffController:
         self.max_alpha = max_alpha
         self.sharp = sharp
 
-    def should_toggle(self, alpha, beta=1.0, gamma=0.85):
+    def should_toggle(self, alpha, beta, gamma):
         avg_syb_alpha = alpha[-self.num_adv:].mean()
         p = self.attacking and avg_syb_alpha < beta * self.max_alpha
         if self.sharp:
@@ -39,8 +39,9 @@ class OnOffController:
             q = not self.attacking and avg_syb_alpha > gamma * self.max_alpha
         return p or q
 
-    def intercept(self, alpha, all_grads):
-        if self.should_toggle(alpha):
+    # def intercept(self, alpha, all_grads, beta=1.0, gamma=0.85):
+    def intercept(self, alpha, all_grads, beta=0.6, gamma=0.5):
+        if self.should_toggle(alpha, beta, gamma):
             self.attacking = not self.attacking
             for a in self.adv:
                 a.toggle()
@@ -72,12 +73,16 @@ class OnOffFRController:
         self.sharp = sharp
         self.prev_params = params
         self.attack_type = attack_type
+        self.timer = 0
 
-    def should_toggle(self, alpha, beta=1.0, gamma=0.85):
+    def should_toggle(self, alpha, beta=1.0, gamma=0.85): # 0.7, 0.7
         avg_syb_alpha = alpha[-self.num_adv:].mean()
         p = self.attacking and avg_syb_alpha < beta * self.max_alpha
         if self.sharp:
-            q = not self.attacking and avg_syb_alpha > 0.4 * self.max_alpha
+            self.timer += 1
+            return self.timer % 30
+            # p = self.attacking and avg_syb_alpha < 0.7 * self.max_alpha
+            # q = not self.attacking and avg_syb_alpha > 0.4 * self.max_alpha
         else:
             q = not self.attacking and avg_syb_alpha > gamma * self.max_alpha
         return p or q
@@ -107,7 +112,7 @@ class MoutherController:
         if "bad" in self.attack_type:
             grad = chief.tree_mul(grad, -1)
         all_grads[-self.num_adv:] = [grad for _ in range(self.num_adv)]
-        
+
 
 @jax.jit
 def tree_rand(tree):
@@ -197,6 +202,7 @@ class Backdoor:
 def backdoor_map(attack_from, attack_to, X, y):
     idx = y == attack_from
     X[idx][:, list(itertools.chain(*[list(range(x * 28, x * 28 + 5)) for x in range(5)]))] = 1
+    # X[idx, 0:5, 0:5, 0] = 1
     y[idx] = attack_to
     return (X, y)
 

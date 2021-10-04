@@ -21,7 +21,10 @@ def make_plot(filename, results, attacking=None):
     for k, v in results.items():
         if k != 'attacking':
             plt.plot(rounds, v, label=k.title().replace('Asr', 'ASR'))
-    plt.legend(loc=2, fontsize=7, framealpha=1.0)
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+    ax.legend(fontsize=7, ncol=4, loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=False, shadow=False, frameon=False)
+    # plt.legend(loc=2, fontsize=7, framealpha=1.0)
     plt.xlabel('Rounds')
     plt.ylabel('Rate')
     plt.savefig(filename, dpi=320)
@@ -31,6 +34,7 @@ def attack_points(attacking):
     state = False
     points = []
     for i, a in enumerate(attacking):
+        a = not a
         if a and not state:
             start = i
             width = 0

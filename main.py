@@ -1,3 +1,4 @@
+import tqdm
 from endpoints.adversaries import AdvController, OnOffController, ScalingController
 from functools import partial
 import pickle
@@ -63,20 +64,21 @@ def scale(alg, server, all_grads, round):
 
 
 if __name__ == "__main__":
-    adv_percent = [0.1, 0.3, 0.5, 0.8]
+    adv_percent = [0.5]
+    # adv_percent = [0.3, 0.5]
     onoff_results = pd.DataFrame(columns=["algorithm", "attack", "dataset"] + [f"{p} mean asr" for p in adv_percent] + [f"{p} std asr" for p in adv_percent])
     print("Starting up...")
     IID = False
-    for DATASET in [utils.datasets.KDDCup99, utils.datasets.CIFAR10]:
+    for DATASET in [utils.datasets.MNIST]:
         DATASET = DATASET()
-        for ALG in ["foolsgold", "krum"]:
+        for ALG in ["foolsgold"]:
             for ADV in ["onoff labelflip"]:
                 if type(DATASET).__name__ == 'KDDCup99':
                     T = 20
                     ATTACK_FROM, ATTACK_TO = 0, 11
                 else:
                     T = 10
-                    ATTACK_FROM, ATTACK_TO = 0, 1
+                    ATTACK_FROM, ATTACK_TO = 8, 2
                 ADV_CLASS = {
                     "labelflip": lambda o, _, b: endpoints.adversaries.LabelFlipper(o, DATASET, b, ATTACK_FROM, ATTACK_TO),
                     "scaling backdoor": lambda o, _, b: endpoints.adversaries.Backdoor(o, DATASET, b, ATTACK_FROM, ATTACK_TO),
@@ -119,6 +121,7 @@ if __name__ == "__main__":
 
                     clients = [endpoints.Client(opt_state, data[i],  batch_sizes[i]) for i in range(N)]
                     clients += [ADV_CLASS(opt_state, data[i + N], batch_sizes[i + N]) for i in range(A)]
+
                     server = SERVER_CLASS()
 
                     results = utils.metrics.create_recorder(['accuracy', 'asr'], train=True, test=True, add_evals=['attacking'])
@@ -143,20 +146,23 @@ if __name__ == "__main__":
                             grads, client.opt_state = client_update(params, client.opt_state, *next(client.data))
                             all_grads.append(grads)
 
-                        # Server side collection of gradients
-                        if ALG != "viceroy":
-                            server = update(ALG, server, all_grads, round)
-                        alpha = scale(ALG, server, all_grads, round)
+                        if ADV.split()[0] != "scaling" or round > 0:
+                            # Server side collection of gradients
+                            if ADV.split()[0] != "scaling" and ALG != "viceroy":
+                                server = update(ALG, server, all_grads, round)
+                            alpha = scale(ALG, server, all_grads, round)
 
-                        # Adversary interception and decision
-                        controller.intercept(alpha, all_grads)
+                            # Adversary interception and decision
+                            controller.intercept(alpha, all_grads)
 
                         if ADV.split()[0] == "scaling":
+                            if ALG != "viceroy":
+                                server = update(ALG, server, all_grads, round)
                             alpha = scale(ALG, server, all_grads, round)
 
                         if ALG == "viceroy":
                             server = update(ALG, server, all_grads, round)
-
+                        # tqdm.tqdm.write(f"alpha = {alpha}")
                         all_grads = chief.apply_scale(alpha, all_grads)
 
                         # Server side aggregation
@@ -172,9 +178,7 @@ if __name__ == "__main__":
                     print()
                 onoff_results = onoff_results.append(cur, ignore_index=True)
     print(onoff_results.to_latex())
-        # with open('data.csv', 'a') as f:
-        #     f.write(utils.metrics.csvline(type(DATASET).__name__, ALG,  A / (A + N), results, TOTAL_ROUNDS))
-        # fn = "results.pkl"
-        # with open(fn, 'wb') as f:
-        #     pickle.dump(results, f)
-        # print(f"Written results to {fn}")
+    fn = "results.pkl"
+    with open(fn, 'wb') as f:
+        pickle.dump(results, f)
+    print(f"Written results to {fn}")
