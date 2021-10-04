@@ -1,5 +1,5 @@
 import sys
-import chief
+import ymir.garrison
 from dataclasses import dataclass
 from typing import Mapping
 
@@ -11,13 +11,19 @@ from functools import partial
 import itertools
 
 
+""""
+Endpoint-side adversaries for use. Requires a controller and the adversary endpoints
+"""
+
+
+
 class ScalingController:
     def __init__(self, num_adversaries, clients):
         self.num_adv = num_adversaries
         self.attacking = True
 
     def intercept(self, alpha, all_grads):
-        all_grads[-self.num_adv:] = chief.apply_scale(
+        all_grads[-self.num_adv:] = ymir.garrison.apply_scale(
             1/np.where(alpha[-self.num_adv:] == 0, sys.float_info.epsilon, alpha[-self.num_adv:]),
             all_grads[-self.num_adv:]
         )
@@ -57,7 +63,7 @@ class FRController:
         if self.attack_type == "random":
             delta = tree_rand(params)
         else:
-            delta = chief.tree_add(params, chief.tree_mul(self.prev_params, -1))
+            delta = ymir.garrison.tree_add(params, ymir.garrison.tree_mul(self.prev_params, -1))
             if "advanced" in self.attack_type:
                 delta = tree_add_rand(delta)
         all_grads[-self.num_adv:] = [delta for _ in range(self.num_adv)]
@@ -92,7 +98,7 @@ class OnOffFRController:
             if self.attack_type == "random":
                 delta = tree_rand(params)
             else:
-                delta = chief.tree_add(params, chief.tree_mul(self.prev_params, -1))
+                delta = ymir.garrison.tree_add(params, ymir.garrison.tree_mul(self.prev_params, -1))
                 if "advanced" in self.attack_type:
                     delta = tree_add_rand(delta)
             all_grads[-self.num_adv:] = [delta for _ in range(self.num_adv)]
@@ -110,7 +116,7 @@ class MoutherController:
     def intercept(self, all_grads):
         grad = all_grads[self.victim]
         if "bad" in self.attack_type:
-            grad = chief.tree_mul(grad, -1)
+            grad = ymir.garrison.tree_mul(grad, -1)
         all_grads[-self.num_adv:] = [grad for _ in range(self.num_adv)]
 
 

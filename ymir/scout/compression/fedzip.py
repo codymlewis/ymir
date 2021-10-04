@@ -4,6 +4,12 @@ import numpy as np
 from sklearn import cluster
 
 
+"""
+Endpoint-side FedZip functionality
+FedZip is from https://arxiv.org/abs/2102.01593
+"""
+
+
 def encode(grads, compress=True):
     usable_grads = jax.tree_leaves(jax.tree_map(lambda x: x.flatten(), grads))
     sparse_grads = [top_z(0.3, np.array(g)) for g in usable_grads]
