@@ -117,7 +117,7 @@ class MoutherController:
         grad = all_grads[self.victim]
         if "bad" in self.attack_type:
             grad = ymir.garrison.tree_mul(grad, -1)
-        all_grads[-self.num_adv:] = [grad for _ in range(self.num_adv)]
+        all_grads[-self.num_adv:] = [tree_add_rand(grad) for _ in range(self.num_adv)]
 
 
 @jax.jit
