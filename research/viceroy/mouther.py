@@ -143,13 +143,16 @@ if __name__ == "__main__":
             all_grads = chief.apply_scale(alpha, all_grads)
 
             if round % 10 == 0:
-                theta = jax.flatten_util.ravel_pytree(chief.sum_grads(all_grads))[0]
-                vicdel = euclid_dist(jax.flatten_util.ravel_pytree(all_grads[VICTIM])[0], theta)
-                if "good" in ADV:
-                    numerator = min(euclid_dist(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads]), theta))
-                    asr = unzero(numerator) / unzero(vicdel)
+                if (alpha[-A:] < 0.0001).all():
+                    asr = -1 if alpha[VICTIM] < 0.0001 else -2
                 else:
-                    asr = unzero(vicdel) / unzero(max(euclid_dist(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads]), theta)))
+                    theta = jax.flatten_util.ravel_pytree(chief.sum_grads(all_grads))[0]
+                    vicdel = euclid_dist(jax.flatten_util.ravel_pytree(all_grads[VICTIM])[0], theta)
+                    if "good" in ADV:
+                        numerator = min(euclid_dist(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads]), theta))
+                        asr = unzero(numerator) / unzero(vicdel)
+                    else:
+                        asr = unzero(vicdel) / unzero(max(euclid_dist(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads]), theta)))
                 results['asr'].append(asr)
                 utils.metrics.record(results, evaluator, params, train_eval, test_eval, {'attacking': controller.attacking})
                 pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}", 'ASR': f"{results['asr'][-1]:.3f}", 'ATT': controller.attacking})

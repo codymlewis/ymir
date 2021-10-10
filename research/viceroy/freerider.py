@@ -146,13 +146,10 @@ if __name__ == "__main__":
 
                         if round % 10 == 0:
                             if controller.attacking:
-                                # results['asr'].append(alpha[-A:].mean() / max_alpha)
-                                if ALG == "foolsgold":
-                                    results['asr'].append(jnp.minimum(alpha[-A:].mean() / (1 / (alpha > 0).sum()), 1))
-                                elif ALG == "krum":
+                                if ALG == "krum":
                                     results['asr'].append(alpha[-A:].mean())
                                 else:
-                                    results['asr'].append(alpha[-A:].mean() / (1 / (alpha > 0).sum()))
+                                    results['asr'].append(jnp.minimum(alpha[-A:].mean() / (1 / (alpha > 0).sum()), 1))
                             else:
                                 results['asr'].append(0.0)
                             utils.metrics.record(results, evaluator, params, train_eval, test_eval, {'attacking': controller.attacking}, attack_from=ATTACK_FROM, attack_to=ATTACK_TO)
