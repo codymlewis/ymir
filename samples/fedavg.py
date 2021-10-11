@@ -21,11 +21,17 @@ if __name__ == "__main__":
     train_eval = dataset.get_iter("train", 10_000)
     test_eval = dataset.get_iter("test")
 
-    net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.nets.LeNet(dataset.classes)(x)))
+    net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet(dataset.classes)(x)))
     opt = optax.sgd(0.01)
     params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
+    opt_state = opt.init(params)
+    loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
+    network = ymir.mp.network.Network(opt, loss)
+    network.add_controller("main", is_server=True)
+    for d in data:
+        network.add_host("main", ymir.scout.Client(opt_state, d))
 
-    model = ymir.Coordinate("fed_avg", opt, params, ymir.mp.losses.cross_entropy_loss(net, dataset.classes), data)
+    model = ymir.Coordinate("fed_avg", opt, opt_state, params, network)
 
     # metrics setup
     evaluator = ymir.mp.metrics.measurer(net)

@@ -11,13 +11,13 @@ The generic high level API
 """
 
 
-def server_init(alg, params, clients):
+def server_init(alg, params, network):
     return {
-        'fed_avg': lambda: garrison.aggregation.fed_avg.Server(jnp.array([c.batch_size for c in clients])),
-        'foolsgold': lambda: garrison.aggregation.foolsgold.Server(len(clients), params, 1.0),
+        'fed_avg': lambda: garrison.aggregation.fed_avg.Server(jnp.array([c.batch_size for c in network.clients])),
+        'foolsgold': lambda: garrison.aggregation.foolsgold.Server(len(network), params, 1.0),
         'krum': lambda: None,
-        'viceroy': lambda: garrison.aggregation.viceroy.Server(len(clients), params),
-        'std_dagmm': lambda: garrison.aggregation.std_dagmm.Server(jnp.array([c.batch_size for c in clients]), params)
+        'viceroy': lambda: garrison.aggregation.viceroy.Server(len(network), params),
+        'std_dagmm': lambda: garrison.aggregation.std_dagmm.Server(jnp.array([c.batch_size for c in network.clients]), params)
     }[alg]()
 
 
@@ -48,22 +48,18 @@ def scale(alg, server, all_grads):
 
 class Coordinate:
     """Class for the high-level API for federated learning"""
-    def __init__(self, alg, opt, params, loss, data):
+    def __init__(self, alg, opt, opt_state, params, network):
         self.alg = alg
         self.params = params
-        self.opt_state = opt.init(params)
-        self.clients = [scout.Client(self.opt_state, d) for d in data]
-        self.server = server_init(alg, params, self.clients)
+        self.opt_state = opt_state
+        self.server = server_init(alg, params, network)
         self.server_update = garrison.update(opt)
-        self.client_update = scout.update(opt, loss)
+        self.network = network
     
     def fit(self):
         """Perform a single round of federated learning"""
         # Client side updates
-        all_grads = []
-        for client in self.clients:
-            grads, client.opt_state = self.client_update(self.params, client.opt_state, *next(client.data))
-            all_grads.append(grads)
+        all_grads = self.network(self.params)
 
         # Server side aggregation scaling
         self.server = update(self.alg, self.server, all_grads)
