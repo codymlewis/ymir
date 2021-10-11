@@ -39,7 +39,9 @@ net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.nets.Net(dataset.class
 opt = optax.sgd(0.01)
 params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
 
-model = ymir.Coordinate(alg_name, opt, params, ymir.mp.losses.cross_entropy_loss(net, dataset.classes), data)
+model = ymir.Coordinate(
+    alg_name, opt, params, ymir.mp.losses.cross_entropy_loss(net, dataset.classes), data
+)
 
 # Train/eval loop.
 for round in range(total_epochs):
