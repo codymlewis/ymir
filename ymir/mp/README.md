@@ -15,5 +15,19 @@ Collection of jax-based loss functions, they have a curried format so the networ
 ## Metrics
 Collection of functions for measuring the performance of the federated learning
 
-## Nets
+## Models
 Collection of haiku defined neural networks
+
+## Network
+Allows for the definition of the network structure for the FL process. Generally the following steps are performed; first the `Network` object
+is constructed using an optimizer and loss function as arguments, next controllers are added, then clients are added to those controllers. Where
+controllers are a non-training node that connects to other controllers and a collection of the clients, they orchestrate the passing of gradients.
+
+The following snippet shows the construction of a star network,
+
+~~~python
+network = ymir.mp.network.Network(opt, loss)
+network.add_controller("main", is_server=True)
+for d in data:
+    network.add_host("main", ymir.scout.Client(opt_state, d))
+~~~
