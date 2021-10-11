@@ -3,3 +3,6 @@ __pycache__/
 *.png
 *.pdf
 *.csv
+build/
+dist/
+*.egg-info
