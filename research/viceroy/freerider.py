@@ -24,10 +24,8 @@ if __name__ == "__main__":
             for ADV in ["onoff freerider"]:
                 if type(DATASET).__name__ == 'KDDCup99':
                     T = 20
-                    ATTACK_FROM, ATTACK_TO = 0, 11
                 else:
                     T = 10
-                    ATTACK_FROM, ATTACK_TO = 0, 1
                 cur = {"algorithm": ALG, "attack": ADV, "dataset": type(DATASET).__name__}
                 for acal in adv_percent:
                     print(f"Running {ALG} on {type(DATASET).__name__}{'-iid' if IID else ''} with {acal:.0%} {ADV} adversaries")
@@ -72,16 +70,6 @@ if __name__ == "__main__":
 
                     evaluator = ymir.mp.metrics.measurer(net)
 
-                    if "backdoor" in ADV:
-                        test_eval = DATASET.get_iter(
-                            "test",
-                            map=partial({
-                                "MNIST": ymir.scout.adversaries.mnist_backdoor_map,
-                                "CIFAR10": ymir.scout.adversaries.cifar10_backdoor_map,
-                                "KDDCup99": ymir.scout.adversaries.kddcup_backdoor_map
-                            }[type(DATASET).__name__], ATTACK_FROM, ATTACK_FROM, no_label=True)
-                        )
-
                     model = ymir.Coordinate(ALG, opt, opt_state, params, network)
 
                     results = ymir.mp.metrics.create_recorder(['accuracy'], train=True, test=True, add_evals=['attacking'])
@@ -91,7 +79,7 @@ if __name__ == "__main__":
                     TOTAL_ROUNDS = 5_001
                     pbar = trange(TOTAL_ROUNDS)
                     for round in pbar:
-                        alpha = model.fit()
+                        alpha, _ = model.fit()
 
                         if round % 10 == 0:
                             if controller.attacking:

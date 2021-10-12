@@ -68,4 +68,4 @@ class Coordinate:
 
         # Server side update
         self.params, self.opt_state = self.server_update(self.params, self.opt_state, garrison.sum_grads(all_grads))
-        return alpha
+        return alpha, all_grads
