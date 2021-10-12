@@ -1,8 +1,17 @@
+import jax
+
 """
 Set-up a network architecture for the FL process
 """
 
-from ymir import scout
+def update(opt, loss):
+    """Do some local training and return the gradient"""
+    @jax.jit
+    def _apply(params, opt_state, X, y):
+        grads = jax.grad(loss)(params, X, y)
+        _, opt_state = opt.update(grads, opt_state)
+        return grads, opt_state
+    return _apply
 
 
 class Controller:
@@ -16,7 +25,10 @@ class Controller:
         self.switches = []
         self.opt = opt
         self.loss = loss
-        self.update = scout.update(opt, loss)
+        self.update = update(opt, loss)
+
+    def __len__(self):
+        return len(self.clients) + sum([len(s) for s in self.switches])
 
     def add_client(self, client):
         """Connect a client directly to this controller"""
@@ -50,11 +62,14 @@ class Network:
         """Get the number of clients in the network"""
         return len(self.clients)
 
-    def add_controller(self, name, is_server=False):
+    def add_controller(self, name, con_class=Controller, is_server=False):
         """Add a new controller with name into this network"""
-        self.controllers[name] = Controller(self.opt, self.loss)
+        self.controllers[name] = con_class(self.opt, self.loss)
         if is_server:
             self.server_name = name
+    
+    def get_controller(self, name):
+        return self.controllers[name]
 
     def add_host(self, controller_name, client):
         """Add a client to the specified controller in this network"""

@@ -17,49 +17,6 @@ from chief.aggregation import fed_avg, krum, viceroy
 import endpoints
 import utils
 
-def update_and_scale(alg, server, all_grads, round):
-    if alg == 'fed_avg':
-        alpha = fed_avg.scale(server.batch_sizes)
-    elif alg == 'foolsgold':
-        server.histories = foolsgold.update(server.histories, all_grads)
-        alpha = foolsgold.scale(server.histories, server.kappa)
-    elif alg == 'krum':
-        alpha = krum.scale(all_grads, 3)
-    elif alg == 'std_dagmm':
-        server.params, server.opt_state = std_dagmm.update(server, all_grads)
-        alpha = std_dagmm.scale(server.batch_sizes, all_grads, server)
-    else:
-        alpha = viceroy.scale(all_grads, server.histories, server.reps, round + 1)
-        if round > 0:
-            server.histories, server.reps = viceroy.update(server.histories, server.reps, all_grads)
-        else:
-            server.histories = viceroy.init(all_grads)
-    return alpha, server
-
-def update(alg, server, all_grads, round):
-    if alg == 'foolsgold':
-        server.histories = foolsgold.update(server.histories, all_grads)
-    elif alg == 'std_dagmm':
-        server.params, server.opt_state = std_dagmm.update(server, all_grads)
-    elif alg == 'viceroy':
-        if round > 0:
-            server.histories, server.reps = viceroy.update(server.histories, server.reps, all_grads)
-        else:
-            server.histories = viceroy.init(all_grads)
-    return server
-
-def scale(alg, server, all_grads, round):
-    if alg == 'fed_avg':
-        alpha = fed_avg.scale(server.batch_sizes)
-    elif alg == 'foolsgold':
-        alpha = foolsgold.scale(server.histories, server.kappa)
-    elif alg == 'krum':
-        alpha = krum.scale(all_grads, 3)
-    elif alg == 'std_dagmm':
-        alpha = std_dagmm.scale(server.batch_sizes, all_grads, server)
-    else:
-        alpha = viceroy.scale(all_grads, server.histories, server.reps, round + 1)
-    return alpha
 
 
 if __name__ == "__main__":
@@ -69,14 +26,12 @@ if __name__ == "__main__":
     IID = False
     for DATASET in [utils.datasets.MNIST, utils.datasets.KDDCup99, utils.datasets.CIFAR10]:
         DATASET = DATASET()
-        for ALG in ["foolsgold", "krum"]:
+        for ALG in ["viceroy"]:
                 ADV = "onoff freerider"
                 if type(DATASET).__name__ == 'KDDCup99':
                     T = 20
-                    ATTACK_FROM, ATTACK_TO = 0, 11
                 else:
                     T = 10
-                    ATTACK_FROM, ATTACK_TO = 8, 2
                 ADV_CLASS = endpoints.Client
                 SERVER_CLASS = {
                     'fed_avg': lambda: fed_avg.Server(jnp.array([c.batch_size for c in clients])),
@@ -135,12 +90,8 @@ if __name__ == "__main__":
                             controller.intercept(alpha, all_grads, params)
 
                         # Server side collection of gradients
-                        if ALG != "viceroy":
-                            server = update(ALG, server, all_grads, round)
+                        server = update(ALG, server, all_grads, round)
                         alpha = scale(ALG, server, all_grads, round)
-
-                        if ALG == "viceroy":
-                            server = update(ALG, server, all_grads, round)
 
                         all_grads = chief.apply_scale(alpha, all_grads)
 
@@ -152,7 +103,7 @@ if __name__ == "__main__":
                                     results['asr'].append(jnp.minimum(alpha[-A:].mean() / (1 / (alpha > 0).sum()), 1))
                             else:
                                 results['asr'].append(0.0)
-                            utils.metrics.record(results, evaluator, params, train_eval, test_eval, {'attacking': controller.attacking}, attack_from=ATTACK_FROM, attack_to=ATTACK_TO)
+                            utils.metrics.record(results, evaluator, params, train_eval, test_eval, {'attacking': controller.attacking})
                             pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}", 'ASR': f"{results['asr'][-1]:.3f}", 'ATT': controller.attacking})
 
                         # Server side aggregation
