@@ -1,22 +1,16 @@
-from endpoints.adversaries import AdvController, OnOffController, OnOffFRController, ScalingController, FRController
 from functools import partial
 import pickle
+import pandas as pd
 
 import jax
-import jax.flatten_util
 import jax.numpy as jnp
+import jax.flatten_util
 import optax
 import haiku as hk
 
-import pandas as pd
 from tqdm import trange
 
-import chief
-from chief.aggregation import foolsgold, std_dagmm
-from chief.aggregation import fed_avg, krum, viceroy
-import endpoints
-import utils
-
+import ymir
 
 
 if __name__ == "__main__":
@@ -24,76 +18,80 @@ if __name__ == "__main__":
     onoff_results = pd.DataFrame(columns=["algorithm", "attack", "dataset"] + [f"{p} mean asr" for p in adv_percent] + [f"{p} std asr" for p in adv_percent])
     print("Starting up...")
     IID = False
-    for DATASET in [utils.datasets.MNIST, utils.datasets.KDDCup99, utils.datasets.CIFAR10]:
+    for DATASET in [ymir.mp.datasets.KDDCup99]:
         DATASET = DATASET()
-        for ALG in ["viceroy"]:
-                ADV = "onoff freerider"
+        for ALG in ["foolsgold"]:
+            for ADV in ["onoff freerider"]:
                 if type(DATASET).__name__ == 'KDDCup99':
                     T = 20
+                    ATTACK_FROM, ATTACK_TO = 0, 11
                 else:
                     T = 10
-                ADV_CLASS = endpoints.Client
-                SERVER_CLASS = {
-                    'fed_avg': lambda: fed_avg.Server(jnp.array([c.batch_size for c in clients])),
-                    'foolsgold': lambda: foolsgold.Server(len(clients), params, 1.0),
-                    'krum': lambda: None,
-                    'viceroy': lambda: viceroy.Server(len(clients), params),
-                    'std_dagmm': lambda: std_dagmm.Server(jnp.array([c.batch_size for c in clients]), params)
-                }[ALG]
+                    ATTACK_FROM, ATTACK_TO = 0, 1
                 cur = {"algorithm": ALG, "attack": ADV, "dataset": type(DATASET).__name__}
                 for acal in adv_percent:
                     print(f"Running {ALG} on {type(DATASET).__name__}{'-iid' if IID else ''} with {acal:.0%} {ADV} adversaries")
-                    net = hk.without_apply_rng(hk.transform(lambda x: utils.nets.LeNet(DATASET.classes)(x)))
+                    if type(DATASET).__name__ == 'CIFAR10':
+                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.ConvLeNet(DATASET.classes)(x)))
+                    else:
+                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet(DATASET.classes)(x)))
+
+                    train_eval = DATASET.get_iter("train", 10_000)
+                    test_eval = DATASET.get_iter("test")
                     opt = optax.sgd(0.01)
-                    server_update = chief.update(opt)
-                    client_update = endpoints.update(opt, utils.losses.cross_entropy_loss(net, DATASET.classes))
-                    evaluator = utils.metrics.measurer(net)
+                    params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
+                    opt_state = opt.init(params)
+                    loss = ymir.mp.losses.cross_entropy_loss(net, DATASET.classes)
 
                     A = int(T * acal)
                     N = T - A
                     batch_sizes = [8 for _ in range(N + A)]
                     data = DATASET.fed_split(batch_sizes, IID)
 
-                    train_eval = DATASET.get_iter("train", 10_000)
-                    test_eval = DATASET.get_iter("test")
+                    network = ymir.mp.network.Network(opt, loss)
+                    network.add_controller(
+                        "main",
+                        con_class = partial({
+                            "onoff freerider": partial(
+                                ymir.scout.adversaries.OnOffFRController,
+                                alg=ALG,
+                                num_adversaries=A,
+                                max_alpha=1/N if ALG in ['fed_avg', 'std_dagmm'] else 1,
+                                sharp=ALG in ['fed_avg', 'std_dagmm', 'krum']
+                            ),
+                            "freerider": partial(ymir.scout.adversaries.FRController, attack_type="delta"),
+                        }[ADV], num_adversaries=A, params=params),
+                        is_server=True
+                    )
 
-                    params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
-                    opt_state = opt.init(params)
+                    for i in range(T):
+                        network.add_host("main", ymir.scout.Client(opt_state, data[i]))
+                    controller = network.get_controller("main")
+                    if "onoff" in ADV:
+                        controller.init()
 
-                    clients = [endpoints.Client(opt_state, data[i],  batch_sizes[i]) for i in range(N)]
-                    clients += [ADV_CLASS(opt_state, data[i + N], batch_sizes[i + N]) for i in range(A)]
-                    server = SERVER_CLASS()
+                    evaluator = ymir.mp.metrics.measurer(net)
 
-                    results = utils.metrics.create_recorder(['accuracy'], train=True, test=True, add_evals=['attacking'])
+                    if "backdoor" in ADV:
+                        test_eval = DATASET.get_iter(
+                            "test",
+                            map=partial({
+                                "MNIST": ymir.scout.adversaries.mnist_backdoor_map,
+                                "CIFAR10": ymir.scout.adversaries.cifar10_backdoor_map,
+                                "KDDCup99": ymir.scout.adversaries.kddcup_backdoor_map
+                            }[type(DATASET).__name__], ATTACK_FROM, ATTACK_FROM, no_label=True)
+                        )
+
+                    model = ymir.Coordinate(ALG, opt, opt_state, params, network)
+
+                    results = ymir.mp.metrics.create_recorder(['accuracy'], train=True, test=True, add_evals=['attacking'])
                     results['asr'] = []
-
-                    max_alpha = 1/T if ALG in ['fed_avg', 'std_dagmm'] else 1
-                    controller = {
-                        "onoff": partial(OnOffFRController, clients=clients, max_alpha=max_alpha, sharp=ALG in ['fed_avg', 'std_dagmm', 'krum']),
-                        "freerider": FRController,
-                    }[ADV.split()[0]](A, params, "advanced delta")
 
                     # Train/eval loop.
                     TOTAL_ROUNDS = 5_001
                     pbar = trange(TOTAL_ROUNDS)
                     for round in pbar:
-                        # Client side training
-                        all_grads = []
-                        for client in clients:
-                            grads, client.opt_state = client_update(params, client.opt_state, *next(client.data))
-                            all_grads.append(grads)
-
-                        if round > 0:
-                            alpha = scale(ALG, server, all_grads, round)
-
-                            # Adversary interception and decision
-                            controller.intercept(alpha, all_grads, params)
-
-                        # Server side collection of gradients
-                        server = update(ALG, server, all_grads, round)
-                        alpha = scale(ALG, server, all_grads, round)
-
-                        all_grads = chief.apply_scale(alpha, all_grads)
+                        alpha = model.fit()
 
                         if round % 10 == 0:
                             if controller.attacking:
@@ -103,19 +101,21 @@ if __name__ == "__main__":
                                     results['asr'].append(jnp.minimum(alpha[-A:].mean() / (1 / (alpha > 0).sum()), 1))
                             else:
                                 results['asr'].append(0.0)
-                            utils.metrics.record(results, evaluator, params, train_eval, test_eval, {'attacking': controller.attacking})
+                            ymir.mp.metrics.record(results, evaluator, params, train_eval, test_eval, {'attacking': controller.attacking})
                             pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}", 'ASR': f"{results['asr'][-1]:.3f}", 'ATT': controller.attacking})
 
-                        # Server side aggregation
-                        params, opt_state = server_update(params, opt_state, chief.sum_grads(all_grads))
-                    results = utils.metrics.finalize(results)
-                    cur[f"{acal} mean asr"] = results['asr'].mean()
-                    cur[f"{acal} std asr"] = results['asr'].std()
+                    results = ymir.mp.metrics.finalize(results)
+                    cur[f"{acal} mean asr"] = results['test asr'].mean()
+                    cur[f"{acal} std asr"] = results['test asr'].std()
                     print()
                     print("=" * 150)
                     print(f"Server type {ALG}, Dataset {type(DATASET).__name__}, {A / (A + N):.2%} {ADV} adversaries, final accuracy: {results['test accuracy'][-1]:.3%}")
-                    print(utils.metrics.tabulate(results, TOTAL_ROUNDS))
+                    print(ymir.mp.metrics.tabulate(results, TOTAL_ROUNDS))
                     print("=" * 150)
                     print()
                 onoff_results = onoff_results.append(cur, ignore_index=True)
     print(onoff_results.to_latex())
+    fn = "results.pkl"
+    with open(fn, 'wb') as f:
+        pickle.dump(results, f)
+    print(f"Written results to {fn}")
