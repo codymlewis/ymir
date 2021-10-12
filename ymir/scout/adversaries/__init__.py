@@ -100,33 +100,35 @@ class OnOffController(mp.network.Controller):
     """
     Network controller that toggles an attack on or off respective to the result of the aggregation algorithm
     """
-    def __init__(self, opt, loss, alg, num_adversaries, max_alpha, sharp):
+    def __init__(self, opt, loss, alg, num_adversaries, max_alpha, sharp, beta=1.0, gamma=0.85):
         super().__init__(opt, loss)
         self.num_adv = num_adversaries
         self.alg = alg
         self.attacking = False
         self.max_alpha = max_alpha
         self.sharp = sharp
+        self.beta = beta
+        self.gamma = gamma
 
     def init(self, params):
         self.server = server_init(self.alg, params, self.clients)
         self.server_update = garrison.update(self.opt)
         
-    def should_toggle(self, alpha, beta, gamma):
+    def should_toggle(self, alpha):
         avg_syb_alpha = alpha[-self.num_adv:].mean()
-        p = self.attacking and avg_syb_alpha < beta * self.max_alpha
+        p = self.attacking and avg_syb_alpha < self.beta * self.max_alpha
         if self.sharp:
             q = not self.attacking and avg_syb_alpha > 0.4 * self.max_alpha
         else:
-            q = not self.attacking and avg_syb_alpha > gamma * self.max_alpha
+            q = not self.attacking and avg_syb_alpha > self.gamma * self.max_alpha
         return p or q
 
-    def __call__(self, params, beta=1.0, gamma=0.85):
+    def __call__(self, params):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
         all_grads = super().__call__(params)
         self.server = update(self.alg, self.server, all_grads)
         alpha = scale(self.alg, self.server, all_grads)
-        if self.should_toggle(alpha, beta, gamma):
+        if self.should_toggle(alpha):
             self.attacking = not self.attacking
             for a in self.clients[-self.num_adv:]:
                 a.toggle()
@@ -162,7 +164,7 @@ class OnOffFRController(mp.network.Controller):
     """
     Network controller that that makes adversaries free ride respective to the results of the aggregation algorithm
     """
-    def __init__(self, opt, loss, alg, num_adversaries, params, max_alpha, sharp):
+    def __init__(self, opt, loss, alg, num_adversaries, params, max_alpha, sharp, beta=1.0, gamma=0.85):
         super().__init__(opt, loss)
         self.num_adv = num_adversaries
         self.prev_params = params
@@ -171,27 +173,29 @@ class OnOffFRController(mp.network.Controller):
         self.max_alpha = max_alpha
         self.sharp = sharp
         self.timer = 0
+        self.beta = beta
+        self.gamma = gamma
 
     def init(self):
         self.server = server_init(self.alg, self.prev_params, self.clients)
         self.server_update = garrison.update(self.opt)
         
-    def should_toggle(self, alpha, beta=1.0, gamma=0.85): # 0.7, 0.7
+    def should_toggle(self, alpha): # 0.7, 0.7
         avg_syb_alpha = alpha[-self.num_adv:].mean()
-        p = self.attacking and avg_syb_alpha < beta * self.max_alpha
+        p = self.attacking and avg_syb_alpha < self.beta * self.max_alpha
         if self.sharp:
             self.timer += 1
             return self.timer % 30
         else:
-            q = not self.attacking and avg_syb_alpha > gamma * self.max_alpha
+            q = not self.attacking and avg_syb_alpha > self.gamma * self.max_alpha
         return p or q
 
-    def __call__(self, params, beta=1.0, gamma=0.85):
+    def __call__(self, params):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
         all_grads = super().__call__(params)
         self.server = update(self.alg, self.server, all_grads)
         alpha = scale(self.alg, self.server, all_grads)
-        if self.should_toggle(alpha, beta, gamma):
+        if self.should_toggle(alpha):
             self.attacking = not self.attacking
         if self.attacking:
             delta = tree_add(params, tree_mul(self.prev_params, -1))
