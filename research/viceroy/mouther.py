@@ -27,10 +27,10 @@ if __name__ == "__main__":
     print("Starting up...")
     IID = False
     VICTIM = 0
-    for DATASET in [ymir.mp.datasets.KDDCup99]:
+    for DATASET in [ymir.mp.datasets.MNIST, ymir.mp.datasets.KDDCup99, ymir.mp.datasets.CIFAR10]:
         DATASET = DATASET()
-        for ALG in ["foolsgold"]:
-            for ADV in ["bad mouther"]:
+        for ALG in ["foolsgold", "krum", "std_dagmm", "viceroy"]:
+            for ADV in ["bad mouther", "good mouther"]:
                 if type(DATASET).__name__ == 'KDDCup99':
                     T = 20
                 else:

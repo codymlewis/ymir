@@ -18,9 +18,9 @@ if __name__ == "__main__":
     onoff_results = pd.DataFrame(columns=["algorithm", "attack", "dataset"] + [f"{p} mean asr" for p in adv_percent] + [f"{p} std asr" for p in adv_percent])
     print("Starting up...")
     IID = False
-    for DATASET in [ymir.mp.datasets.KDDCup99]:
+    for DATASET in [ymir.mp.datasets.MNIST, ymir.mp.datasets.KDDCup99, ymir.mp.datasets.CIFAR10]:
         DATASET = DATASET()
-        for ALG in ["foolsgold"]:
+        for ALG in ["foolsgold", "krum", "std_dagmm", "viceroy"]:
             for ADV in ["onoff freerider"]:
                 if type(DATASET).__name__ == 'KDDCup99':
                     T = 20
