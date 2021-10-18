@@ -17,40 +17,46 @@ if __name__ == "__main__":
     onoff_results = pd.DataFrame(columns=["algorithm", "attack", "dataset"] + [f"{p} mean asr" for p in adv_percent] + [f"{p} std asr" for p in adv_percent])
     print("Starting up...")
     IID = False
-    for DATASET in [ymir.mp.datasets.MNIST, ymir.mp.datasets.KDDCup99, ymir.mp.datasets.CIFAR10]:
-        DATASET = DATASET()
+    for DATASET in ['mnist', 'kddcup99', 'cifar10']:
+        DS = ymir.mp.datasets.load(DATASET)
         for ALG in ["foolsgold", "krum", "std_dagmm", "viceroy"]:
             for ADV in ["onoff labelflip", "labelflip", "scaling backdoor"]:
-                if type(DATASET).__name__ == 'KDDCup99':
+                if DATASET == 'kddcup99':
                     T = 20
                     ATTACK_FROM, ATTACK_TO = 0, 11
                 else:
                     T = 10
                     ATTACK_FROM, ATTACK_TO = 0, 1
                 ADV_CLASS = {
-                    "labelflip": lambda o, _, b: ymir.scout.adversaries.LabelFlipper(o, DATASET, b, ATTACK_FROM, ATTACK_TO),
-                    "scaling backdoor": lambda o, _, b: ymir.scout.adversaries.Backdoor(o, DATASET, b, ATTACK_FROM, ATTACK_TO),
-                    "onoff labelflip": lambda o, d, b: ymir.scout.adversaries.OnOffLabelFlipper(o, d, DATASET, b, ATTACK_FROM, ATTACK_TO),
+                    "labelflip": lambda o, _, b: ymir.scout.adversaries.LabelFlipper(o, DS, b, ATTACK_FROM, ATTACK_TO),
+                    "scaling backdoor": lambda o, _, b: ymir.scout.adversaries.Backdoor(o, DS, b, ATTACK_FROM, ATTACK_TO),
+                    "onoff labelflip": lambda o, d, b: ymir.scout.adversaries.OnOffLabelFlipper(o, d, DS, b, ATTACK_FROM, ATTACK_TO),
                 }[ADV]
-                cur = {"algorithm": ALG, "attack": ADV, "dataset": type(DATASET).__name__}
+                cur = {"algorithm": ALG, "attack": ADV, "dataset": DATASET}
                 for acal in adv_percent:
-                    print(f"Running {ALG} on {type(DATASET).__name__}{'-iid' if IID else ''} with {acal:.0%} {ADV} adversaries")
-                    if type(DATASET).__name__ == 'CIFAR10':
-                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.ConvLeNet(DATASET.classes)(x)))
+                    print(f"Running {ALG} on {DATASET}{'-iid' if IID else ''} with {acal:.0%} {ADV} adversaries")
+                    if DATASET == 'cifar10':
+                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.ConvLeNet(DS.classes)(x)))
                     else:
-                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet(DATASET.classes)(x)))
+                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet(DS.classes)(x)))
 
-                    train_eval = DATASET.get_iter("train", 10_000)
-                    test_eval = DATASET.get_iter("test")
+                    train_eval = DS.get_iter("train", 10_000)
+                    test_eval = DS.get_iter("test")
                     opt = optax.sgd(0.01)
                     params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
                     opt_state = opt.init(params)
-                    loss = ymir.mp.losses.cross_entropy_loss(net, DATASET.classes)
+                    loss = ymir.mp.losses.cross_entropy_loss(net, DS.classes)
 
                     A = int(T * acal)
                     N = T - A
                     batch_sizes = [8 for _ in range(N + A)]
-                    data = DATASET.fed_split(batch_sizes, IID)
+                    if IID:
+                        data = DS.fed_split(batch_sizes)
+                    else:
+                        if DATASET != 'kddcup99':
+                            data = DS.fed_split(batch_sizes, [[i % 10] for i in range(T)])
+                        else:
+                            data = DS.fed_split(batch_sizes, [[(i + 1 if i >= 11 else i) % DS.classes, 11] for i in range(T)])
 
                     network = ymir.mp.network.Network(opt, loss)
                     network.add_controller(
@@ -81,13 +87,13 @@ if __name__ == "__main__":
                     evaluator = ymir.mp.metrics.measurer(net)
 
                     if "backdoor" in ADV:
-                        test_eval = DATASET.get_iter(
+                        test_eval = DS.get_iter(
                             "test",
                             map=partial({
                                 "MNIST": ymir.scout.adversaries.mnist_backdoor_map,
                                 "CIFAR10": ymir.scout.adversaries.cifar10_backdoor_map,
                                 "KDDCup99": ymir.scout.adversaries.kddcup_backdoor_map
-                            }[type(DATASET).__name__], ATTACK_FROM, ATTACK_FROM, no_label=True)
+                            }[DATASET], ATTACK_FROM, ATTACK_FROM, no_label=True)
                         )
 
                     model = ymir.Coordinate(ALG, opt, opt_state, params, network)
@@ -108,7 +114,7 @@ if __name__ == "__main__":
                     cur[f"{acal} std asr"] = results['test asr'].std()
                     print()
                     print("=" * 150)
-                    print(f"Server type {ALG}, Dataset {type(DATASET).__name__}, {A / (A + N):.2%} {ADV} adversaries, final accuracy: {results['test accuracy'][-1]:.3%}")
+                    print(f"Server type {ALG}, Dataset {DATASET}, {A / (A + N):.2%} {ADV} adversaries, final accuracy: {results['test accuracy'][-1]:.3%}")
                     print(ymir.mp.metrics.tabulate(results, TOTAL_ROUNDS))
                     print("=" * 150)
                     print()
