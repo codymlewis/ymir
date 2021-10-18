@@ -1,6 +1,7 @@
 import sklearn.datasets as skds
 import sklearn.preprocessing as skp
 import numpy as np
+import os
 
 import abc
 
@@ -28,19 +29,17 @@ class DataIter:
 
 class Dataset:
     """Abstract definition for the datasets"""
-    def __init__(self, X, y):
-        self.X, self.y = X, y
+    def __init__(self, X, y, train):
+        self.X, self.y, self.train_idx = X, y, train
         self.classes = np.unique(self.y).shape[0]
 
-    @abc.abstractmethod
     def train(self) -> tuple[np.ndarray, np.ndarray]:
         """Get the training subset"""
-        pass
+        return self.X[self.train_idx], self.y[self.train_idx]
 
-    @abc.abstractmethod
     def test(self) -> tuple[np.ndarray, np.ndarray]:
         """Get the testing subset"""
-        pass
+        return self.X[~self.train_idx], self.y[~self.train_idx]
 
     def get_iter(self, split, batch_size=None, filter=None, map=None) -> DataIter:
         """Generate an iterator out of the dataset"""
@@ -53,10 +52,16 @@ class Dataset:
             X, y = map(X, y)
         return DataIter(X, y, batch_size)
     
-    @abc.abstractmethod
-    def fed_split(self, batch_sizes: np.ndarray, iid: bool) -> list[DataIter]:
+    def fed_split(self, batch_sizes, mappings):
         """Divide the dataset for federated learning"""
-        pass
+        return [self.get_iter("train", b, filter=lambda y: np.isin(y, m)) for b, m in zip(batch_sizes, mappings)]
+
+
+def load(dataset, dir="~/ymir_datasets"):
+    dir = os.path.expanduser(dir)
+    ds = np.load(f"{dir}/{dataset}.npz")
+    X, y, train = ds['X'], ds['y'], ds['train']
+    return Dataset(X, y, train)
 
 
 class MNIST(Dataset):

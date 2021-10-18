@@ -15,9 +15,9 @@ if __name__ == "__main__":
     # setup
     print("Setting up the system...")
     num_endpoints = 10
-    dataset = ymir.mp.datasets.MNIST()
+    dataset = ymir.mp.datasets.load('mnist')
     batch_sizes = [8 for _ in range(num_endpoints)]
-    data = dataset.fed_split(batch_sizes, False)
+    data = dataset.fed_split(batch_sizes, [[i % 10] for i in range(num_endpoints)])
     train_eval = dataset.get_iter("train", 10_000)
     test_eval = dataset.get_iter("test")
 
