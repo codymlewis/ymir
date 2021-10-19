@@ -7,25 +7,45 @@ import jax
 import jax.numpy as jnp
 import optax
 
-import jaxlib
+from . import server
 
 
 """
 The viceroy algorithm
-
-Call order: server init -> update -> scale
 """
 
 
-@dataclass
-class Server:
-    histories: jaxlib.xla_extension.DeviceArray
-    reps: jaxlib.xla_extension.DeviceArray
+class Server(server.AggServer):
+    def __init__(self, params, network):
+        self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
+        self.reps = jnp.array([0.01 for _ in range(len(network))])
 
-    def __init__(self, n_clients, params):
-        self.histories = jnp.zeros((n_clients, jax.flatten_util.ravel_pytree(params)[0].shape[0]))
-        self.reps = jnp.array([0.01 for _ in range(n_clients)])
+    def update(self, all_grads):
+        self.histories, self.reps = update(self.histories, self.reps, all_grads)
 
+    def scale(self, all_grads):
+        n_clients = self.histories.shape[0]
+        cs = smp.cosine_similarity(self.histories) - np.eye(n_clients)
+        maxcs = np.max(cs, axis=1)
+        # pardoning
+        for i in range(n_clients):
+            for j in range(n_clients):
+                if i == j:
+                    continue
+                if maxcs[i] < maxcs[j]:
+                    cs[i][j] = cs[i][j] * maxcs[i] / maxcs[j]
+        wv = 1 - (np.max(cs, axis=1))
+        wv[wv > 1] = 1
+        wv[wv < 0] = 0
+        # Rescale so that max value is wv
+        wv = wv / np.max(wv)
+        wv[(wv == 1)] = .99
+        # Logit function
+        idx = wv != 0
+        wv[idx] = (np.log(wv[idx] / (1 - wv[idx])) + 0.5)
+        wv[(np.isinf(wv) + wv > 1)] = 1
+        wv[(wv < 0)] = 0
+        return wv * np.maximum(self.reps, 0)
 
 
 @jax.jit
@@ -42,28 +62,3 @@ def update(histories, rep, all_grads, omega=0.85, eta=0.25, epsilon=-0.0001):
     histories = omega * histories + (X.T * (rep >= 0)).T
     rep = jnp.where(idx * ((r + (rep / 2)) < 0.5), -1, rep)
     return histories, rep
-
-
-def scale(histories, reps):
-    n_clients = histories.shape[0]
-    cs = smp.cosine_similarity(histories) - np.eye(n_clients)
-    maxcs = np.max(cs, axis=1)
-    # pardoning
-    for i in range(n_clients):
-        for j in range(n_clients):
-            if i == j:
-                continue
-            if maxcs[i] < maxcs[j]:
-                cs[i][j] = cs[i][j] * maxcs[i] / maxcs[j]
-    wv = 1 - (np.max(cs, axis=1))
-    wv[wv > 1] = 1
-    wv[wv < 0] = 0
-    # Rescale so that max value is wv
-    wv = wv / np.max(wv)
-    wv[(wv == 1)] = .99
-    # Logit function
-    idx = wv != 0
-    wv[idx] = (np.log(wv[idx] / (1 - wv[idx])) + 0.5)
-    wv[(np.isinf(wv) + wv > 1)] = 1
-    wv[(wv < 0)] = 0
-    return wv * np.maximum(reps, 0)

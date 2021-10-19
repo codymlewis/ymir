@@ -12,10 +12,10 @@ import jaxlib
 
 from sklearn import mixture
 
+from . import server
+
 """
 STD-DAGMM algorithm proposed in https://arxiv.org/abs/1911.12560
-
-Call order: server init -> update -> scale
 """
 
 # Utility functions/classes
@@ -80,39 +80,37 @@ def predict(params, net, gmm, X):
 
 # Algorithm functions/classes
 
-class Server:
-    def __init__(self, batch_sizes, x):
-        self.batch_sizes = batch_sizes
-        x = jnp.array([jax.flatten_util.ravel_pytree(x)[0]])
+
+class Server(server.AggServer):
+    def __init__(self, params, network):
+        self.batch_sizes = jnp.array([c.batch_size for c in network.clients])
+        x = jnp.array([jax.flatten_util.ravel_pytree(params)[0]])
         self.da = hk.without_apply_rng(hk.transform(lambda x: DA(x[0].shape[0])(x)))
         rng = jax.random.PRNGKey(42)
         self.params = self.da.init(rng, x)
         opt = optax.adamw(0.001, weight_decay=0.0001)
         self.opt_state = opt.init(self.params)
-        self.update = da_update(opt, loss(self.da))
+        self.da_update = da_update(opt, loss(self.da))
 
         self.gmm = mixture.GaussianMixture(4, random_state=0, warm_start=True)
 
+    def update(self, all_grads):
+        grads = jnp.array([jax.flatten_util.ravel_pytree(g)[0].tolist() for g in all_grads])
+        self.params, self.opt_state = self.da_update(self.params, self.opt_state, grads)
+        enc, dec = self.da.apply(self.params, grads)
+        z = jnp.array([[
+            jnp.squeeze(e),
+            relative_euclidean_distance(x, d),
+            optax.cosine_similarity(x, d),
+            jnp.std(x)
+        ] for x, e, d in zip(grads, enc, dec)])
+        self.gmm = self.gmm.fit(z)
 
-def update(server, grads):
-    grads = jnp.array([jax.flatten_util.ravel_pytree(g)[0].tolist() for g in grads])
-    params, opt_state = server.update(server.params, server.opt_state, grads)
-    enc, dec = server.da.apply(params, grads)
-    z = jnp.array([[
-        jnp.squeeze(e),
-        relative_euclidean_distance(x, d),
-        optax.cosine_similarity(x, d),
-        jnp.std(x)
-    ] for x, e, d in zip(grads, enc, dec)])
-    server.gmm = server.gmm.fit(z)
-    return params, opt_state
-
-
-def scale(batch_sizes, grads, server):
-    grads = jnp.array([jax.flatten_util.ravel_pytree(g)[0].tolist() for g in grads])
-    energies = predict(server.params, server.da, server.gmm, grads)
-    std = jnp.std(energies)
-    avg = jnp.mean(energies)
-    mask = jnp.where((energies >= avg - std) * (energies <= avg + std), 1, 0)
-    total_dc = jnp.sum(batch_sizes * mask)
-    return (batch_sizes / total_dc) * mask
+    def scale(self, all_grads):
+        grads = jnp.array([jax.flatten_util.ravel_pytree(g)[0].tolist() for g in all_grads])
+        energies = predict(self.params, self.da, self.gmm, grads)
+        std = jnp.std(energies)
+        avg = jnp.mean(energies)
+        mask = jnp.where((energies >= avg - std) * (energies <= avg + std), 1, 0)
+        total_dc = jnp.sum(self.batch_sizes * mask)
+        return (self.batch_sizes / total_dc) * mask
