@@ -6,11 +6,9 @@ from ymir import mp
 
 import numpy as np
 import jax
-import jax.numpy as jnp
 import optax
 
 from functools import partial
-import itertools
 
 
 @jax.jit
@@ -37,40 +35,6 @@ def tree_add(*trees):
     return jax.tree_multimap(lambda *xs: sum(xs), *trees)
 
 
-def server_init(alg, params, clients):
-    return {
-        'fed_avg': lambda: garrison.aggregation.fed_avg.Server(jnp.array([c.batch_size for c in clients])),
-        'foolsgold': lambda: garrison.aggregation.foolsgold.Server(len(clients), params, 1.0),
-        'krum': lambda: None,
-        'viceroy': lambda: garrison.aggregation.viceroy.Server(len(clients), params),
-        'std_dagmm': lambda: garrison.aggregation.std_dagmm.Server(jnp.array([c.batch_size for c in clients]), params)
-    }[alg]()
-
-
-def update(alg, server, all_grads):
-    if alg == 'foolsgold':
-        server.histories = garrison.aggregation.foolsgold.update(server.histories, all_grads)
-    elif alg == 'std_dagmm':
-        server.params, server.opt_state = garrison.aggregation.std_dagmm.update(server, all_grads)
-    elif alg == 'viceroy':
-        server.histories, server.reps = garrison.aggregation.viceroy.update(server.histories, server.reps, all_grads)
-    return server
-
-
-def scale(alg, server, all_grads):
-    if alg == 'fed_avg':
-        alpha = garrison.aggregation.fed_avg.scale(server.batch_sizes)
-    elif alg == 'foolsgold':
-        alpha = garrison.aggregation.foolsgold.scale(server.histories, server.kappa)
-    elif alg == 'krum':
-        alpha = garrison.aggregation.krum.scale(all_grads, 3)
-    elif alg == 'std_dagmm':
-        alpha = garrison.aggregation.std_dagmm.scale(server.batch_sizes, all_grads, server)
-    else:
-        alpha = garrison.aggregation.viceroy.scale(server.histories, server.reps)
-    return alpha
-
-
 class ScalingController(mp.network.Controller):
     """
     Network controller that scales adversaries' gradients by the inverse of aggregation algorithm
@@ -82,14 +46,14 @@ class ScalingController(mp.network.Controller):
         self.attacking = True
 
     def init(self, params):
-        self.server = server_init(self.alg, params, self.clients)
+        self.server = getattr(garrison.aggregation, self.alg).Server(params, self)
         self.server_update = garrison.update(self.opt)
         
     def __call__(self, params):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
         all_grads = super().__call__(params)
-        self.server = update(self.alg, self.server, all_grads)
-        alpha = np.array(scale(self.alg, self.server, all_grads))
+        self.server.update(all_grads)
+        alpha = np.array(self.server.scale(all_grads))
         idx = np.arange(len(alpha) - self.num_adv, len(alpha))[alpha[-self.num_adv:] > 0.0001]
         alpha[idx] = 1 / alpha[idx]
         for i in idx:
@@ -111,7 +75,7 @@ class OnOffController(mp.network.Controller):
         self.gamma = gamma
 
     def init(self, params):
-        self.server = server_init(self.alg, params, self.clients)
+        self.server = getattr(garrison.aggregation, self.alg).Server(params, self)
         self.server_update = garrison.update(self.opt)
         
     def should_toggle(self, alpha):
@@ -126,8 +90,8 @@ class OnOffController(mp.network.Controller):
     def __call__(self, params):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
         all_grads = super().__call__(params)
-        self.server = update(self.alg, self.server, all_grads)
-        alpha = scale(self.alg, self.server, all_grads)
+        self.server.update(all_grads)
+        alpha = self.server.scale(all_grads)
         if self.should_toggle(alpha):
             self.attacking = not self.attacking
             for a in self.clients[-self.num_adv:]:
@@ -176,8 +140,8 @@ class OnOffFRController(mp.network.Controller):
         self.beta = beta
         self.gamma = gamma
 
-    def init(self):
-        self.server = server_init(self.alg, self.prev_params, self.clients)
+    def init(self, params):
+        self.server = getattr(garrison.aggregation, self.alg).Server(params, self)
         self.server_update = garrison.update(self.opt)
         
     def should_toggle(self, alpha): # 0.7, 0.7
@@ -193,8 +157,8 @@ class OnOffFRController(mp.network.Controller):
     def __call__(self, params):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
         all_grads = super().__call__(params)
-        self.server = update(self.alg, self.server, all_grads)
-        alpha = scale(self.alg, self.server, all_grads)
+        self.server.update(all_grads)
+        alpha = self.server.scale(all_grads)
         if self.should_toggle(alpha):
             self.attacking = not self.attacking
         if self.attacking:
@@ -271,7 +235,7 @@ class Backdoor:
 
     def __init__(self, opt_state, dataset, batch_size, attack_from, attack_to):
         self.opt_state = opt_state
-        self.map=partial({"MNIST": mnist_backdoor_map, "CIFAR10": cifar10_backdoor_map, "KDDCup99": kddcup_backdoor_map}[type(dataset).__name__], attack_from, attack_to)
+        self.map=partial(globals()[f"{type(dataset).__name__.lower()}_backdoor_map"], attack_from, attack_to)
         self.data = dataset.get_iter(
             "train",
             batch_size,
@@ -284,7 +248,6 @@ class Backdoor:
 def mnist_backdoor_map(attack_from, attack_to, X, y, no_label=False):
     idx = y == attack_from
     X[idx, 0:5, 0:5] = 1
-    # X[idx][:, list(itertools.chain(*[list(range(x * 28, x * 28 + 5)) for x in range(5)]))] = 1
     if not no_label:
         y[idx] = attack_to
     return (X, y)
@@ -297,7 +260,7 @@ def cifar10_backdoor_map(attack_from, attack_to, X, y, no_label=False):
     return (X, y)
 
 
-def kddcup_backdoor_map(attack_from, attack_to, X, y, no_label=False):
+def kddcup99_backdoor_map(attack_from, attack_to, X, y, no_label=False):
     idx = y == attack_from
     X[idx, 0:5] = 1
     if not no_label:

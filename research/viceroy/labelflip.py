@@ -15,7 +15,7 @@ import metrics
 
 
 if __name__ == "__main__":
-    adv_percent = [0.5]
+    adv_percent = [0.1, 0.3, 0.5, 0.8]
     onoff_results = pd.DataFrame(columns=["algorithm", "attack", "dataset"] + [f"{p} mean asr" for p in adv_percent] + [f"{p} std asr" for p in adv_percent])
     print("Starting up...")
     IID = False

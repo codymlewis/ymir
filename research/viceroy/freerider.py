@@ -74,7 +74,7 @@ if __name__ == "__main__":
                         network.add_host("main", ymir.scout.Client(opt_state, data[i]))
                     controller = network.get_controller("main")
                     if "onoff" in ADV:
-                        controller.init()
+                        controller.init(params)
 
                     evaluator = metrics.measurer(net)
 
