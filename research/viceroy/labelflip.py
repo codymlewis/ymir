@@ -11,6 +11,8 @@ from tqdm import trange
 
 import ymir
 
+import metrics
+
 
 if __name__ == "__main__":
     adv_percent = [0.5]
@@ -84,7 +86,7 @@ if __name__ == "__main__":
                     if type(controller).__name__ != "Controller":
                         controller.init(params)
 
-                    evaluator = ymir.mp.metrics.measurer(net)
+                    evaluator = metrics.measurer(net)
 
                     if "backdoor" in ADV:
                         test_eval = DS.get_iter(
@@ -98,24 +100,24 @@ if __name__ == "__main__":
 
                     model = ymir.Coordinate(ALG, opt, opt_state, params, network)
 
-                    results = ymir.mp.metrics.create_recorder(['accuracy', 'asr'], train=True, test=True, add_evals=['attacking'])
+                    results = metrics.create_recorder(['accuracy', 'asr'], train=True, test=True, add_evals=['attacking'])
 
                     # Train/eval loop.
                     TOTAL_ROUNDS = 5_001
                     pbar = trange(TOTAL_ROUNDS)
                     for round in pbar:
                         if round % 10 == 0:
-                            ymir.mp.metrics.record(results, evaluator, model.params, train_eval, test_eval, {'attacking': controller.attacking}, attack_from=ATTACK_FROM, attack_to=ATTACK_TO)
+                            metrics.record(results, evaluator, model.params, train_eval, test_eval, {'attacking': controller.attacking}, attack_from=ATTACK_FROM, attack_to=ATTACK_TO)
                             pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}", 'ASR': f"{results['test asr'][-1]:.3f}", 'ATT': controller.attacking})
 
                         model.fit()
-                    results = ymir.mp.metrics.finalize(results)
+                    results = metrics.finalize(results)
                     cur[f"{acal} mean asr"] = results['test asr'].mean()
                     cur[f"{acal} std asr"] = results['test asr'].std()
                     print()
                     print("=" * 150)
                     print(f"Server type {ALG}, Dataset {DATASET}, {A / (A + N):.2%} {ADV} adversaries, final accuracy: {results['test accuracy'][-1]:.3%}")
-                    print(ymir.mp.metrics.tabulate(results, TOTAL_ROUNDS))
+                    print(metrics.tabulate(results, TOTAL_ROUNDS))
                     print("=" * 150)
                     print()
                 onoff_results = onoff_results.append(cur, ignore_index=True)

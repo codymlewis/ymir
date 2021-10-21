@@ -13,6 +13,9 @@ from tqdm import trange
 
 import ymir
 
+import metrics
+
+
 @jax.jit
 def euclid_dist(a, b):
     return jnp.sqrt(jnp.sum((a - b)**2, axis=-1))
@@ -74,11 +77,11 @@ if __name__ == "__main__":
                     if "onoff" in ADV:
                         controller.init()
 
-                    evaluator = ymir.mp.metrics.measurer(net)
+                    evaluator = metrics.measurer(net)
 
                     model = ymir.Coordinate(ALG, opt, opt_state, params, network)
 
-                    results = ymir.mp.metrics.create_recorder(['accuracy'], train=True, test=True, add_evals=['attacking'])
+                    results = metrics.create_recorder(['accuracy'], train=True, test=True, add_evals=['attacking'])
                     results['asr'] = []
 
                     # Train/eval loop.
@@ -99,16 +102,16 @@ if __name__ == "__main__":
                                 else:
                                     asr = unzero(vicdel) / unzero(max(euclid_dist(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads]), theta)))
                             results['asr'].append(asr)
-                            ymir.mp.metrics.record(results, evaluator, params, train_eval, test_eval, {'attacking': controller.attacking})
+                            metrics.record(results, evaluator, params, train_eval, test_eval, {'attacking': controller.attacking})
                             pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}", 'ASR': f"{results['asr'][-1]:.3f}", 'ATT': controller.attacking})
 
-                    results = ymir.mp.metrics.finalize(results)
+                    results = metrics.finalize(results)
                     cur[f"{acal} mean asr"] = results['test asr'].mean()
                     cur[f"{acal} std asr"] = results['test asr'].std()
                     print()
                     print("=" * 150)
                     print(f"Server type {ALG}, Dataset {DATASET}, {A / (A + N):.2%} {ADV} adversaries, final accuracy: {results['test accuracy'][-1]:.3%}")
-                    print(ymir.mp.metrics.tabulate(results, TOTAL_ROUNDS))
+                    print(metrics.tabulate(results, TOTAL_ROUNDS))
                     print("=" * 150)
                     print()
                 onoff_results = onoff_results.append(cur, ignore_index=True)

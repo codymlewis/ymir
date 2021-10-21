@@ -1,64 +1,48 @@
+import itertools
+import sklearn.metrics as skm
+
+import numpy as np
 import jax
 import jax.numpy as jnp
 
 """
 Measure performance during experiments
-TODO: NEEDS REWORK
 """
 
 
-def measurer(net):
+def accuracy(net, **_):
+    """Find the accuracy of the models predictions on the data"""
     @jax.jit
-    def accuracy(params, X, y):
-        predictions = net.apply(params, X)
-        return jnp.mean(jnp.argmax(predictions, axis=-1) == y)
+    def _apply(params, X, y):
+        return jnp.mean(jnp.argmax(net.apply(params, X), axis=-1) == y)
+    return _apply
 
+def asr(net, attack_from, attack_to, **_):
+    """Find the success rate of a label flipping/backdoor attack that attempts the mapping attack_from -> attack_to"""
     @jax.jit
-    def attack_success_rate(params, X, y, attack_from, attack_to):
+    def _apply(params, X, y):
         preds = jnp.argmax(net.apply(params, X), axis=-1)
         idx = y == attack_from
         return jnp.sum(jnp.where(idx, preds, -1) == attack_to) / jnp.sum(idx)
-    return {'acc': accuracy, 'asr': attack_success_rate}
+    return _apply
 
 
-def create_recorder(evals, train=False, test=False, add_evals=None):
-    results = dict()
-    if train:
-        results.update({f"train {e}": [] for e in evals})
-    if test:
-        results.update({f"test {e}": [] for e in evals})
-    if add_evals is not None:
-        results.update({e: [] for e in add_evals})
-    return results
+class Neurometer:
+    """Measure aspects of the model"""
+    def __init__(self, net, datasets, evals, **kwargs):
+        self.datasets = datasets
+        self.evaluators = {e: globals()[e](net, **kwargs) for e in evals}
+        self.results = {f"{d} {e}": [] for d, e in itertools.product(datasets.keys(), evals)}
 
+    def add_record(self, params):
+        """Add a measurement of the chosen aspects with respect to the current params, return the latest results"""
+        for ds_type, ds in self.datasets.items():
+            for eval_type, eval in self.evaluators.items():
+                self.results[f"{ds_type} {eval_type}"].append(eval(params, *next(ds)))
+        return {k: v[-1] for k, v in self.results.items()}
 
-def record(results, evaluator, params, train_ds=None, test_ds=None, add_recs=None, **kwargs):
-    for k, v in results.items():
-        ds = train_ds if "train" in k else test_ds
-        if "acc" in k:
-            v.append(evaluator['acc'](params, *next(ds)))
-        if ("test" in k or "train" in k) and ("asr" in k):
-            v.append(evaluator['asr'](params, *next(ds), kwargs['attack_from'], kwargs['attack_to']))
-    if add_recs is not None:
-        for k, v in add_recs.items():
-            results[k].append(v)
-
-
-def finalize(results):
-    for k, v in results.items():
-        results[k] = jnp.array(v)
-    return results
-
-
-def tabulate(results, total_rounds, ri=10):
-    halftime = int((total_rounds / 2) / ri)
-    table = ""
-    for k, v in results.items():
-        table += f"[{k}] mean: {v.mean()}, std: {v.std()} [after {halftime * ri} rounds] mean {v[halftime:].mean()}, std: {v[halftime:].std()}\n"
-    return table[:-1]
-
-
-def csvline(ds_name, alg, adv, results, total_rounds, ri=10):
-    halftime = int((total_rounds / 2) / ri)
-    asr = results['test asr']
-    return f"{ds_name},{alg},{adv:.2%},{results['test accuracy'][-1]},{asr.mean()},{asr.std()},{asr[halftime:].mean()},{asr[halftime:].std()}\n"
+    def get_results(self):
+        """Return overall results formatted into jax.numpy arrays"""
+        for k, v in self.results.items():
+            self.results[k] = jnp.array(v)
+        return self.results

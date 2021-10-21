@@ -1,3 +1,4 @@
+import re
 import jax
 import haiku as hk
 import optax
@@ -32,10 +33,7 @@ if __name__ == "__main__":
         network.add_host("main", ymir.scout.Client(opt_state, d))
 
     model = ymir.Coordinate("fed_avg", opt, opt_state, params, network)
-
-    # metrics setup
-    evaluator = ymir.mp.metrics.measurer(net)
-    results = ymir.mp.metrics.create_recorder(['accuracy'], train=True, test=True)
+    meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval}, ['accuracy'])
 
     print("Done, beginning training.")
 
@@ -44,6 +42,6 @@ if __name__ == "__main__":
     pbar = trange(TOTAL_ROUNDS)
     for round in pbar:
         if round % 10 == 0:
-            ymir.mp.metrics.record(results, evaluator, model.params, train_eval, test_eval)
-            pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}"})
+            results = meter.add_record(model.params)
+            pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}"})
         model.fit()
