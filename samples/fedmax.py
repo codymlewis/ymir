@@ -23,10 +23,11 @@ if __name__ == "__main__":
     test_eval = dataset.get_iter("test")
 
     net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(dataset.classes)(x)))
+    net_act = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(dataset.classes).act(x)))
     opt = optax.sgd(0.01)
     params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
     opt_state = opt.init(params)
-    loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
+    loss = ymir.mp.losses.fedmax_loss(net, net_act, dataset.classes)
     network = ymir.mp.network.Network(opt, loss)
     network.add_controller("main", is_server=True)
     for d in data:
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     print("Done, beginning training.")
 
     # Train/eval loop.
-    TOTAL_ROUNDS = 5_001
+    TOTAL_ROUNDS = 6_01
     pbar = trange(TOTAL_ROUNDS)
     for round in pbar:
         results = meter.add_record(model.params)
