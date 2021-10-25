@@ -21,8 +21,10 @@ class Client:
     opt_state: optax.OptState
     data: mp.datasets.DataIter
     batch_size: int
+    epochs: int
 
-    def __init__(self, opt_state, data):
+    def __init__(self, opt_state, data, epochs):
         self.opt_state = opt_state
         self.data = data
         self.batch_size = data.batch_size
+        self.epochs = epochs

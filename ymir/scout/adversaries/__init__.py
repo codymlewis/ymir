@@ -195,8 +195,9 @@ class OnOffLabelFlipper:
     data: Mapping[str, np.ndarray]
     shadow_data: Mapping[str, np.ndarray]
     batch_size: int
+    epochs: int
 
-    def __init__(self, opt_state, data, dataset, batch_size, attack_from, attack_to):
+    def __init__(self, opt_state, data, dataset, batch_size, epochs, attack_from, attack_to):
         self.opt_state = opt_state
         self.data = data
         self.shadow_data = dataset.get_iter(
@@ -206,6 +207,7 @@ class OnOffLabelFlipper:
             map=partial(labelflip_map, attack_from, attack_to)
         )
         self.batch_size = batch_size
+        self.epochs = epochs
 
     def toggle(self):
         self.data, self.shadow_data = self.shadow_data, self.data
@@ -216,8 +218,9 @@ class LabelFlipper:
     opt_state: optax.OptState
     data: Mapping[str, np.ndarray]
     batch_size: int
+    epochs: int
 
-    def __init__(self, opt_state, dataset, batch_size, attack_from, attack_to):
+    def __init__(self, opt_state, dataset, batch_size, epochs, attack_from, attack_to):
         self.opt_state = opt_state
         self.data = dataset.get_iter(
             "train",
@@ -226,14 +229,16 @@ class LabelFlipper:
             map=partial(labelflip_map, attack_from, attack_to)
         )
         self.batch_size = batch_size
+        self.epochs = epochs
 
 @dataclass
 class Backdoor:
     opt_state: optax.OptState
     data: Mapping[str, np.ndarray]
     batch_size: int
+    epochs: int
 
-    def __init__(self, opt_state, dataset, batch_size, attack_from, attack_to):
+    def __init__(self, opt_state, dataset, batch_size, epochs, attack_from, attack_to):
         self.opt_state = opt_state
         self.map=partial(globals()[f"{type(dataset).__name__.lower()}_backdoor_map"], attack_from, attack_to)
         self.data = dataset.get_iter(
@@ -243,6 +248,7 @@ class Backdoor:
             map=self.map
         )
         self.batch_size = batch_size
+        self.epochs = epochs
 
 
 def mnist_backdoor_map(attack_from, attack_to, X, y, no_label=False):

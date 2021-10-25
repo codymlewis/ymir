@@ -1,16 +1,24 @@
 import jax
+import optax
 
 """
 Set-up a network architecture for the FL process
 """
+
+
+@jax.jit
+def tree_add(*trees):
+    """Element-wise add any number of pytrees"""
+    return jax.tree_multimap(lambda *xs: sum(xs), *trees)
+
 
 def update(opt, loss):
     """Do some local training and return the gradient"""
     @jax.jit
     def _apply(params, opt_state, X, y):
         grads = jax.grad(loss)(params, X, y)
-        _, opt_state = opt.update(grads, opt_state)
-        return grads, opt_state
+        updates, opt_state = opt.update(grads, opt_state)
+        return grads, opt_state, updates
     return _apply
 
 
@@ -44,8 +52,13 @@ class Controller:
         for switch in self.switches:
             all_grads.extend(switch(params))
         for client in self.clients:
-            grads, client.opt_state = self.update(params, client.opt_state, *next(client.data))
-            all_grads.append(grads)
+            p = params
+            sum_grads = None
+            for _ in range(client.epochs):
+                grads, client.opt_state, updates = self.update(p, client.opt_state, *next(client.data))
+                p = optax.apply_updates(p, updates)
+                sum_grads = grads if sum_grads is None else tree_add(sum_grads, grads)
+            all_grads.append(sum_grads)
         return all_grads
 
 
