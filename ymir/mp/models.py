@@ -6,6 +6,22 @@ Neural networks to be used with FL
 """
 
 
+class Logistic(hk.Module):
+    """Multi-class one-vs-all logistic regression model"""
+    def __init__(self, classes, name=None):
+        super().__init__(name=name)
+        self.layers = [
+            hk.Flatten(),
+            hk.Linear(classes), jax.nn.sigmoid
+        ]
+    
+    def __call__(self, x):
+        return hk.Sequential(self.layers)(x)
+
+    def act(self, x):
+        return hk.Sequential(self.layers[:-1])(x)
+
+
 class LeNet_300_100(hk.Module):
     """LeNet 300-100 network"""
     def __init__(self, classes, name=None):
