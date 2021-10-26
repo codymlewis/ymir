@@ -1,24 +1,14 @@
 import jax
 import optax
 
+import ymirlib
+
 from . import aggregation
 from . import compression
 
 """
 General gradient aggregation functions
 """
-
-
-@jax.jit
-def tree_mul(tree, scale):
-    """Multiply the elements of a pytree by the value of scale"""
-    return jax.tree_map(lambda x: x * scale, tree)
-
-
-@jax.jit
-def tree_add(*trees):
-    """Element-wise add any number of pytrees"""
-    return jax.tree_multimap(lambda *xs: sum(xs), *trees)
 
 
 def update(opt):
@@ -37,8 +27,8 @@ def update(opt):
 
 def apply_scale(alpha, all_grads):
     """Scale a collection of gradients by the value of alpha"""
-    return [tree_mul(g, a) for g, a in zip(all_grads, alpha)]
+    return [ymirlib.tree_mul(g, a) for g, a in zip(all_grads, alpha)]
 
 def sum_grads(all_grads):
     """Element-wise sum together a collection of gradients"""
-    return tree_add(*all_grads)
+    return ymirlib.tree_add(*all_grads)

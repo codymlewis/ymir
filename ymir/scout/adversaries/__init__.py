@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Mapping
 
+import ymirlib
+
 from ymir import garrison
 from ymir import mp
 
@@ -9,30 +11,6 @@ import jax
 import optax
 
 from functools import partial
-
-
-@jax.jit
-def tree_mul(tree, scale):
-    return jax.tree_map(lambda x: x * scale, tree)
-
-
-@jax.jit
-def tree_rand(tree):
-    return jax.tree_map(lambda x: np.random.uniform(low=-10e-3, high=10e-3, size=x.shape), tree)
-
-@jax.jit
-def tree_add_rand(tree):
-    return jax.tree_map(lambda x: x + np.random.normal(loc=0.0, scale=10e-4, size=x.shape), tree)
-
-@jax.jit
-def tree_mul(tree, scale):
-    """Multiply the elements of a pytree by the value of scale"""
-    return jax.tree_map(lambda x: x * scale, tree)
-
-@jax.jit
-def tree_add(*trees):
-    """Element-wise add any number of pytrees"""
-    return jax.tree_multimap(lambda *xs: sum(xs), *trees)
 
 
 class ScalingController(mp.network.Controller):
@@ -57,7 +35,7 @@ class ScalingController(mp.network.Controller):
         idx = np.arange(len(alpha) - self.num_adv, len(alpha))[alpha[-self.num_adv:] > 0.0001]
         alpha[idx] = 1 / alpha[idx]
         for i in idx:
-            all_grads[i] = tree_mul(all_grads[i], alpha[i])
+            all_grads[i] = ymirlib.tree_mul(all_grads[i], alpha[i])
         return all_grads
 
 class OnOffController(mp.network.Controller):
@@ -114,11 +92,11 @@ class FRController(mp.network.Controller):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
         all_grads = super().__call__(params)
         if self.attack_type == "random":
-            delta = tree_rand(params)
+            delta = ymirlib.tree_uniform(params, low=-10e-3, high=10e-3)
         else:
-            delta = tree_add(params, tree_mul(self.prev_params, -1))
+            delta = ymirlib.tree_add(params, ymirlib.tree_mul(self.prev_params, -1))
             if "advanced" in self.attack_type:
-                delta = tree_add_rand(delta)
+                delta = ymirlib.tree_add_normal(delta, loc=0.0, scale=10e-4)
         all_grads[-self.num_adv:] = [delta for _ in range(self.num_adv)]
         self.prev_params = params
         return all_grads
@@ -162,7 +140,7 @@ class OnOffFRController(mp.network.Controller):
         if self.should_toggle(alpha):
             self.attacking = not self.attacking
         if self.attacking:
-            delta = tree_add(params, tree_mul(self.prev_params, -1))
+            delta = ymirlib.tree_add(params, ymirlib.tree_mul(self.prev_params, -1))
             all_grads[-self.num_adv:] = [delta for _ in range(self.num_adv)]
         self.prev_params = params
         return all_grads
@@ -184,8 +162,8 @@ class MoutherController(mp.network.Controller):
         all_grads = super().__call__(params)
         grad = all_grads[self.victim]
         if "bad" in self.attack_type:
-            grad = tree_mul(grad, -1)
-        all_grads[-self.num_adv:] = [tree_add_rand(grad) for _ in range(self.num_adv)]
+            grad = ymirlib.tree_mul(grad, -1)
+        all_grads[-self.num_adv:] = [ymirlib.tree_add_normal(grad, loc=0.0, scale=10e-4) for _ in range(self.num_adv)]
         return all_grads
 
 

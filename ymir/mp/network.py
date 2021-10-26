@@ -1,15 +1,11 @@
 import jax
 import optax
 
+import ymirlib
+
 """
 Set-up a network architecture for the FL process
 """
-
-
-@jax.jit
-def tree_add(*trees):
-    """Element-wise add any number of pytrees"""
-    return jax.tree_multimap(lambda *xs: sum(xs), *trees)
 
 
 def update(opt, loss):
@@ -57,7 +53,7 @@ class Controller:
             for _ in range(client.epochs):
                 grads, client.opt_state, updates = self.update(p, client.opt_state, *next(client.data))
                 p = optax.apply_updates(p, updates)
-                sum_grads = grads if sum_grads is None else tree_add(sum_grads, grads)
+                sum_grads = grads if sum_grads is None else ymirlib.tree_add(sum_grads, grads)
             all_grads.append(sum_grads)
         return all_grads
 
