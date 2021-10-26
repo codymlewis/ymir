@@ -24,5 +24,5 @@ make
 
 #### Quick install
 ~~~sh
-git clone git@github.com:codymlewis/ymir.git && cd ymir && pip install -r requirements.txt && make
+pip install ymirlib
 ~~~
