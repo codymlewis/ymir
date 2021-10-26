@@ -27,6 +27,9 @@ make
 git clone git@github.com:codymlewis/ymir.git && cd ymir && pip install -r requirements.txt && make
 ~~~
 
+### The data
+Run the `dlall.sh` shell script to download, preprocess and save the datasets used.
+
 ## Usage
 We provide examples of the library's usage in the `samples` folder. Though, generally
 a program involves initializing shared values and the network architecture, then initialization
@@ -35,8 +38,8 @@ of our `Coordinate` object, and finally calling fit from that object.
 The following is a generic example snippet
 ~~~python
 # setup
-dataset = ymir.mp.datasets.DATASET()
-data = dataset.fed_split(batch_sizes, iid)
+dataset = ymir.mp.datasets.load(DATASET)
+data = dataset.fed_split(batch_sizes, DIST_LIST)
 train_eval = dataset.get_iter("train", 10_000)
 test_eval = dataset.get_iter("test")
 
@@ -48,11 +51,11 @@ loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
 network = ymir.mp.network.Network(opt, loss)
 network.add_controller("main", is_server=True)
 for d in data:
-    network.add_host("main", ymir.scout.Client(opt_state, d))
+    network.add_host("main", ymir.scout.Client(opt_state, d, CLIENT_EPOCHS))
 
 model = ymir.Coordinate(AGG_ALG, opt, opt_state, params, network)
 
 # Train/eval loop.
-for round in range(total_epochs):
+for round in range(TOTAL_EPOCHS):
     model.fit()
 ~~~
