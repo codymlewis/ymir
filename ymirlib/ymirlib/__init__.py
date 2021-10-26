@@ -1,3 +1,5 @@
+from functools import partial
+
 import jax
 import numpy as np
 
@@ -6,13 +8,13 @@ General utility library for ymir
 """
 
 
-@jax.jit
+@partial(jax.jit, static_argnums=(1, 2,))
 def tree_uniform(tree, low=0.0, high=1.0):
     """Create an equivalently shaped tree with random number elements in the range [low, high)"""
     return jax.tree_map(lambda x: np.random.uniform(low=low, high=high, size=x.shape), tree)
 
 
-@jax.jit
+@partial(jax.jit, static_argnums=(1, 2,))
 def tree_add_normal(tree, loc=0.0, scale=1.0):
     """Add normally distributed noise to each element of the tree, (mu=loc, sigma=scale)"""
     return jax.tree_map(lambda x: x + np.random.normal(loc=loc, scale=scale, size=x.shape), tree)
