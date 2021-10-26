@@ -30,9 +30,9 @@ if __name__ == "__main__":
                     T = 10
                     ATTACK_FROM, ATTACK_TO = 0, 1
                 ADV_CLASS = {
-                    "labelflip": lambda o, _, b: ymir.scout.adversaries.LabelFlipper(o, DS, b, ATTACK_FROM, ATTACK_TO),
-                    "scaling backdoor": lambda o, _, b: ymir.scout.adversaries.Backdoor(o, DS, b, ATTACK_FROM, ATTACK_TO),
-                    "onoff labelflip": lambda o, d, b: ymir.scout.adversaries.OnOffLabelFlipper(o, d, DS, b, ATTACK_FROM, ATTACK_TO),
+                    "labelflip": lambda o, _, b: ymir.scout.adversaries.LabelFlipper(o, DS, b, 1, ATTACK_FROM, ATTACK_TO),
+                    "scaling backdoor": lambda o, _, b: ymir.scout.adversaries.Backdoor(o, DS, b, 1, ATTACK_FROM, ATTACK_TO),
+                    "onoff labelflip": lambda o, d, b: ymir.scout.adversaries.OnOffLabelFlipper(o, d, DS, b, 1, ATTACK_FROM, ATTACK_TO),
                 }[ADV]
                 cur = {"algorithm": ALG, "attack": ADV, "dataset": DATASET}
                 for acal in adv_percent:
@@ -40,7 +40,7 @@ if __name__ == "__main__":
                     if DATASET == 'cifar10':
                         net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.ConvLeNet(DS.classes)(x)))
                     else:
-                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet(DS.classes)(x)))
+                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(DS.classes)(x)))
 
                     train_eval = DS.get_iter("train", 10_000)
                     test_eval = DS.get_iter("test")
@@ -77,7 +77,7 @@ if __name__ == "__main__":
                         is_server=True
                     )
                     for i in range(N):
-                        network.add_host("main", ymir.scout.Client(opt_state, data[i]))
+                        network.add_host("main", ymir.scout.Client(opt_state, data[i], 1))
                     for i in range(A):
                         network.add_host("main", ADV_CLASS(opt_state, data[i + N], batch_sizes[i + N]))
                     controller = network.get_controller("main")

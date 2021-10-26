@@ -34,7 +34,7 @@ if __name__ == "__main__":
                     if DATASET == 'cifar10':
                         net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.ConvLeNet(DS.classes)(x)))
                     else:
-                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet(DS.classes)(x)))
+                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(DS.classes)(x)))
 
                     train_eval = DS.get_iter("train", 10_000)
                     test_eval = DS.get_iter("test")
@@ -71,7 +71,7 @@ if __name__ == "__main__":
                     )
 
                     for i in range(T):
-                        network.add_host("main", ymir.scout.Client(opt_state, data[i]))
+                        network.add_host("main", ymir.scout.Client(opt_state, data[i], 1))
                     controller = network.get_controller("main")
                     if "onoff" in ADV:
                         controller.init(params)

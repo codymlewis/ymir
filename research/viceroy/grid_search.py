@@ -25,7 +25,7 @@ if __name__ == "__main__":
     ATTACK_FROM, ATTACK_TO = 0, 1
     ALG = "foolsgold"
     ADV = "onoff labelflip"
-    ADV_CLASS = lambda o, d, b: ymir.scout.adversaries.OnOffLabelFlipper(o, d, DS, b, ATTACK_FROM, ATTACK_TO)
+    ADV_CLASS = lambda o, d, b: ymir.scout.adversaries.OnOffLabelFlipper(o, d, DS, b, 1, ATTACK_FROM, ATTACK_TO)
     for beta, gamma in itertools.product(np.arange(0.0, 1.1, 0.05), np.arange(0.0, 1.2, 0.05)):
         print(f"beta: {beta}, gamma: {gamma}")
         cur = {"beta": beta, "gamma": gamma}
@@ -34,7 +34,7 @@ if __name__ == "__main__":
             if DATASET == 'CIFAR10':
                 net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.ConvLeNet(DS.classes)(x)))
             else:
-                net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet(DS.classes)(x)))
+                net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(DS.classes)(x)))
 
             train_eval = DS.get_iter("train", 10_000)
             test_eval = DS.get_iter("test")
@@ -71,7 +71,7 @@ if __name__ == "__main__":
                 is_server=True
             )
             for i in range(N):
-                network.add_host("main", ymir.scout.Client(opt_state, data[i]))
+                network.add_host("main", ymir.scout.Client(opt_state, data[i], 1))
             for i in range(A):
                 network.add_host("main", ADV_CLASS(opt_state, data[i + N], batch_sizes[i + N]))
             controller = network.get_controller("main")
