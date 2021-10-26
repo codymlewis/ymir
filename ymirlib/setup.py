@@ -10,7 +10,7 @@ setuptools.setup(
     description="JAX-based Federated Learning utility library",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    url="https://github.com/codymlewis/ymir/ymirlib",
+    url="https://github.com/codymlewis/ymir/tree/main/ymirlib",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
