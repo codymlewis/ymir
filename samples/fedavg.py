@@ -17,7 +17,7 @@ if __name__ == "__main__":
     print("Setting up the system...")
     num_endpoints = 10
     dataset = ymir.mp.datasets.load('mnist')
-    batch_sizes = [64 for _ in range(num_endpoints)]
+    batch_sizes = [8 for _ in range(num_endpoints)]
     data = dataset.fed_split(batch_sizes, [[i % 10] for i in range(num_endpoints)])
     train_eval = dataset.get_iter("train", 10_000)
     test_eval = dataset.get_iter("test")
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     network = ymir.mp.network.Network(opt, loss)
     network.add_controller("main", is_server=True)
     for d in data:
-        network.add_host("main", ymir.scout.Client(opt_state, d, 60))
+        network.add_host("main", ymir.scout.Client(opt_state, d, 1))
 
     model = ymir.Coordinate("fed_avg", opt, opt_state, params, network)
     meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval}, ['accuracy'])
