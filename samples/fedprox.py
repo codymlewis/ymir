@@ -8,7 +8,7 @@ from tqdm import tqdm, trange
 import ymir
 
 """
-Example of federated averaging on the MNIST dataset
+Example of FedProx on the MNIST dataset
 """
 
 
