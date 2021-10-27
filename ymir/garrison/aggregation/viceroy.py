@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import sys
 
 import numpy as np
@@ -18,10 +17,14 @@ The viceroy algorithm
 class Server(server.AggServer):
     def __init__(self, params, network):
         self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
-        self.reps = jnp.array([0.01 for _ in range(len(network))])
+        self.reps = jnp.array([1.0 for _ in range(len(network))])
+        self.first = True
 
     def update(self, all_grads):
-        self.histories, self.reps = update(self.histories, self.reps, all_grads)
+        if self.first:
+            self.first = False
+        else:
+            self.histories, self.reps = update(self.histories, self.reps, all_grads)
 
     def scale(self, all_grads):
         n_clients = self.histories.shape[0]
