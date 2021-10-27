@@ -27,7 +27,7 @@ jobs:
       - name: Test ymirlib
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install jax jaxlib chex wheel unittest
+          python3 -m pip install jax jaxlib chex wheel
           cd ymirlib
           python3 -m pip install -r requirements.txt
           make
