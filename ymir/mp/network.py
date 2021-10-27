@@ -13,7 +13,7 @@ def update(opt, loss):
     @jax.jit
     def _apply(params, opt_state, X, y):
         grads = jax.grad(loss)(params, X, y)
-        updates, opt_state = opt.update(grads, opt_state)
+        updates, opt_state = opt.update(grads, opt_state, params)
         return grads, opt_state, updates
     return _apply
 

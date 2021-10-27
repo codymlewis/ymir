@@ -19,7 +19,7 @@ def update(opt):
     """
     @jax.jit
     def _apply(params, opt_state, grads):
-        updates, opt_state = opt.update(grads, opt_state)
+        updates, opt_state = opt.update(grads, opt_state, params)
         new_params = optax.apply_updates(params, updates)
         return new_params, opt_state
     return _apply
