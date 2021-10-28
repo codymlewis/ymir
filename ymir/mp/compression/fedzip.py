@@ -4,6 +4,7 @@ import numpy as np
 from sklearn import cluster
 import optax
 
+from ymir import garrison
 import ymirlib
 
 from .. import network
@@ -12,6 +13,9 @@ class Controller(network.Controller):
     """
     Controller that performs FedZip on the gradients
     """
+    def init(self, params):
+        pass
+
     def __call__(self, params):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
         all_grads = []
@@ -34,7 +38,6 @@ class Network(network.Network):
     def __call__(self, params):
         """Perform an update step across the network and return the respective gradients"""
         return decode(params, self.controllers[self.server_name](params))
-
 
 
 # FedZip: https://arxiv.org/abs/2102.01593
@@ -117,3 +120,174 @@ def _huffman_decode(params, grads, encodings):
         for k, v in encodings[i].items():
             final_grads[i] = jnp.where(grads[i].reshape(p.shape) == k, v, final_grads[i])
     return jax.tree_unflatten(tree_struct, final_grads)
+
+
+
+# Adversary compression controllers
+class ScalingController(Controller):
+    """
+    Network controller that scales adversaries' gradients by the inverse of aggregation algorithm
+    """
+    def __init__(self, opt, loss, alg, num_adversaries):
+        super().__init__(opt, loss)
+        self.num_adv = num_adversaries
+        self.alg = alg
+        self.attacking = True
+
+    def init(self, params):
+        super().init(params)
+        self.server = getattr(garrison.aggregation, self.alg).Server(params, self)
+        self.server_update = garrison.update(self.opt)
+        
+    def __call__(self, params):
+        """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
+        all_grads = super().__call__(params)
+        # intercept
+        int_grads = decode(params, self.controllers[self.server_name](params))
+        self.server.update(int_grads)
+        alpha = np.array(self.server.scale(int_grads))
+        idx = np.arange(len(alpha) - self.num_adv, len(alpha))[alpha[-self.num_adv:] > 0.0001]
+        alpha[idx] = 1 / alpha[idx]
+        for i in idx:
+            int_grads[i] = jax.flatten_util.ravel_pytree(ymirlib.tree_mul(int_grads[i], alpha[i]))[0]
+            all_grads[i] = encode(int_grads[i])
+        return all_grads
+
+class OnOffController(Controller):
+    """
+    Network controller that toggles an attack on or off respective to the result of the aggregation algorithm
+    """
+    def __init__(self, opt, loss, alg, num_adversaries, max_alpha, sharp, beta=1.0, gamma=0.85):
+        super().__init__(opt, loss)
+        self.num_adv = num_adversaries
+        self.alg = alg
+        self.attacking = False
+        self.max_alpha = max_alpha
+        self.sharp = sharp
+        self.beta = beta
+        self.gamma = gamma
+
+    def init(self, params):
+        super().init(params)
+        self.server = getattr(garrison.aggregation, self.alg).Server(params, self)
+        self.server_update = garrison.update(self.opt)
+        
+    def should_toggle(self, alpha):
+        avg_syb_alpha = alpha[-self.num_adv:].mean()
+        p = self.attacking and avg_syb_alpha < self.beta * self.max_alpha
+        if self.sharp:
+            q = not self.attacking and avg_syb_alpha > 0.4 * self.max_alpha
+        else:
+            q = not self.attacking and avg_syb_alpha > self.gamma * self.max_alpha
+        return p or q
+
+    def __call__(self, params):
+        """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
+        all_grads = super().__call__(params)
+        # intercept
+        int_grads = decode(params, all_grads)
+        self.server.update(int_grads)
+        alpha = self.server.scale(int_grads)
+        if self.should_toggle(alpha):
+            self.attacking = not self.attacking
+            for a in self.clients[-self.num_adv:]:
+                a.toggle()
+        return all_grads
+
+
+class FRController(network.Controller):
+    """
+    Network controller that that makes adversaries free ride
+    """
+    def __init__(self, opt, loss, num_adversaries, params, attack_type):
+        super().__init__(opt, loss)
+        self.num_adv = num_adversaries
+        self.attacking = True
+        self.prev_params = params
+        self.attack_type = attack_type
+        
+    def __call__(self, params):
+        """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
+        all_grads = super().__call__(params)
+        # intercept
+        if self.attack_type == "random":
+            delta = ymirlib.tree_uniform(params, low=-10e-3, high=10e-3)
+        else:
+            delta = ymirlib.tree_add(params, ymirlib.tree_mul(self.prev_params, -1))
+            if "advanced" in self.attack_type:
+                delta = ymirlib.tree_add_normal(delta, loc=0.0, scale=10e-4)
+        all_grads[-self.num_adv:] = [encode(delta) for _ in range(self.num_adv)]
+        self.prev_params = params
+        return all_grads
+
+
+class OnOffFRController(network.Controller):
+    """
+    Network controller that that makes adversaries free ride respective to the results of the aggregation algorithm
+    """
+    def __init__(self, opt, loss, alg, num_adversaries, params, max_alpha, sharp, beta=1.0, gamma=0.85):
+        super().__init__(opt, loss)
+        self.num_adv = num_adversaries
+        self.prev_params = params
+        self.alg = alg
+        self.attacking = False
+        self.max_alpha = max_alpha
+        self.sharp = sharp
+        self.timer = 0
+        self.beta = beta
+        self.gamma = gamma
+
+    def init(self, params):
+        super().init(params)
+        self.server = getattr(garrison.aggregation, self.alg).Server(params, self)
+        self.server_update = garrison.update(self.opt)
+        
+    def should_toggle(self, alpha):
+        avg_syb_alpha = alpha[-self.num_adv:].mean()
+        p = self.attacking and avg_syb_alpha < self.beta * self.max_alpha
+        if self.sharp:
+            self.timer += 1
+            return self.timer % 30
+        else:
+            q = not self.attacking and avg_syb_alpha > self.gamma * self.max_alpha
+        return p or q
+
+    def __call__(self, params):
+        """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
+        all_grads = super().__call__(params)
+        # intercept
+        int_grads = decode(params, all_grads)
+        self.server.update(int_grads)
+        alpha = self.server.scale(int_grads)
+        if self.should_toggle(alpha):
+            self.attacking = not self.attacking
+        if self.attacking:
+            delta = ymirlib.tree_add(params, ymirlib.tree_mul(self.prev_params, -1))
+            int_grads[-self.num_adv:] = [delta for _ in range(self.num_adv)]
+        all_grads[-self.num_adv:] = [encode(g) for g in int_grads[-self.num_adv:]]
+        self.prev_params = params
+        return all_grads
+
+
+class MoutherController(network.Controller):
+    """
+    Network controller that scales adversaries' gradients by the inverse of aggregation algorithm
+    """
+    def __init__(self, opt, loss, num_adversaries, victim, attack_type):
+        super().__init__(opt, loss)
+        self.num_adv = num_adversaries
+        self.attacking = True
+        self.victim = victim
+        self.attack_type = attack_type
+        
+    def __call__(self, params):
+        """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
+        all_grads = super().__call__(params)
+        # intercept
+        int_grads = decode(params, all_grads)
+        grad = int_grads[self.victim]
+        if "bad" in self.attack_type:
+            grad = ymirlib.tree_mul(grad, -1)
+        int_grads[-self.num_adv:] = [ymirlib.tree_add_normal(grad, loc=0.0, scale=10e-4) for _ in range(self.num_adv)]
+        all_grads[-self.num_adv:] = [encode(g) for g in int_grads[-self.num_adv:]]
+        return all_grads
