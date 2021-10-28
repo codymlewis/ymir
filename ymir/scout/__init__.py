@@ -6,7 +6,6 @@ import jax
 import optax
 
 from . import adversaries
-from . import compression
 from ymir import mp
 
 

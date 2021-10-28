@@ -16,6 +16,14 @@ def cross_entropy_loss(net, classes):
         return jnp.mean(optax.softmax_cross_entropy(logits, labels))
     return _apply
 
+def l2_loss(net):
+    """L2 loss, best suited for regression models"""
+    @jax.jit
+    def _apply(params, x):
+        z = net.apply(params, x)
+        return jnp.mean(optax.l2_loss(z, x))
+    return _apply
+
 
 def fedmax_loss(net, net_act, classes):
     """Loss function used for the FedMAX algorithm proposed in https://arxiv.org/abs/2004.03657"""

@@ -4,7 +4,6 @@ import optax
 import ymirlib
 
 from . import aggregation
-from . import compression
 
 """
 General gradient aggregation functions
