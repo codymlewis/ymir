@@ -18,10 +18,10 @@ Evaluation of heterogeneous techniques applied to viceroy.
 
 if __name__ == "__main__":
     xls = pd.ExcelWriter("results.xlsx", mode='a', if_sheet_exists="replace")
-    LOCAL_EPOCHS = 1
-    TOTAL_ROUNDS = 5000
+    LOCAL_EPOCHS = 10
+    TOTAL_ROUNDS = 500
     adv_percent = [0.3, 0.5]
-    for comp_alg in ["fedzip", "ae"]:
+    for comp_alg in ["fedmax", "fedprox"]:
         full_results = pd.DataFrame(columns=["Dataset", "Compression", "Aggregation", "Attack"] + [f"{a:.0%} Adv." for a in adv_percent])
         for dataset_name in ["mnist", "kddcup99"]:
             dataset = ymir.mp.datasets.load(dataset_name)
@@ -46,27 +46,35 @@ if __name__ == "__main__":
                         train_eval = dataset.get_iter("train", 10_000)
                         test_eval = dataset.get_iter("test")
 
-                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(dataset.classes)(x)))
+                        selected_model = lambda: ymir.mp.models.LeNet_300_100(dataset.classes)
+                        net = hk.without_apply_rng(hk.transform(lambda x: selected_model()(x)))
+                        net_act = hk.without_apply_rng(hk.transform(lambda x: selected_model().act(x)))
                         opt = optax.sgd(0.01)
                         params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
                         opt_state = opt.init(params)
-                        loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
+                        if comp_alg == "fedmax":
+                            loss = ymir.mp.losses.fedmax_loss(net, net_act, dataset.classes)
+                            client_opt, client_opt_state = opt, opt_state
+                        else:
+                            loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
+                            client_opt = ymir.mp.optimizers.pgd(0.01, 1)
+                            client_opt_state = client_opt.init(params)
     
-                        network = getattr(ymir.mp.compression, comp_alg).Network(opt, loss)
+                        network = ymir.mp.network.Network(client_opt, loss)
                         network.add_controller(
                             "main",
                             con_class={
                                 "onoff labelflip": partial(
-                                    getattr(ymir.mp.compression, comp_alg).OnOffController,
+                                    ymir.scout.adversaries.OnOffController,
                                     alg=alg,
                                     num_adversaries=num_adversaries,
                                     max_alpha=1/num_endpoints if alg in ['fed_avg', 'std_dagmm'] else 1,
                                     sharp=alg in ['fed_avg', 'std_dagmm', 'krum']
                                 ),
-                                "labelflip": getattr(ymir.mp.compression, comp_alg).Controller,
-                                "scaling backdoor": partial(getattr(ymir.mp.compression, comp_alg).ScalingController, alg=alg, num_adversaries=num_adversaries),
+                                "labelflip": ymir.mp.network.Controller,
+                                "scaling backdoor": partial(ymir.scout.adversaries.ScalingController, alg=alg, num_adversaries=num_adversaries),
                                 "onoff freerider": partial(
-                                    getattr(ymir.mp.compression, comp_alg).OnOffFRController,
+                                    ymir.scout.adversaries.OnOffFRController,
                                     alg=alg,
                                     num_adversaries=num_adversaries,
                                     max_alpha=1/num_endpoints if alg in ['fed_avg', 'std_dagmm'] else 1,
@@ -74,16 +82,16 @@ if __name__ == "__main__":
                                     params=params
                                 ),
                                 "freerider": partial(
-                                    getattr(ymir.mp.compression, comp_alg).FRController, attack_type="delta", num_adversaries=num_adversaries, params=params
+                                    ymir.scout.adversaries.FRController, attack_type="delta", num_adversaries=num_adversaries, params=params
                                 ),
                                 "mouther": partial(
-                                    getattr(ymir.mp.compression, comp_alg).MoutherController, num_adversaries=num_adversaries, victim=0, attack_type=attack
+                                    ymir.scout.adversaries.MoutherController, num_adversaries=num_adversaries, victim=0, attack_type=attack
                                 )
                             }[attack],
                             is_server=True
                         )
                         for i in range(num_clients):
-                            network.add_host("main", ymir.scout.Client(opt_state, data[i], LOCAL_EPOCHS))
+                            network.add_host("main", ymir.scout.Client(client_opt_state, data[i], LOCAL_EPOCHS))
                         adv_class = {
                             "labelflip": lambda o, _, b, e: ymir.scout.adversaries.LabelFlipper(o, dataset, b, e, attack_from, attack_to),
                             "scaling backdoor": lambda o, _, b, e: ymir.scout.adversaries.Backdoor(o, dataset, b, e, attack_from, attack_to),
@@ -92,8 +100,10 @@ if __name__ == "__main__":
                             "mouther": ymir.scout.Client,
                         }[attack]
                         for i in range(num_adversaries):
-                            network.add_host("main", adv_class(opt_state, data[i + num_clients], batch_sizes[i + num_clients], LOCAL_EPOCHS))
-                        (controller := network.get_controller("main")).init(params)
+                            network.add_host("main", adv_class(client_opt_state, data[i + num_clients], batch_sizes[i + num_clients], LOCAL_EPOCHS))
+                        controller = network.get_controller("main")
+                        if attack != "labelflip":
+                            controller.init(params)
                         if "onoff" not in attack:
                             controller.attacking = True
 
