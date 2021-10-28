@@ -143,13 +143,13 @@ class ScalingController(Controller):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
         all_grads = super().__call__(params)
         # intercept
-        int_grads = decode(params, self.controllers[self.server_name](params))
+        int_grads = decode(params, all_grads)
         self.server.update(int_grads)
         alpha = np.array(self.server.scale(int_grads))
         idx = np.arange(len(alpha) - self.num_adv, len(alpha))[alpha[-self.num_adv:] > 0.0001]
         alpha[idx] = 1 / alpha[idx]
         for i in idx:
-            int_grads[i] = jax.flatten_util.ravel_pytree(ymirlib.tree_mul(int_grads[i], alpha[i]))[0]
+            int_grads[i] = ymirlib.tree_mul(int_grads[i], alpha[i])
             all_grads[i] = encode(int_grads[i])
         return all_grads
 
