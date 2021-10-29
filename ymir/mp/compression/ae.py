@@ -226,7 +226,7 @@ class FRController(network.Controller):
         return all_grads
 
 
-class OnOffFRController(network.Controller):
+class OnOffFRController(Controller):
     """
     Network controller that that makes adversaries free ride respective to the results of the aggregation algorithm
     """
@@ -276,7 +276,7 @@ class OnOffFRController(network.Controller):
         return all_grads
 
 
-class MoutherController(network.Controller):
+class MoutherController(Controller):
     """
     Network controller that scales adversaries' gradients by the inverse of aggregation algorithm
     """
