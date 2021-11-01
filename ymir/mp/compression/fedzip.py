@@ -136,7 +136,7 @@ class ScalingController(Controller):
 
     def init(self, params):
         super().init(params)
-        self.server = getattr(garrison.aggregation, self.alg).Server(params, self)
+        self.server = getattr(garrison.aggregators, self.alg).Server(params, self)
         self.server_update = garrison.update(self.opt)
         
     def __call__(self, params):
@@ -169,7 +169,7 @@ class OnOffController(Controller):
 
     def init(self, params):
         super().init(params)
-        self.server = getattr(garrison.aggregation, self.alg).Server(params, self)
+        self.server = getattr(garrison.aggregators, self.alg).Server(params, self)
         self.server_update = garrison.update(self.opt)
         
     def should_toggle(self, alpha):
@@ -239,7 +239,7 @@ class OnOffFRController(Controller):
 
     def init(self, params):
         super().init(params)
-        self.server = getattr(garrison.aggregation, self.alg).Server(params, self)
+        self.server = getattr(garrison.aggregators, self.alg).Server(params, self)
         self.server_update = garrison.update(self.opt)
         
     def should_toggle(self, alpha):

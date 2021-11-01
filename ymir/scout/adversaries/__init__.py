@@ -24,7 +24,7 @@ class ScalingController(mp.network.Controller):
         self.attacking = True
 
     def init(self, params):
-        self.server = getattr(garrison.aggregation, self.alg).Server(params, self)
+        self.server = getattr(garrison.aggregators, self.alg).Server(params, self)
         self.server_update = garrison.update(self.opt)
         
     def __call__(self, params):
@@ -53,7 +53,7 @@ class OnOffController(mp.network.Controller):
         self.gamma = gamma
 
     def init(self, params):
-        self.server = getattr(garrison.aggregation, self.alg).Server(params, self)
+        self.server = getattr(garrison.aggregators, self.alg).Server(params, self)
         self.server_update = garrison.update(self.opt)
         
     def should_toggle(self, alpha):
@@ -119,7 +119,7 @@ class OnOffFRController(mp.network.Controller):
         self.gamma = gamma
 
     def init(self, params):
-        self.server = getattr(garrison.aggregation, self.alg).Server(params, self)
+        self.server = getattr(garrison.aggregators, self.alg).Server(params, self)
         self.server_update = garrison.update(self.opt)
         
     def should_toggle(self, alpha): # 0.7, 0.7

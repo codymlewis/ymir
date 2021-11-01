@@ -3,7 +3,7 @@ import optax
 
 import ymirlib
 
-from . import aggregation
+from . import aggregators
 
 """
 General gradient aggregation functions

@@ -30,7 +30,7 @@ if __name__ == "__main__":
     network = ymir.mp.network.Network(opt, loss)
     network.add_controller("main", is_server=True)
     for d in data:
-        network.add_host("main", ymir.scout.Client(opt_state, d, 1))
+        network.add_host("main", ymir.scout.Collaborator(opt_state, d, 1))
 
     server_opt = optax.sgd(0.01)
     server_opt_state = server_opt.init(params)
@@ -46,4 +46,4 @@ if __name__ == "__main__":
     for round in pbar:
         results = meter.add_record(model.params)
         pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}"})
-        model.fit()
+        model.step()

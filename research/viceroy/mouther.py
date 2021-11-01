@@ -72,7 +72,7 @@ if __name__ == "__main__":
                     )
 
                     for i in range(T):
-                        network.add_host("main", ymir.scout.Client(opt_state, data[i], 1))
+                        network.add_host("main", ymir.scout.Collaborator(opt_state, data[i], 1))
                     controller = network.get_controller("main")
                     if "onoff" in ADV:
                         controller.init()
@@ -88,7 +88,7 @@ if __name__ == "__main__":
                     TOTAL_ROUNDS = 5_001
                     pbar = trange(TOTAL_ROUNDS)
                     for round in pbar:
-                        alpha, all_grads = model.fit()
+                        alpha, all_grads = model.step()
 
                         if round % 10 == 0:
                             if (alpha[-A:] < 0.0001).all():

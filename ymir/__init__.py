@@ -16,11 +16,11 @@ class Coordinate:
         self.alg = alg
         self.params = params
         self.opt_state = opt_state
-        self.server = getattr(garrison.aggregation, alg).Server(params, network)
+        self.server = getattr(garrison.aggregators, alg).Server(params, network)
         self.server_update = garrison.update(opt)
         self.network = network
     
-    def fit(self):
+    def step(self):
         """Perform a single round of federated learning"""
         # Client side updates
         all_grads = self.network(self.params)

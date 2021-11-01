@@ -29,5 +29,8 @@ The following snippet shows the construction of a star network,
 network = ymir.mp.network.Network(opt, loss)
 network.add_controller("main", is_server=True)
 for d in data:
-    network.add_host("main", ymir.scout.Client(opt_state, d))
+    network.add_host("main", ymir.scout.Collaborator(opt_state, d))
 ~~~
+
+## Optimizers
+Collection of optax-based optimizers to be used on both endpoints and the server

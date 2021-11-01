@@ -71,7 +71,7 @@ if __name__ == "__main__":
                 is_server=True
             )
             for i in range(N):
-                network.add_host("main", ymir.scout.Client(opt_state, data[i], 1))
+                network.add_host("main", ymir.scout.Collaborator(opt_state, data[i], 1))
             for i in range(A):
                 network.add_host("main", ADV_CLASS(opt_state, data[i + N], batch_sizes[i + N]))
             controller = network.get_controller("main")
@@ -104,7 +104,7 @@ if __name__ == "__main__":
                     metrics.record(results, evaluator, model.params, train_eval, test_eval, {'attacking': controller.attacking}, attack_from=ATTACK_FROM, attack_to=ATTACK_TO)
                     pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}", 'ASR': f"{results['test asr'][-1]:.3f}", 'ATT': controller.attacking})
 
-                model.fit()
+                model.step()
             results = metrics.finalize(results)
             cur[f"{acal} mean asr"] = results['test asr'].mean()
             cur[f"{acal} std asr"] = results['test asr'].std()

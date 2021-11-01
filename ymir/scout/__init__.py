@@ -15,7 +15,7 @@ Endpoint side functionalities
 
 
 @dataclass
-class Client:
+class Collaborator:
     """Store client-based data"""
     opt_state: optax.OptState
     data: mp.datasets.DataIter
