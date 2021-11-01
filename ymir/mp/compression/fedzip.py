@@ -65,8 +65,9 @@ def _top_z(z, grads):
     return grads
 
 def _k_means(grads):
-    model = cluster.KMeans(init='random', n_clusters=3, max_iter=4, n_init=1, random_state=0)
-    model.fit(np.unique(grads).reshape((-1, 1)))
+    X = np.array(grads).reshape(-1, 1)
+    model = cluster.KMeans(init='random', n_clusters=3 if len(X) >= 3 else len(X), max_iter=4, n_init=1, random_state=0)
+    model.fit(X)
     labels = model.predict(grads.reshape((-1, 1)))
     centroids = model.cluster_centers_
     for i, c in enumerate(centroids):
