@@ -14,7 +14,7 @@ def pgd(learning_rate, mu, local_epochs=1):
     Perturbed gradient descent proposed as the mechanism for FedProx in https://arxiv.org/abs/1812.06127
     """
     return optax.chain(
-        _add_reg(mu, local_epochs),
+        _add_prox(mu, local_epochs),
         optax.scale(learning_rate)
     )
 
@@ -24,7 +24,7 @@ class PgdState(optax.OptState):
     counter: chex.Array
 
 
-def _add_reg(mu: float, local_epochs: int) -> optax.GradientTransformation:
+def _add_prox(mu: float, local_epochs: int) -> optax.GradientTransformation:
     """
     Adds a regularization term to the gradient.
     """
