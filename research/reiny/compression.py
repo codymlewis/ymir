@@ -1,15 +1,18 @@
 from functools import partial
-import itertools
+import sys
 
 import pandas as pd
 
 import jax
+import jax.numpy as jnp
 import haiku as hk
 import optax
 
 from tqdm import tqdm, trange
 
 import ymir
+
+import utils
 
 """
 Evaluation of heterogeneous techniques applied to viceroy.
@@ -29,7 +32,7 @@ if __name__ == "__main__":
                 dataset = ymir.mp.datasets.load(dataset_name)
                 for alg in ["foolsgold", "krum", "viceroy"]:
                     # attacks = ["labelflip", "onoff labelflip", "onoff freerider", "bad mouther"]
-                    attacks = ["labelflip", "onoff labelflip"]
+                    attacks = ["onoff freerider", "bad mouther"]
                     for attack in attacks:
                         cur = {"Dataset": dataset_name, "Compression": comp_alg, "Aggregation": alg, "Attack": attack}
                         for adv_p in adv_percent:
@@ -42,6 +45,7 @@ if __name__ == "__main__":
                                 num_endpoints = 10
                                 distribution = [[i % dataset.classes] for i in range(num_endpoints)]
                                 attack_from, attack_to = 0, 1
+                            victim = 0
                             num_adversaries = round(num_endpoints * adv_p)
                             num_clients = num_endpoints - num_adversaries
 
@@ -81,7 +85,7 @@ if __name__ == "__main__":
                                         getattr(ymir.mp.compression, comp_alg).FRController, attack_type="delta", num_adversaries=num_adversaries, params=params
                                     ),
                                     "bad mouther": partial(
-                                        getattr(ymir.mp.compression, comp_alg).MoutherController, num_adversaries=num_adversaries, victim=0, attack_type=attack
+                                        getattr(ymir.mp.compression, comp_alg).MoutherController, num_adversaries=num_adversaries, victim=victim, attack_type=attack
                                     )
                                 }[attack],
                                 is_server=True
@@ -107,6 +111,7 @@ if __name__ == "__main__":
                                 net,
                                 {'train': train_eval, 'test': test_eval},
                                 ['accuracy', 'asr'],
+                                add_keys=['asr'] if "labelflip" not in attack else [],
                                 attack_from=attack_from,
                                 attack_to=attack_to
                             )
@@ -116,14 +121,38 @@ if __name__ == "__main__":
                             # Train/eval loop.
                             pbar = trange(TOTAL_ROUNDS)
                             for _ in pbar:
-                                results = meter.add_record(model.params)
-                                pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}", 'ASR': f"{results['test asr']:.3f}", 'ATT': f"{controller.attacking}"})
+                                if "labelflip" in attack:
+                                    results = meter.add_record(model.params)
+                                    pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}", 'ASR': f"{results['test asr']:.3f}", 'ATT': f"{controller.attacking}"})
                                 model.step()
-                                # alpha, _ = model.step()
-                                # tqdm.write(f"{alpha=}")
-                            asrs = meter.get_results()['test asr']
-                            accs = meter.get_results()['test accuracy']
-                            cur[f"{adv_p:.0%} Adv."] = f"ACC: {accs.mean()} ({accs.std()}), ASR: {asrs.mean()} ({asrs.std()})"
+                                alpha, all_grads = model.step()
+                                if "labelflip" not in attack:
+                                    if "freerider" in attack:
+                                        if controller.attacking:
+                                            if alg == "krum":
+                                                meter.add('asr', alpha[-num_adversaries:].mean())
+                                            else:
+                                                meter.add('asr', jnp.minimum(alpha[-num_adversaries:].mean() / (1 / (alpha > 0).sum()), 1))
+                                        else:
+                                            meter.add('asr', 0.0)
+                                    elif "mouther" in attack:
+                                        if (alpha[-num_adversaries:] < 0.0001).all():
+                                            asr = -1 if alpha[victim] < 0.0001 else -2
+                                        else:
+                                            theta = jax.flatten_util.ravel_pytree(ymir.garrison.sum_grads(all_grads))[0]
+                                            vicdel = utils.euclid_dist(jax.flatten_util.ravel_pytree(all_grads[victim])[0], theta)
+                                            if "good" in attack:
+                                                numerator = min(utils.euclid_dist(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads]), theta))
+                                                asr = utils.unzero(numerator) / utils.unzero(vicdel)
+                                            else:
+                                                asr = utils.unzero(vicdel) / utils.unzero(max(utils.euclid_dist(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads]), theta)))
+                                        meter.add('asr', asr)
+                                    results = meter.add_record(model.params)
+                                    pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}", 'ASR': f"{results['asr']:.3f}", 'ATT': f"{controller.attacking}"})
+                            final_results = meter.get_results()
+                            asrs = final_results['test asr'] if "labelflip" in attack else final_results['asr']
+                            accs = final_results['test accuracy']
+                            cur[f"{adv_p:.0%} Adv."] = f"ACC: {accs[-1]}, ASR: {asrs.mean()} ({asrs.std()})"
                             print(f"""Results are {cur[f"{adv_p:.0%} Adv."]}""")
                         full_results = full_results.append(cur, ignore_index=True)
             full_results.to_excel(xls, sheet_name=comp_alg)

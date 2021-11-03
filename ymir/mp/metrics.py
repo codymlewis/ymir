@@ -29,10 +29,12 @@ def asr(net, attack_from, attack_to, **_):
 
 class Neurometer:
     """Measure aspects of the model"""
-    def __init__(self, net, datasets, evals, **kwargs):
+    def __init__(self, net, datasets, evals, add_keys=[], **kwargs):
         self.datasets = datasets
         self.evaluators = {e: globals()[e](net, **kwargs) for e in evals}
         self.results = {f"{d} {e}": [] for d, e in itertools.product(datasets.keys(), evals)}
+        for k in add_keys:
+            self.results[k] = []
 
     def add_record(self, params):
         """Add a measurement of the chosen aspects with respect to the current params, return the latest results"""
@@ -40,6 +42,10 @@ class Neurometer:
             for eval_type, eval in self.evaluators.items():
                 self.results[f"{ds_type} {eval_type}"].append(eval(params, *next(ds)))
         return {k: v[-1] for k, v in self.results.items()}
+
+    def add(self, key, value):
+        """Add a single result to the results"""
+        self.results[key].append(value)
 
     def get_results(self):
         """Return overall results formatted into jax.numpy arrays"""
