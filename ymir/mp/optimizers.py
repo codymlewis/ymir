@@ -26,13 +26,13 @@ class PgdState(optax.OptState):
 
 def _add_prox(mu: float, local_epochs: int) -> optax.GradientTransformation:
     """
-    Adds a regularization term to the gradient.
+    Adds a regularization term to the optimizer.
     """
 
     def init_fn(params: optax.Params) -> PgdState:
         return PgdState(params, jnp.array(0))
 
-    def update_fn(grads, state, params):
+    def update_fn(grads: optax.Updates, state: PgdState, params: optax.Params) -> tuple[optax.Updates, PgdState]:
         if params is None:
             raise ValueError("params argument required for this transform")
         updates = jax.tree_multimap(lambda g, w, wt: g + mu * ((w - g) - wt), grads, params, state.params)
