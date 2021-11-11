@@ -1,10 +1,9 @@
-import re
 import jax
 import haiku as hk
 import optax
 from absl import app
 
-from tqdm import tqdm, trange
+from tqdm import trange
 
 import ymir
 
