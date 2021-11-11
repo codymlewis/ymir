@@ -32,4 +32,4 @@ jobs:
           npm install -g @bazel/bazelisk
           pip3 install --upgrade pip
           pip3 install jax jaxlib wheel
-          bazelisk test tests/ymirlib
+          bazelisk test tests/ymirlib --test_output=errors

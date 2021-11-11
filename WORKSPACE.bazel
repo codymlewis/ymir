@@ -9,5 +9,5 @@ load("@rules_python//python:pip.bzl", "pip_install")
 
 pip_install(
    name = "ymir_deps",
-   requirements = "requirements.txt",
+   requirements = "//:requirements.txt",
 )
