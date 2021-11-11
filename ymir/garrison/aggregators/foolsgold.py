@@ -5,8 +5,6 @@ import sklearn.metrics.pairwise as smp
 import jax
 import jax.numpy as jnp
 
-import jaxlib
-
 from . import server
 
 
