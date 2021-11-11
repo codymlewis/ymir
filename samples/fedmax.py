@@ -41,9 +41,7 @@ def main(_):
     print("Done, beginning training.")
 
     # Train/eval loop.
-    TOTAL_ROUNDS = 6_01
-    pbar = trange(TOTAL_ROUNDS)
-    for round in pbar:
+    for _ in (pbar := trange(601)):
         results = meter.add_record(model.params)
         pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}"})
         model.step()
