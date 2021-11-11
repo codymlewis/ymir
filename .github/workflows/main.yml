@@ -27,6 +27,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: Test ymirlib
         run: |
+          DEBIAN_FRONTEND=noninteractive
           apt update
           apt install -y npm
           npm install -g @bazel/bazelisk
