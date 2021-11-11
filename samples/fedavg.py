@@ -17,7 +17,7 @@ def main(_):
     # setup
     print("Setting up the system...")
     num_endpoints = 10
-    dataset = ymir.mp.datasets.load('kddcup99')
+    dataset = ymir.mp.datasets.load('mnist')
     batch_sizes = [8 for _ in range(num_endpoints)]
     data = dataset.fed_split(batch_sizes, [[i % 10] for i in range(num_endpoints)])
     train_eval = dataset.get_iter("train", 10_000)

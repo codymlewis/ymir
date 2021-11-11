@@ -1,6 +1,7 @@
 from functools import partial
 import itertools
 import pandas as pd
+from absl import app
 
 import numpy as np
 import jax
@@ -15,7 +16,7 @@ import ymir
 import metrics
 
 
-if __name__ == "__main__":
+def main(_):
     grid_results = pd.DataFrame(columns=["beta", "gamma", "0.3 mean asr", "0.3 std asr", "0.5 mean asr", "0.5 std asr"])
     print("Starting up...")
     IID = False
@@ -116,3 +117,7 @@ if __name__ == "__main__":
             print()
         grid_results = grid_results.append(cur, ignore_index=True)
     print(grid_results.to_latex())
+
+
+if __name__ == "__main__":
+    app.run(main)

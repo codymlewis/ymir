@@ -58,3 +58,45 @@ py_binary(
   srcs = ["samples/fedprox.py"],
   main = "fedprox.py",
 )
+
+py_binary(
+    name = "viceroy/labelflip",
+    deps = ['ymir'],
+    srcs = ["research/viceroy/labelflip.py", "research/viceroy/metrics.py"],
+    main = "labelflip.py",
+)
+
+py_binary(
+    name = "viceroy/freerider",
+    deps = ['ymir'],
+    srcs = ["research/viceroy/freerider.py", "research/viceroy/metrics.py"],
+    main = "freerider.py",
+)
+
+py_binary(
+    name = "viceroy/grid_search",
+    deps = ['ymir'],
+    srcs = ["research/viceroy/grid_search.py", "research/viceroy/metrics.py"],
+    main = "grid_search.py",
+)
+
+py_binary(
+    name = "viceroy/mouther",
+    deps = ['ymir'],
+    srcs = ["research/viceroy/mouther.py", "research/viceroy/metrics.py"],
+    main = "mouther.py",
+)
+
+py_binary(
+    name = "reiny/compression",
+    deps = ['ymir'],
+    srcs = ["research/reiny/compression.py", "research/reiny/utils.py"],
+    main = "compression.py",
+)
+
+py_binary(
+    name = "reiny/tutelage",
+    deps = ['ymir'],
+    srcs = ["research/reiny/tutelage.py", "research/reiny/utils.py"],
+    main = "tutelage.py",
+)

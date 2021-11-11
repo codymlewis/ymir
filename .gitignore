@@ -5,7 +5,6 @@ __pycache__/
 *.csv
 *.xlsx
 .~*
-build/
-dist/
 *.egg-info
 /bazel-*
+data/

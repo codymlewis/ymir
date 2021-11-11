@@ -6,29 +6,22 @@ As prerequisite, the `jax` and `jaxlib` libraries must be installed, we omit the
 included `requirements.txt` as the installed library is respective to the system used. We direct
 to first follow https://github.com/google/jax#installation then proceed with this section.
 
-### The Ymir library
-First make sure to install wheel
+Afterwards, the build tool bazel must be installed, we direct you to follow https://bazel.build/
+
+Finally, any of programs in the `samples` and `research` folders may be run/built using bazel.
+The options within the `samples` folder follow the pattern `samples/<program>`, while the options
+within the `research` folder follow the pattern `<project_name>/<program>`. For example, to run the
+Federated Averaging sample (located in `samples/fedavg.py`):
+
 ~~~sh
-pip install wheel
+bazel run samples/fedavg
 ~~~
 
-after cloning the repository and opening a terminal inside the root folder, install the requirements with
-~~~sh
-pip install -r requirements.txt
-~~~
+On the other hand, to run the on off labelflip experiments from the viceroy project (located in `research/viceroy/labelflip.py`):
 
-and finally make and install the library with
 ~~~sh
-make
+bazel run viceroy/labelflip
 ~~~
-
-#### Quick install
-~~~sh
-git clone git@github.com:codymlewis/ymir.git && cd ymir && pip install -r requirements.txt && make
-~~~
-
-### The data
-Run the `dlall.sh` shell script to download, preprocess and save the datasets used.
 
 ## Usage
 We provide examples of the library's usage in the `samples` folder. Though, generally

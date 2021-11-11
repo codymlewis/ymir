@@ -6,6 +6,7 @@ import jax
 import jax.numpy as jnp
 import haiku as hk
 import optax
+from absl import app
 
 from tqdm import tqdm, trange
 
@@ -18,10 +19,10 @@ Evaluation of heterogeneous techniques applied to viceroy.
 """
 
 
-if __name__ == "__main__":
+def main(_):
     LOCAL_EPOCHS = 10
     TOTAL_ROUNDS = 500
-    with pd.ExcelWriter("results.xlsx", mode='a', if_sheet_exists="new") as xls:
+    with pd.ExcelWriter("results.xlsx") as xls:
         adv_percent = [0.3, 0.5]
         for comp_alg in ["fedmax", "fedprox"]:
             full_results = pd.DataFrame(columns=["Dataset", "Compression", "Aggregation", "Attack"] + [f"{a:.0%} Adv." for a in adv_percent])
@@ -159,3 +160,7 @@ if __name__ == "__main__":
                             print(f"""Results are {cur[f"{adv_p:.0%} Adv."]}""")
                         full_results = full_results.append(cur, ignore_index=True)
             full_results.to_excel(xls, sheet_name=comp_alg)
+
+
+if __name__ == "__main__":
+    app.run(main)

@@ -2,6 +2,7 @@ from functools import partial
 import sys
 import pickle
 import pandas as pd
+from absl import app
 
 import jax
 import jax.numpy as jnp
@@ -24,7 +25,7 @@ def unzero(x):
     return max(x, sys.float_info.epsilon)
 
 
-if __name__ == "__main__":
+def main(_):
     adv_percent = [0.1, 0.3, 0.5, 0.8]
     onoff_results = pd.DataFrame(columns=["algorithm", "attack", "dataset"] + [f"{p} mean asr" for p in adv_percent] + [f"{p} std asr" for p in adv_percent])
     print("Starting up...")
@@ -120,3 +121,7 @@ if __name__ == "__main__":
     with open(fn, 'wb') as f:
         pickle.dump(results, f)
     print(f"Written results to {fn}")
+
+
+if __name__ == "__main__":
+    app.run(main)
