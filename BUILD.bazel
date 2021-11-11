@@ -34,3 +34,17 @@ py_binary(
   srcs = ["samples/fedavg.py"],
   main = "fedavg.py",
 )
+
+py_binary(
+  name = "samples/fedmax",
+  deps = ['ymir'],
+  srcs = ["samples/fedmax.py"],
+  main = "fedmax.py",
+)
+
+py_binary(
+  name = "samples/fedprox",
+  deps = ['ymir'],
+  srcs = ["samples/fedprox.py"],
+  main = "fedprox.py",
+)

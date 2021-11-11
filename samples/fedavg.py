@@ -2,6 +2,7 @@ import re
 import jax
 import haiku as hk
 import optax
+from absl import app
 
 from tqdm import tqdm, trange
 
@@ -12,7 +13,7 @@ Example of federated averaging on the MNIST dataset
 """
 
 
-if __name__ == "__main__":
+def main(_):
     # setup
     print("Setting up the system...")
     num_endpoints = 10
@@ -44,3 +45,7 @@ if __name__ == "__main__":
         results = meter.add_record(model.params)
         pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}"})
         model.step()
+
+
+if __name__ == "__main__":
+    app.run(main)
