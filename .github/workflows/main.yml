@@ -28,7 +28,7 @@ jobs:
       - name: Test ymirlib
         run: |
           apt update
-          DEBIAN_FRONTEND=noninteractive apt install -y npm
+          DEBIAN_FRONTEND=noninteractive apt install -y npm python3
           npm install -g @bazel/bazelisk
           python3 -m pip install --upgrade pip
           python3 -m pip install jax jaxlib wheel
