@@ -24,15 +24,13 @@ if __name__ == "__main__":
     TOTAL_ROUNDS = 5000
     with pd.ExcelWriter("results.xlsx", mode='a', if_sheet_exists="new") as xls:
         adv_percent = [0.3, 0.5]
-        # for comp_alg in ["fedzip", "ae"]:
-        for comp_alg in ["fedzip"]: # do ae viceroys both DS soon
+        for comp_alg in ["fedzip", "ae"]:
             full_results = pd.DataFrame(columns=["Dataset", "Compression", "Aggregation", "Attack"] + [f"{a:.0%} Adv." for a in adv_percent])
             for dataset_name in ["mnist", "kddcup99"]:
-            # for dataset_name in ["kddcup99"]:
                 dataset = ymir.mp.datasets.load(dataset_name)
                 for alg in ["foolsgold", "krum", "viceroy"]:
-                    # attacks = ["labelflip", "onoff labelflip", "onoff freerider", "bad mouther"]
-                    attacks = ["onoff freerider", "bad mouther"]
+                    attacks = ["labelflip", "onoff labelflip"]
+                    attacks.extend(["onoff freerider", "bad mouther"] if alg != "krum" else ["onoff freerider"])
                     for attack in attacks:
                         cur = {"Dataset": dataset_name, "Compression": comp_alg, "Aggregation": alg, "Attack": attack}
                         for adv_p in adv_percent:
@@ -124,7 +122,6 @@ if __name__ == "__main__":
                                 if "labelflip" in attack:
                                     results = meter.add_record(model.params)
                                     pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}", 'ASR': f"{results['test asr']:.3f}", 'ATT': f"{controller.attacking}"})
-                                model.step()
                                 alpha, all_grads = model.step()
                                 if "labelflip" not in attack:
                                     if "freerider" in attack:
