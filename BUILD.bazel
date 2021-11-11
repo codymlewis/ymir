@@ -1,0 +1,25 @@
+py_library(
+    name = 'ymirlib',
+    srcs = glob(["ymirlib/**/*.py"]),
+    deps = [],
+)
+
+py_test(
+    name = "tests/ymirlib",
+    srcs = ['tests/test_ymirlib.py'],
+    deps = ['ymirlib'],
+    main = "test_ymirlib.py"
+)
+
+py_library(
+    name = 'ymir',
+    srcs = glob(["ymir/**/*.py"]),
+    deps = ['ymirlib'],
+)
+
+py_binary(
+  name = "samples/fedavg",
+  deps = ['ymir'],
+  srcs = ["samples/fedavg.py"],
+  main = "fedavg.py",
+)

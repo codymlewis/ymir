@@ -26,9 +26,9 @@ jobs:
       # Runs a single command using the runners shell
       - name: Test ymirlib
         run: |
+          apt update
+          apt install -y npm
+          npm install -g @bazel/bazelisk
           python3 -m pip install --upgrade pip
-          python3 -m pip install jax jaxlib chex wheel
-          cd ymirlib
-          python3 -m pip install -r requirements.txt
-          make
-          python3 -m unittest discover tests/ 
+          python3 -m pip install jax jaxlib wheel
+          bazelisk test tests/ymirlib

@@ -1,4 +1,4 @@
-import unittest
+from absl.testing import absltest
 import itertools
 
 import jax
@@ -17,7 +17,7 @@ class Params:
     b: chex.ArrayDevice
 
 
-class TestTreeFunctions(unittest.TestCase):
+class TestTreeFunctions(absltest.TestCase):
     def test_tree_uniform(self):
         params = Params(w=jnp.zeros(10), b=jnp.zeros(10))
         uniform_params = ymirlib.tree_uniform(params)
@@ -86,4 +86,4 @@ class TestTreeFunctions(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    absltest.main()
