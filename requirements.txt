@@ -2,3 +2,4 @@ optax
 dm-haiku
 chex
 absl-py
+scikit-learn

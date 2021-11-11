@@ -1,9 +1,9 @@
-import argparse
 import os
 
 import sklearn.datasets as skds
 import sklearn.preprocessing as skp
 import numpy as np
+from absl import logging
 
 
 def load():
@@ -18,18 +18,14 @@ def preprocess(X, y):
     return X, y
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Download, preprocess and save the MNIST dataset.')
-    parser.add_argument('file', metavar='FILE', type=str, nargs='?', default='~/ymir_datasets/mnist',
-                    help='File to save to')
-    args = parser.parse_args()
-    fn = os.path.expanduser(args.file)
+def download(path):
+    fn = os.path.expanduser(path)
     dir = os.path.dirname(fn)
 
-    print("Downloading data...")
+    logging.info("Downloading data...")
     X, y = load()
-    print("Done. Preprocessing data...")
+    logging.info("Done. Preprocessing data...")
     X, y = preprocess(X, y)
-    print(f"Done. Saving as a compressed file to {fn}")
+    logging.info(f"Done. Saving as a compressed file to {fn}")
     os.makedirs(dir, exist_ok=True)
     np.savez_compressed(fn, X=X, y=y, train=(np.arange(len(y)) < 60_000))

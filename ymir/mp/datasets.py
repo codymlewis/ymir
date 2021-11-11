@@ -5,6 +5,7 @@ import os
 
 import abc
 
+import datalib
 
 """
 Load and preprocess datasets
@@ -59,8 +60,11 @@ class Dataset:
         return [self.get_iter("train", b) for b in batch_sizes]
 
 
-def load(dataset, dir="~/ymir_datasets"):
-    dir = os.path.expanduser(dir)
+def load(dataset, dir="data"):
+    # dir = os.path.expanduser(dir)
+    fn = f"{dir}/{dataset}.npz"
+    if not os.path.exists(fn):
+        datalib.download(dir, dataset)
     ds = np.load(f"{dir}/{dataset}.npz")
     X, y, train = ds['X'], ds['y'], ds['train']
     return Dataset(X, y, train)

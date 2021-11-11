@@ -6,6 +6,15 @@ py_library(
     deps = [],
 )
 
+py_library(
+    name = 'datalib',
+    srcs = glob(["datalib/**/*.py"]),
+    deps = [
+        requirement('scikit-learn'),
+        requirement('absl-py'),
+    ],
+)
+
 py_test(
     name = "tests/ymirlib",
     srcs = ['tests/test_ymirlib.py'],
@@ -22,6 +31,7 @@ py_library(
     srcs = glob(["ymir/**/*.py"]),
     deps = [
         'ymirlib',
+        'datalib',
         requirement('dm-haiku'),
         requirement('optax'),
         requirement('absl-py')
