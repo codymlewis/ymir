@@ -14,6 +14,7 @@ from tqdm import trange
 import ymir
 
 import metrics
+import datasets
 
 
 def main(_):
@@ -21,7 +22,7 @@ def main(_):
     print("Starting up...")
     IID = False
     DATASET = 'mnist'
-    DS = ymir.mp.datasets.load(DATASET)
+    DS = datasets.load(DATASET)
     T = 10
     ATTACK_FROM, ATTACK_TO = 0, 1
     ALG = "foolsgold"

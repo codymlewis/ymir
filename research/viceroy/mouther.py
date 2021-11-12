@@ -15,6 +15,7 @@ from tqdm import trange
 import ymir
 
 import metrics
+import datasets
 
 
 @jax.jit
@@ -32,7 +33,7 @@ def main(_):
     IID = False
     VICTIM = 0
     for DATASET in ['mnist', 'kddcup99', 'cifar10']:
-        DS = ymir.mp.datasets.load(DATASET)
+        DS = datasets.load(DATASET)
         for ALG in ["foolsgold", "krum", "std_dagmm", "viceroy"]:
             for ADV in ["bad mouther", "good mouther"]:
                 if DATASET == 'kddcup99':

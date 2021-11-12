@@ -13,7 +13,7 @@ class Server(server.AggServer):
     def update(self, all_grads):
         pass
 
-    def scale(self, all_grads, rng):
+    def scale(self, all_grads, rng=np.random.default_rng()):
         n = len(all_grads)
         X = np.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads])
         scores = np.zeros(n)

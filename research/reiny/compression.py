@@ -14,7 +14,6 @@ from tqdm import tqdm, trange
 import ymir
 
 import utils
-import metrics
 
 """
 Evaluation of heterogeneous techniques applied to viceroy.
@@ -28,7 +27,7 @@ def main(_):
     for comp_alg in ["fedzip", "ae"]:
         full_results = pd.DataFrame(columns=["Dataset", "Compression", "Aggregation", "Attack"] + [f"{a:.0%} Adv." for a in adv_percent])
         for dataset_name in ["mnist", "kddcup99"]:
-            dataset = ymir.mp.datasets.load(dataset_name)
+            dataset = utils.load(dataset_name)
             for alg in ["foolsgold", "krum", "viceroy"]:
                 attacks = ["labelflip", "onoff labelflip"]
                 attacks.extend(["onoff freerider", "bad mouther"] if alg != "krum" else ["onoff freerider"])
@@ -106,7 +105,7 @@ def main(_):
                             controller.attacking = True
 
                         model = ymir.Coordinate(alg, opt, opt_state, params, network)
-                        meter = metrics.Neurometer(
+                        meter = utils.Neurometer(
                             net,
                             {'train': train_eval, 'test': test_eval},
                             ['accuracy', 'asr'],

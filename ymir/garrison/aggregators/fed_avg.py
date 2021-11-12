@@ -20,6 +20,6 @@ class Server(server.AggServer):
     def update(self, all_grads):
         self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in self.network.clients])
 
-    def scale(self, all_grads, rng):
+    def scale(self, all_grads, rng=np.random.default_rng()):
         idx = rng.choice(self.K, size=int(self.C * self.K), replace=False)
         return jax.vmap(lambda b: b / self.batch_sizes[idx].sum())(self.batch_sizes[idx])

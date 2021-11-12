@@ -1,6 +1,5 @@
 import sys
 from dataclasses import dataclass
-from haiku._src.basic import Linear
 
 import jax
 from jax._src.numpy.lax_numpy import expand_dims
@@ -9,6 +8,7 @@ import jax.numpy as jnp
 import haiku as hk
 import optax
 import jaxlib
+import numpy as np
 
 from sklearn import mixture
 
@@ -108,7 +108,7 @@ class Server(server.AggServer):
         ] for x, e, d in zip(grads, enc, dec)])
         self.gmm = self.gmm.fit(z)
 
-    def scale(self, all_grads, rng):
+    def scale(self, all_grads, rng=np.random.default_rng()):
         grads = jnp.array([jax.flatten_util.ravel_pytree(g)[0].tolist() for g in all_grads])
         energies = predict(self.params, self.da, self.gmm, grads)
         std = jnp.std(energies)
