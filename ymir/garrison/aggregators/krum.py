@@ -8,7 +8,7 @@ The multi-krum algorithm proposed in https://papers.nips.cc/paper/2017/hash/f4b9
 """
 class Server(server.AggServer):
     def __init__(self, params, network, clip=3):
-        self.clip = 3
+        self.clip = clip
 
     def update(self, all_grads):
         pass

@@ -1,4 +1,4 @@
-import jax.numpy as jnp
+import numpy as np
 
 from . import garrison
 from . import mp
@@ -12,11 +12,10 @@ The generic high level API
 
 class Coordinate:
     """Class for the high-level API for federated learning"""
-    def __init__(self, alg, opt, opt_state, params, network):
-        self.alg = alg
+    def __init__(self, alg, opt, opt_state, params, network, **kwargs):
+        self.server = getattr(garrison.aggregators, alg).Server(params, network, **kwargs)
         self.params = params
         self.opt_state = opt_state
-        self.server = getattr(garrison.aggregators, alg).Server(params, network)
         self.server_update = garrison.update(opt)
         self.network = network
     
