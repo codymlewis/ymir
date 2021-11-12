@@ -14,11 +14,12 @@ Load and preprocess datasets
 
 class DataIter:
     """Iterator that gives random batchs in pairs of (sample, label)"""
-    def __init__(self, X, y, batch_size):
+    def __init__(self, X, y, batch_size, classes):
         self.X = X
         self.y = y
         self.batch_size = y.shape[0] if batch_size is None else min(batch_size, y.shape[0])
         self.idx = np.arange(y.shape[0])
+        self.classes = classes
 
     def __iter__(self):
         return self
@@ -51,7 +52,7 @@ class Dataset:
             X, y = X[idx], y[idx]
         if map is not None:
             X, y = map(X, y)
-        return DataIter(X, y, batch_size)
+        return DataIter(X, y, batch_size, self.classes)
     
     def fed_split(self, batch_sizes, mappings=None):
         """Divide the dataset for federated learning"""

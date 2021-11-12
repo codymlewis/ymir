@@ -23,7 +23,7 @@ def main(_):
     train_eval = dataset.get_iter("train", 10_000)
     test_eval = dataset.get_iter("test")
 
-    selected_model = lambda: ymir.mp.models.Logistic(dataset.classes)
+    selected_model = lambda: ymir.mp.models.LeNet_300_100(dataset.classes)
     net = hk.without_apply_rng(hk.transform(lambda x: selected_model()(x)))
     net_act = hk.without_apply_rng(hk.transform(lambda x: selected_model().act(x)))
     opt = optax.sgd(0.01)
@@ -33,17 +33,17 @@ def main(_):
     network = ymir.mp.network.Network(opt, loss)
     network.add_controller("main", is_server=True)
     for d in data:
-        network.add_host("main", ymir.scout.Collaborator(opt_state, d, 60))
+        network.add_host("main", ymir.scout.Collaborator(opt_state, d, 10))
 
     model = ymir.Coordinate("fed_avg", opt, opt_state, params, network)
-    meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval}, ['accuracy'])
+    meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval})
 
     print("Done, beginning training.")
 
     # Train/eval loop.
-    for _ in (pbar := trange(601)):
-        results = meter.add_record(model.params)
-        pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}"})
+    for _ in (pbar := trange(500)):
+        results = meter.measure(model.params, ['test'])
+        pbar.set_postfix({'ACC': f"{results['test']:.3f}"})
         model.step()
 
 

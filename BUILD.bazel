@@ -34,7 +34,9 @@ py_library(
         'datalib',
         requirement('dm-haiku'),
         requirement('optax'),
-        requirement('absl-py')
+        requirement('absl-py'),
+        requirement('scikit-learn'),
+        requirement('numpy'),
     ],
 )
 
@@ -90,13 +92,13 @@ py_binary(
 py_binary(
     name = "reiny/compression",
     deps = ['ymir'],
-    srcs = ["research/reiny/compression.py", "research/reiny/utils.py"],
+    srcs = ["research/reiny/compression.py", "research/reiny/utils.py", "research/reiny/metrics.py"],
     main = "compression.py",
 )
 
 py_binary(
     name = "reiny/tutelage",
     deps = ['ymir'],
-    srcs = ["research/reiny/tutelage.py", "research/reiny/utils.py"],
+    srcs = ["research/reiny/tutelage.py", "research/reiny/utils.py", "research/reiny/metrics.py"],
     main = "tutelage.py",
 )

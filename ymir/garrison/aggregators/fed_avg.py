@@ -1,7 +1,6 @@
 import jax
 import jax.numpy as jnp
 import numpy as np
-from absl import logging
 
 from . import server
 

@@ -13,6 +13,7 @@ from tqdm import tqdm, trange
 import ymir
 
 import utils
+import metrics
 
 """
 Evaluation of heterogeneous techniques applied to viceroy.
@@ -111,7 +112,7 @@ def main(_):
                             controller.attacking = True
 
                         model = ymir.Coordinate(alg, opt, opt_state, params, network)
-                        meter = ymir.mp.metrics.Neurometer(
+                        meter = metrics.Neurometer(
                             net,
                             {'train': train_eval, 'test': test_eval},
                             ['accuracy', 'asr'],

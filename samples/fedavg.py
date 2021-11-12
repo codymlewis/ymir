@@ -35,14 +35,14 @@ def main(_):
         network.add_host("main", ymir.scout.Collaborator(opt_state, d, 1))
 
     model = ymir.Coordinate("fed_avg", opt, opt_state, params, network)
-    meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval}, ['accuracy'])
+    meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval})
 
     print("Done, beginning training.")
 
     # Train/eval loop.
-    for _ in (pbar := trange(5001)):
-        results = meter.add_record(model.params)
-        pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}"})
+    for _ in (pbar := trange(5000)):
+        results = meter.measure(model.params, ['test'])
+        pbar.set_postfix({'ACC': f"{results['test']:.3f}"})
         model.step()
 
 

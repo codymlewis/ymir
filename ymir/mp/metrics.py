@@ -1,4 +1,3 @@
-import itertools
 import sklearn.metrics as skm
 
 import numpy as np
@@ -10,45 +9,37 @@ Measure performance during experiments
 """
 
 
-def accuracy(net, **_):
-    """Find the accuracy of the models predictions on the data"""
+def evaluator(net):
+    """
+    Get the tuple of of the form (y_true, y_preds) where the predictions are formed by the input net on the current params
+    """
     @jax.jit
     def _apply(params, X, y):
-        return jnp.mean(jnp.argmax(net.apply(params, X), axis=-1) == y)
+        return (y, jnp.argmax(net.apply(params, X), axis=-1))
     return _apply
 
-def asr(net, attack_from, attack_to, **_):
-    """Find the success rate of a label flipping/backdoor attack that attempts the mapping attack_from -> attack_to"""
-    @jax.jit
-    def _apply(params, X, y):
-        preds = jnp.argmax(net.apply(params, X), axis=-1)
-        idx = y == attack_from
-        return jnp.sum(jnp.where(idx, preds, -1) == attack_to) / jnp.sum(idx)
-    return _apply
+@jax.jit
+def accuracy_score(y_true, y_pred):
+    return jnp.mean(y_true == y_pred)
 
 
 class Neurometer:
     """Measure aspects of the model"""
-    def __init__(self, net, datasets, evals, add_keys=[], **kwargs):
+    def __init__(self, net, datasets):
         self.datasets = datasets
-        self.evaluators = {e: globals()[e](net, **kwargs) for e in evals}
-        self.results = {f"{d} {e}": [] for d, e in itertools.product(datasets.keys(), evals)}
-        for k in add_keys:
-            self.results[k] = []
-
-    def add_record(self, params):
+        self.results = {d: [] for d in datasets.keys()}
+        self.evaluator = evaluator(net)
+        self.classes = {d: ds.classes for d, ds in datasets.items()}
+    
+    def measure(self, params, accs: list[str] = None):
         """Add a measurement of the chosen aspects with respect to the current params, return the latest results"""
         for ds_type, ds in self.datasets.items():
-            for eval_type, eval in self.evaluators.items():
-                self.results[f"{ds_type} {eval_type}"].append(eval(params, *next(ds)))
-        return {k: v[-1] for k, v in self.results.items()}
+            self.results[ds_type].append(self.evaluator(params, *next(ds)))
+        if accs is not None:
+            return {a: accuracy_score(*self.results[a][-1]) for a in accs}
 
-    def add(self, key, value):
-        """Add a single result to the results"""
-        self.results[key].append(value)
-
-    def get_results(self):
+    def conclude(self):
         """Return overall results formatted into jax.numpy arrays"""
         for k, v in self.results.items():
-            self.results[k] = jnp.array(v)
-        return self.results
+            self.results[k] = [skm.confusion_matrix(y_true, y_pred, labels=range(self.classes[k])) for y_true, y_pred in v]
+        return {k: np.array(v) for k, v in self.results.items()}
