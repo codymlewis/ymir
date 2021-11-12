@@ -200,12 +200,13 @@ class FRController(network.Controller):
     """
     Network controller that that makes adversaries free ride
     """
-    def __init__(self, opt, loss, num_adversaries, params, attack_type):
+    def __init__(self, opt, loss, num_adversaries, params, attack_type, rng=np.random.default_rng()):
         super().__init__(opt, loss)
         self.num_adv = num_adversaries
         self.attacking = True
         self.prev_params = params
         self.attack_type = attack_type
+        self.rng = rng
         
     def __call__(self, params):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
@@ -215,11 +216,11 @@ class FRController(network.Controller):
         unraveller = jax.flatten_util.ravel_pytree(params)[1]
         int_grads = [unraveller(d) for d in decoded_grads]
         if self.attack_type == "random":
-            delta = ymirlib.tree_uniform(params, low=-10e-3, high=10e-3)
+            delta = ymirlib.tree_uniform(params, low=-10e-3, high=10e-3, rng=self.rng)
         else:
             delta = ymirlib.tree_add(params, ymirlib.tree_mul(self.prev_params, -1))
             if "advanced" in self.attack_type:
-                delta = ymirlib.tree_add_normal(delta, loc=0.0, scale=10e-4)
+                delta = ymirlib.tree_add_normal(delta, loc=0.0, scale=10e-4, rng=self.rng)
         int_grads[-self.num_adv:] = [delta for _ in range(self.num_adv)]
         all_grads[-self.num_adv:] = [self.coder.encode(jax.flatten_util.ravel_pytree(delta)[0], i) for i, delta in enumerate(int_grads[-self.num_adv:])]
         self.prev_params = params

@@ -32,26 +32,26 @@ class TestTreeFunctions(absltest.TestCase):
             jax.tree_map(lambda x: self.assertTrue((x >= low).all() and (x < high).all()), uniform_params)
 
     def test_tree_normal(self):
-        length = 1500
+        length = 150
         params = Params(w=jnp.zeros(length), b=jnp.zeros(length))
         normal_params = ymirlib.tree_add_normal(params)
         chex.assert_trees_all_equal_shapes(params, normal_params)
         chex.assert_tree_all_finite(normal_params)
         chex.assert_tree_no_nones(normal_params)
         # check that the generated tree values are within the range
-        jax.tree_map(lambda x: self.assertAlmostEqual(x.mean(), 0.0, 1), normal_params)
-        jax.tree_map(lambda x: self.assertAlmostEqual(x.std(), 1.0, 1), normal_params)
+        jax.tree_map(lambda x: self.assertAlmostEqual(x.mean(), 0.0, delta=0.5), normal_params)
+        jax.tree_map(lambda x: self.assertAlmostEqual(x.std(), 1.0, delta=0.5), normal_params)
         # check for other values
         for (mean, std) in [(0.5, 0.7), (-0.5, 0.5), (2, 10), (-1000, 10)]:
             normal_params = ymirlib.tree_add_normal(params, loc=mean, scale=std)
             jax.tree_map(lambda x: self.assertAlmostEqual(x.mean(), mean, delta=std*0.5), normal_params)
-            jax.tree_map(lambda x: self.assertAlmostEqual(x.std(), std, delta=0.5), normal_params)
+            jax.tree_map(lambda x: self.assertAlmostEqual(x.std(), std, delta=std*0.5), normal_params)
         # check adding properties
         params = Params(w=jnp.ones(length), b=jnp.ones(length))
         for (mean, std) in [(0.0, 1.0), (0.5, 0.7), (-0.5, 0.5), (2, 10), (-1000, 10)]:
             normal_params = ymirlib.tree_add_normal(params, loc=mean, scale=std)
             jax.tree_map(lambda x: self.assertAlmostEqual(x.mean(), mean + 1, delta=std*0.5), normal_params)
-            jax.tree_map(lambda x: self.assertAlmostEqual(x.std(), std, delta=0.5), normal_params)
+            jax.tree_map(lambda x: self.assertAlmostEqual(x.std(), std, delta=std*0.5), normal_params)
     
     def test_tree_mul(self):
         params = Params(w=jnp.zeros(10), b=jnp.zeros(10))

@@ -108,7 +108,7 @@ class Server(server.AggServer):
         ] for x, e, d in zip(grads, enc, dec)])
         self.gmm = self.gmm.fit(z)
 
-    def scale(self, all_grads):
+    def scale(self, all_grads, rng):
         grads = jnp.array([jax.flatten_util.ravel_pytree(g)[0].tolist() for g in all_grads])
         energies = predict(self.params, self.da, self.gmm, grads)
         std = jnp.std(energies)

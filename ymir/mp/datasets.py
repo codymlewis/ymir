@@ -14,18 +14,19 @@ Load and preprocess datasets
 
 class DataIter:
     """Iterator that gives random batchs in pairs of (sample, label)"""
-    def __init__(self, X, y, batch_size, classes):
+    def __init__(self, X, y, batch_size, classes, rng):
         self.X = X
         self.y = y
         self.batch_size = y.shape[0] if batch_size is None else min(batch_size, y.shape[0])
         self.idx = np.arange(y.shape[0])
         self.classes = classes
+        self.rng = rng
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        idx = np.random.choice(self.idx, self.batch_size, replace=False)
+        idx = self.rng.choice(self.idx, self.batch_size, replace=False)
         return self.X[idx], self.y[idx]
 
 
@@ -43,7 +44,7 @@ class Dataset:
         """Get the testing subset"""
         return self.X[~self.train_idx], self.y[~self.train_idx]
 
-    def get_iter(self, split, batch_size=None, filter=None, map=None) -> DataIter:
+    def get_iter(self, split, batch_size=None, filter=None, map=None, rng=np.random.default_rng()) -> DataIter:
         """Generate an iterator out of the dataset"""
         X, y = self.train() if split == 'train' else self.test()
         X, y = X.copy(), y.copy()
@@ -52,7 +53,7 @@ class Dataset:
             X, y = X[idx], y[idx]
         if map is not None:
             X, y = map(X, y)
-        return DataIter(X, y, batch_size, self.classes)
+        return DataIter(X, y, batch_size, self.classes, rng)
     
     def fed_split(self, batch_sizes, mappings=None):
         """Divide the dataset for federated learning"""

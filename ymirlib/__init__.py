@@ -8,16 +8,16 @@ General utility library for ymir
 """
 
 
-@partial(jax.jit, static_argnums=(1, 2,))
-def tree_uniform(tree, low=0.0, high=1.0):
+@partial(jax.jit, static_argnums=(1, 2, 3,))
+def tree_uniform(tree, low=0.0, high=1.0, rng=np.random.default_rng()):
     """Create an equivalently shaped tree with random number elements in the range [low, high)"""
-    return jax.tree_map(lambda x: np.random.uniform(low=low, high=high, size=x.shape), tree)
+    return jax.tree_map(lambda x: rng.uniform(low=low, high=high, size=x.shape), tree)
 
 
-@partial(jax.jit, static_argnums=(1, 2,))
-def tree_add_normal(tree, loc=0.0, scale=1.0):
+@partial(jax.jit, static_argnums=(1, 2, 3,))
+def tree_add_normal(tree, loc=0.0, scale=1.0, rng=np.random.default_rng()):
     """Add normally distributed noise to each element of the tree, (mu=loc, sigma=scale)"""
-    return jax.tree_map(lambda x: x + np.random.normal(loc=loc, scale=scale, size=x.shape), tree)
+    return jax.tree_map(lambda x: x + rng.normal(loc=loc, scale=scale, size=x.shape), tree)
 
 
 @jax.jit

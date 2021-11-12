@@ -26,7 +26,7 @@ class Server(server.AggServer):
         else:
             self.histories, self.reps = update(self.histories, self.reps, all_grads)
 
-    def scale(self, all_grads):
+    def scale(self, all_grads, rng):
         n_clients = self.histories.shape[0]
         cs = smp.cosine_similarity(self.histories) - np.eye(n_clients)
         maxcs = np.max(cs, axis=1)
