@@ -11,7 +11,6 @@ Static norm clipping aggregator.
 
 class Server(server.AggServer):
     def __init__(self, params, network, M=1.0):
-        self.batch_sizes = jnp.array([c.batch_size for c in network.clients])
         self.M = M
     
     def update(self, all_grads):

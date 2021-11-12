@@ -83,7 +83,8 @@ def predict(params, net, gmm, X):
 
 class Server(server.AggServer):
     def __init__(self, params, network):
-        self.batch_sizes = jnp.array([c.batch_size for c in network.clients])
+        self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in network.clients])
+        self.network = network
         x = jnp.array([jax.flatten_util.ravel_pytree(params)[0]])
         self.da = hk.without_apply_rng(hk.transform(lambda x: DA(x[0].shape[0])(x)))
         rng = jax.random.PRNGKey(42)
@@ -95,6 +96,7 @@ class Server(server.AggServer):
         self.gmm = mixture.GaussianMixture(4, random_state=0, warm_start=True)
 
     def update(self, all_grads):
+        self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in self.network.clients])
         grads = jnp.array([jax.flatten_util.ravel_pytree(g)[0].tolist() for g in all_grads])
         self.params, self.opt_state = self.da_update(self.params, self.opt_state, grads)
         enc, dec = self.da.apply(self.params, grads)
