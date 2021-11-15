@@ -14,5 +14,5 @@ class AggServer(ABC):
         pass
 
     @abstractmethod
-    def scale(self, all_grads, rng):
+    def scale(self, all_grads):
         pass

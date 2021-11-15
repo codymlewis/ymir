@@ -23,11 +23,11 @@ class Coordinate:
     def step(self):
         """Perform a single round of federated learning"""
         # Client side updates
-        all_grads = self.network(self.params)
+        all_grads = self.network(self.params, self.rng)
 
         # Server side aggregation scaling
         self.server.update(all_grads)
-        alpha = self.server.scale(all_grads, self.rng)
+        alpha = self.server.scale(all_grads)
         all_grads = garrison.apply_scale(alpha, all_grads)
 
         # Server side update

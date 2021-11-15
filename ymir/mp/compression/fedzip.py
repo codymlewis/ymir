@@ -16,7 +16,7 @@ class Controller(network.Controller):
     def init(self, params):
         pass
 
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
         all_grads = []
         for switch in self.switches:
@@ -35,9 +35,9 @@ class Controller(network.Controller):
 
 class Network(network.Network):
     """Network for handling FedZip"""
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Perform an update step across the network and return the respective gradients"""
-        return decode(params, self.controllers[self.server_name](params))
+        return decode(params, self.controllers[self.server_name](params, rng))
 
 
 # FedZip: https://arxiv.org/abs/2102.01593
@@ -140,9 +140,9 @@ class ScalingController(Controller):
         self.server = getattr(garrison.aggregators, self.alg).Server(params, self)
         self.server_update = garrison.update(self.opt)
         
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         # intercept
         int_grads = decode(params, all_grads)
         self.server.update(int_grads)
@@ -182,9 +182,9 @@ class OnOffController(Controller):
             q = not self.attacking and avg_syb_alpha > self.gamma * self.max_alpha
         return p or q
 
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         # intercept
         int_grads = decode(params, all_grads)
         self.server.update(int_grads)
@@ -208,9 +208,9 @@ class FRController(Controller):
         self.attack_type = attack_type
         self.rng = rng
         
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         # intercept
         if self.attack_type == "random":
             delta = ymirlib.tree_uniform(params, low=-10e-3, high=10e-3, rng=self.rng)
@@ -254,9 +254,9 @@ class OnOffFRController(Controller):
             q = not self.attacking and avg_syb_alpha > self.gamma * self.max_alpha
         return p or q
 
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         # intercept
         int_grads = decode(params, all_grads)
         self.server.update(int_grads)
@@ -282,9 +282,9 @@ class MoutherController(Controller):
         self.victim = victim
         self.attack_type = attack_type
         
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         # intercept
         int_grads = decode(params, all_grads)
         grad = int_grads[self.victim]

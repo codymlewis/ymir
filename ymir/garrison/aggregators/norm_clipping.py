@@ -19,7 +19,6 @@ class Server(server.AggServer):
     def update(self, all_grads):
         pass
 
-    def scale(self, all_grads, rng=np.random.default_rng()):
-        idx = rng.choice(self.K, size=int(self.C * self.K), replace=False)
+    def scale(self, all_grads):
         G = jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads])
-        return jax.vmap(lambda g: 1 / jnp.maximum(1, jnp.linalg.norm(g, ord=2) / self.M))(G[idx])
+        return jax.vmap(lambda g: 1 / jnp.maximum(1, jnp.linalg.norm(g, ord=2) / self.M))(G)

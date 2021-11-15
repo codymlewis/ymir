@@ -19,7 +19,7 @@ class Controller(network.Controller):
     def init(self, params):
         self.coder = ae_coder(params, len(self))
 
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
         all_grads = []
         for switch in self.switches:
@@ -40,9 +40,9 @@ class Controller(network.Controller):
 
 class Network(network.Network):
     """Network for handling FedZip"""
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Perform an update step across the network and return the respective gradients"""
-        decoded_grads = self.controllers[self.server_name].coder.decode(self.controllers[self.server_name](params))
+        decoded_grads = self.controllers[self.server_name].coder.decode(self.controllers[self.server_name](params, rng))
         unraveller = jax.flatten_util.ravel_pytree(params)[1]
         return [unraveller(d) for d in decoded_grads]
 
@@ -134,9 +134,9 @@ class ScalingController(Controller):
         self.server = getattr(garrison.aggregators, self.alg).Server(params, self)
         self.server_update = garrison.update(self.opt)
         
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         # intercept
         decoded_grads = self.coder.decode(all_grads)
         unraveller = jax.flatten_util.ravel_pytree(params)[1]
@@ -180,9 +180,9 @@ class OnOffController(Controller):
             q = not self.attacking and avg_syb_alpha > self.gamma * self.max_alpha
         return p or q
 
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         # intercept
         decoded_grads = self.coder.decode(all_grads)
         unraveller = jax.flatten_util.ravel_pytree(params)[1]
@@ -208,9 +208,9 @@ class FRController(network.Controller):
         self.attack_type = attack_type
         self.rng = rng
         
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         # intercept
         decoded_grads = self.coder.decode(all_grads)
         unraveller = jax.flatten_util.ravel_pytree(params)[1]
@@ -258,9 +258,9 @@ class OnOffFRController(Controller):
             q = not self.attacking and avg_syb_alpha > self.gamma * self.max_alpha
         return p or q
 
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         # intercept
         decoded_grads = self.coder.decode(all_grads)
         unraveller = jax.flatten_util.ravel_pytree(params)[1]
@@ -288,9 +288,9 @@ class MoutherController(Controller):
         self.victim = victim
         self.attack_type = attack_type
         
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng=np.random.default_rng())
         # intercept
         decoded_grads = self.coder.decode(all_grads)
         unraveller = jax.flatten_util.ravel_pytree(params)[1]

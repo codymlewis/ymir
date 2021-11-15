@@ -20,7 +20,7 @@ class Server(server.AggServer):
     def update(self, all_grads):
         self.histories = update(self.histories, all_grads)
 
-    def scale(self, all_grads, rng=np.random.default_rng()):
+    def scale(self, all_grads):
         """Adapted from https://github.com/DistributedML/FoolsGold"""
         n_clients = self.histories.shape[0]
         cs = smp.cosine_similarity(self.histories) - np.eye(n_clients)
