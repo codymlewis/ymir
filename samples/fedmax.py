@@ -19,7 +19,7 @@ def main(_):
     num_endpoints = 20
     dataset = ymir.mp.datasets.load('kddcup99')
     batch_sizes = [64 for _ in range(num_endpoints)]
-    data = dataset.fed_split(batch_sizes, [[(i + 1 if i >= 11 else i) % dataset.classes, 11] for i in range(num_endpoints)])
+    data = dataset.fed_split(batch_sizes, ymir.mp.distributions.lda)
     train_eval = dataset.get_iter("train", 10_000)
     test_eval = dataset.get_iter("test")
 

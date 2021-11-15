@@ -2,7 +2,7 @@
 Functionality shared between the endpoint and server
 """
 
-
+from . import distributions
 from . import datasets
 from . import losses
 from . import metrics

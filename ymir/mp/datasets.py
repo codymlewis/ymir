@@ -1,16 +1,20 @@
-import sklearn.datasets as skds
-import sklearn.preprocessing as skp
 import numpy as np
 import os
-from absl import logging
-
-import abc
 
 import datalib
 
 """
 Load and preprocess datasets
 """
+
+
+def load(dataset, dir="data"):
+    fn = f"{dir}/{dataset}.npz"
+    if not os.path.exists(fn):
+        datalib.download(dir, dataset)
+    ds = np.load(f"{dir}/{dataset}.npz")
+    X, y, train = ds['X'], ds['y'], ds['train']
+    return Dataset(X, y, train)
 
 
 class DataIter:
@@ -63,32 +67,3 @@ class Dataset:
             distribution = mapping(*self.train(), len(batch_sizes), self.classes, rng)
             return [self.get_iter("train", b, idx=d, rng=rng) for b, d in zip(batch_sizes, distribution)]
         return [self.get_iter("train", b, rng=rng) for b in batch_sizes]
-
-
-def homogeneous(X, y, nendpoints, nclasses, rng):
-    """Assign all data to all endpoints"""
-    return [np.arange(len(y)) for _ in range(nendpoints)]
-
-def heterogeneous(X, y, nendpoints, nclasses, rng):
-    """Assign each endpoint only the data from each class"""
-    return [np.isin(y, i % nclasses) for i in range(nendpoints)]
-
-def lda(X, y, nendpoints, nclasses, rng):
-    """Latent dirichlet allocation from https://arxiv.org/abs/2002.06440"""
-    distribution = [[] for _ in range(nendpoints)]
-    proportions = rng.dirichlet(np.repeat(0.5, nendpoints), size=nclasses)
-    for c in range(nclasses):
-        idx_c = np.where(y == c)[0]
-        dists_c = np.split(idx_c, np.round(np.cumsum(proportions[c]) * len(idx_c)).astype(int)[:-1])
-        distribution = [distribution[i] + d.tolist() for i, d in enumerate(dists_c)]
-    logging.debug(f"distribution: {proportions.tolist()}")
-    return distribution
-
-
-def load(dataset, dir="data"):
-    fn = f"{dir}/{dataset}.npz"
-    if not os.path.exists(fn):
-        datalib.download(dir, dataset)
-    ds = np.load(f"{dir}/{dataset}.npz")
-    X, y, train = ds['X'], ds['y'], ds['train']
-    return Dataset(X, y, train)
