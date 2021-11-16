@@ -9,18 +9,17 @@ to first follow https://github.com/google/jax#installation then proceed with thi
 Afterwards, the build tool bazel must be installed, we direct you to follow https://bazel.build/
 
 Finally, any of programs in the `samples` and `research` folders may be run/built using bazel.
-The options within the `samples` folder follow the pattern `samples/<program>`, while the options
-within the `research` folder follow the pattern `<project_name>/<program>`. For example, to run the
-Federated Averaging sample (located in `samples/fedavg.py`):
+Simply execute a bazel command directed towards the path of the file (without extensions) you wish to run,
+for example, to run the federated averaging sample, execute:
 
 ~~~sh
 bazel run samples/fedavg
 ~~~
 
-On the other hand, to run the on off labelflip experiments from the viceroy project (located in `research/viceroy/labelflip.py`):
+And for the labelflip experiment from the viceroy research project, execute:
 
 ~~~sh
-bazel run viceroy/labelflip
+bazel run research/viceroy/labelflip
 ~~~
 
 ## Usage

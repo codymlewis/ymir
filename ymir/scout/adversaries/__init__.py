@@ -17,8 +17,8 @@ class ScalingController(mp.network.Controller):
     """
     Network controller that scales adversaries' gradients by the inverse of aggregation algorithm
     """
-    def __init__(self, opt, loss, alg, num_adversaries):
-        super().__init__(opt, loss)
+    def __init__(self, opt, loss, alg, C, num_adversaries):
+        super().__init__(opt, loss, C)
         self.num_adv = num_adversaries
         self.alg = alg
         self.attacking = True
@@ -27,9 +27,9 @@ class ScalingController(mp.network.Controller):
         self.server = getattr(garrison.aggregators, self.alg).Server(params, self)
         self.server_update = garrison.update(self.opt)
         
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         self.server.update(all_grads)
         alpha = np.array(self.server.scale(all_grads))
         idx = np.arange(len(alpha) - self.num_adv, len(alpha))[alpha[-self.num_adv:] > 0.0001]
@@ -42,8 +42,8 @@ class OnOffController(mp.network.Controller):
     """
     Network controller that toggles an attack on or off respective to the result of the aggregation algorithm
     """
-    def __init__(self, opt, loss, alg, num_adversaries, max_alpha, sharp, beta=1.0, gamma=0.85):
-        super().__init__(opt, loss)
+    def __init__(self, opt, loss, C, alg, num_adversaries, max_alpha, sharp, beta=1.0, gamma=0.85):
+        super().__init__(opt, loss, C)
         self.num_adv = num_adversaries
         self.alg = alg
         self.attacking = False
@@ -65,9 +65,9 @@ class OnOffController(mp.network.Controller):
             q = not self.attacking and avg_syb_alpha > self.gamma * self.max_alpha
         return p or q
 
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         self.server.update(all_grads)
         alpha = self.server.scale(all_grads)
         if self.should_toggle(alpha):
@@ -81,17 +81,17 @@ class FRController(mp.network.Controller):
     """
     Network controller that that makes adversaries free ride
     """
-    def __init__(self, opt, loss, num_adversaries, params, attack_type, rng=np.random.default_rng()):
-        super().__init__(opt, loss)
+    def __init__(self, opt, loss, C, num_adversaries, params, attack_type, rng=np.random.default_rng()):
+        super().__init__(opt, loss, C)
         self.num_adv = num_adversaries
         self.attacking = True
         self.prev_params = params
         self.attack_type = attack_type
         self.rng = rng
         
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         if self.attack_type == "random":
             delta = ymirlib.tree_uniform(params, low=-10e-3, high=10e-3, rng=self.rng)
         else:
@@ -107,8 +107,8 @@ class OnOffFRController(mp.network.Controller):
     """
     Network controller that that makes adversaries free ride respective to the results of the aggregation algorithm
     """
-    def __init__(self, opt, loss, alg, num_adversaries, params, max_alpha, sharp, beta=1.0, gamma=0.85):
-        super().__init__(opt, loss)
+    def __init__(self, opt, loss, C, alg, num_adversaries, params, max_alpha, sharp, beta=1.0, gamma=0.85):
+        super().__init__(opt, loss, C)
         self.num_adv = num_adversaries
         self.prev_params = params
         self.alg = alg
@@ -133,9 +133,9 @@ class OnOffFRController(mp.network.Controller):
             q = not self.attacking and avg_syb_alpha > self.gamma * self.max_alpha
         return p or q
 
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         self.server.update(all_grads)
         alpha = self.server.scale(all_grads)
         if self.should_toggle(alpha):
@@ -151,16 +151,16 @@ class MoutherController(mp.network.Controller):
     """
     Network controller that scales adversaries' gradients by the inverse of aggregation algorithm
     """
-    def __init__(self, opt, loss, num_adversaries, victim, attack_type):
-        super().__init__(opt, loss)
+    def __init__(self, opt, loss, C, num_adversaries, victim, attack_type):
+        super().__init__(opt, loss, C)
         self.num_adv = num_adversaries
         self.attacking = True
         self.victim = victim
         self.attack_type = attack_type
         
-    def __call__(self, params):
+    def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = super().__call__(params)
+        all_grads = super().__call__(params, rng)
         grad = all_grads[self.victim]
         if "bad" in self.attack_type:
             grad = ymirlib.tree_mul(grad, -1)

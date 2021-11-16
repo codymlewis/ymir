@@ -1,4 +1,4 @@
-name: CI
+name: Test libraries
 
 # Controls when the workflow will run
 on:
@@ -32,4 +32,4 @@ jobs:
           npm install -g @bazel/bazelisk
           pip3 install --upgrade pip
           pip3 install jax jaxlib wheel
-          bazelisk test tests/ymirlib
+          bazelisk test tests/...
