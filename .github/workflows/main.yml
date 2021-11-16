@@ -27,7 +27,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: Test ymirlib
         run: |
-          pacman -Sy python python-pip bazel
+          pacman -Sy --noconfirm python python-pip bazel
           pip install --upgrade pip
           pip install jax jaxlib wheel
           bazel test tests/...
