@@ -17,7 +17,7 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    container: archlinux:latest
+    container: openjdk:8
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -27,8 +27,11 @@ jobs:
       # Runs a single command using the runners shell
       - name: Test ymirlib
         run: |
-          pacman -Sy --noconfirm python python-pip bazel gcc
+          apt install apt-transport-https curl gnupg
+          curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
+          mv bazel.gpg /etc/apt/trusted.gpg.d/
+          echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
+          apt update && apt install --yes build-essential bazel graphviz python3-pip python3 python-is-python3
           pip install --upgrade pip
-          pip install jax jaxlib wheel
-          bazel sync
+          pip install jax jaxlib
           bazel test tests/...
