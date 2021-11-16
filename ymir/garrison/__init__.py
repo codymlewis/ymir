@@ -29,5 +29,5 @@ def apply_scale(alpha, all_grads):
     return [ymirlib.tree_mul(g, a) for g, a in zip(all_grads, alpha)]
 
 def sum_grads(all_grads):
-    """Element-wise sum together a collection of gradients"""
+    """Element-wise sum together a collection of gradients, simplifies boilerplate"""
     return ymirlib.tree_add(*all_grads)

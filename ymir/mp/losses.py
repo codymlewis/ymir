@@ -16,6 +16,7 @@ def cross_entropy_loss(net, classes):
         return jnp.mean(optax.softmax_cross_entropy(logits, labels))
     return _apply
 
+
 def l2_loss(net):
     """L2 loss, best suited for regression models"""
     @jax.jit
