@@ -1,5 +1,4 @@
 from absl.testing import absltest
-from absl.testing import parameterized
 
 import optax
 import haiku as hk
@@ -8,7 +7,7 @@ import numpy as np
 
 import ymir
 
-class TestCollaboratorFunctions(parameterized.TestCase):
+class TestCollaboratorFunctions(absltest.TestCase):
     def setUp(self):
         rng = np.random.default_rng(0)
         dataset = ymir.mp.datasets.Dataset((X := rng.random((50, 1))), np.sin(X).reshape(-1), np.full(len(X), True))

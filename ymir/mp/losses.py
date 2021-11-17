@@ -17,8 +17,8 @@ def cross_entropy_loss(net, classes):
     return _apply
 
 
-def l2_loss(net):
-    """L2 loss, best suited for regression models"""
+def ae_l2_loss(net):
+    """Autoencoder L2 loss"""
     @jax.jit
     def _apply(params, x):
         z = net.apply(params, x)

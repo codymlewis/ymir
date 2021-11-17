@@ -76,3 +76,6 @@ class ConvLeNet(hk.Module):
 
     def __call__(self, x):
         return hk.Sequential(self.layers)(x)
+
+    def act(self, x):
+        return hk.Sequential(self.layers[:-2])(x)

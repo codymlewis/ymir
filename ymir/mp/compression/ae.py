@@ -67,7 +67,7 @@ class ae_coder:
         self.f = hk.without_apply_rng(hk.transform(lambda x: ae()(x)))
         self.fe = hk.without_apply_rng(hk.transform(lambda x: ae().encode(x)))
         self.fd = hk.without_apply_rng(hk.transform(lambda x: ae().decode(x)))
-        loss = losses.l2_loss(self.f)
+        loss = losses.ae_l2_loss(self.f)
         opt = optax.adam(1e-3)
         self.updater = _update(opt, loss)
         params = self.f.init(jax.random.PRNGKey(0), gm_params)

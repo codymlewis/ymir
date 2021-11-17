@@ -38,14 +38,69 @@ py_test(
 )
 
 py_test(
-    name = "mp",
-    srcs = ['test_mp.py'],
+    name = "distributions",
+    srcs = ['test_distributions.py'],
     deps = [
         '//:ymir',
         requirement('chex'),
         requirement('absl-py'),
-        requirement('dm-haiku'),
-        requirement('optax'),
+        requirement('numpy'),
     ],
-    main = "test_mp.py"
+    main = "test_distributions.py"
+)
+
+py_test(
+    name = "losses",
+    srcs = ['test_losses.py'],
+    deps = [
+        '//:ymir',
+        requirement('absl-py'),
+    ],
+    main = "test_losses.py"
+)
+
+py_test(
+    name = "datasets",
+    srcs = ['test_datasets.py'],
+    deps = [
+        '//:ymir',
+        requirement('absl-py'),
+        requirement('chex'),
+        requirement('numpy'),
+    ],
+    main = "test_datasets.py"
+)
+
+py_test(
+    name = "metrics",
+    srcs = ['test_metrics.py'],
+    deps = [
+        '//:ymir',
+        requirement('absl-py'),
+        requirement('chex'),
+        requirement('numpy'),
+    ],
+    main = "test_metrics.py"
+)
+
+py_test(
+    name = "network",
+    srcs = ['test_network.py'],
+    deps = [
+        '//:ymir',
+        requirement('absl-py'),
+    ],
+    main = "test_network.py"
+)
+
+py_test(
+    name = "models",
+    srcs = ['test_models.py'],
+    deps = [
+        '//:ymir',
+        requirement('absl-py'),
+        requirement('chex'),
+        requirement('dm-haiku'),
+    ],
+    main = "test_models.py"
 )
