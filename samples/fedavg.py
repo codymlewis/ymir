@@ -1,3 +1,4 @@
+import numpy as np
 import jax
 import haiku as hk
 import optax
@@ -15,13 +16,14 @@ Example of federated averaging on the MNIST dataset
 def main(_):
     print("Setting up the system...")
     num_endpoints = 10
+    rng = np.random.default_rng(0)
 
     # Setup the dataset
     dataset = ymir.mp.datasets.load('mnist')
     batch_sizes = [8 for _ in range(num_endpoints)]
-    data = dataset.fed_split(batch_sizes, ymir.mp.distributions.lda)
-    train_eval = dataset.get_iter("train", 10_000)
-    test_eval = dataset.get_iter("test")
+    data = dataset.fed_split(batch_sizes, ymir.mp.distributions.lda, rng)
+    train_eval = dataset.get_iter("train", 10_000, rng=rng)
+    test_eval = dataset.get_iter("test", rng=rng)
 
     # Setup the network
     net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(dataset.classes)(x)))
@@ -36,7 +38,7 @@ def main(_):
 
     server_opt = optax.sgd(0.1)
     server_opt_state = server_opt.init(params)
-    model = ymir.Coordinate("fed_avg", server_opt, server_opt_state, params, network)
+    model = ymir.Coordinate("fed_avg", server_opt, server_opt_state, params, network, rng)
     meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval})
 
     print("Done, beginning training.")
