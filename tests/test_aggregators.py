@@ -3,7 +3,6 @@ from absl.testing import parameterized
 
 import chex
 import jax
-import numpy as np
 import jax.numpy as jnp
 
 import ymir
