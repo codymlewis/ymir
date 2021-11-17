@@ -104,3 +104,15 @@ py_test(
     ],
     main = "test_models.py"
 )
+
+
+py_test(
+    name = "aggregators",
+    srcs = ['test_aggregators.py'],
+    deps = [
+        '//:ymir',
+        requirement('absl-py'),
+        requirement('chex'),
+    ],
+    main = "test_aggregators.py"
+)

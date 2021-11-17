@@ -1,29 +1,59 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 
-import optax
-import haiku as hk
+import chex
 import jax
 import numpy as np
+import jax.numpy as jnp
 
 import ymir
 
-# class TestCollaboratorFunctions(parameterized.TestCase):
-#     def setUp(self):
-#         rng = np.random.default_rng(0)
-#         dataset = ymir.mp.datasets.Dataset((X := rng.random((50, 1))), np.sin(X).reshape(-1), np.full(len(X), True))
-#         self.data = dataset.get_iter("train")
-#         net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(dataset.classes)(x)))
-#         params = net.init(jax.random.PRNGKey(42), next(self.data)[0])
-#         opt = optax.sgd(0.1)
-#         self.opt_state = opt.init(params)
-#         self.client = ymir.scout.Collaborator(self.opt_state, self.data, 1)
+@chex.dataclass
+class Client:
+    batch_size: int
+    epochs: int
 
-#     def test_member_variables(self):
-#         self.assertEqual(self.client.opt_state, self.opt_state)
-#         self.assertEqual(self.client.data, self.data)
-#         self.assertEqual(self.client.batch_size, 50)
-#         self.assertEqual(self.client.epochs, 1)
+class Network:
+    def __init__(self, clients):
+        self.clients = clients
+
+    def __len__(self):
+        return len(self.clients)
+
+@chex.dataclass
+class Params:
+    w: chex.ArrayDevice
+    b: chex.ArrayDevice
+
+
+class TestAggregators(parameterized.TestCase):
+    def setUp(self):
+        self.params = Params(w=jnp.ones(10), b=jnp.ones(2))
+        self.network = Network([Client(batch_size=32, epochs=10) for _ in range(10)])
+
+    @parameterized.named_parameters(
+        [
+            {"testcase_name": f"_{server_name=}", "server_name": server_name}
+            for server_name in ["fed_avg", "foolsgold", "krum", "norm_clipping", "std_dagmm", "viceroy"]
+        ]
+    )
+    def test_aggregator(self, server_name):
+        server = getattr(ymir.garrison.aggregators, server_name).Server(self.params, self.network)
+        rngs = jax.random.split(jax.random.PRNGKey(0))
+        all_grads = [
+            Params(
+                w=jax.random.uniform(rngs[0], (10,), dtype=jnp.float32),
+                b=jax.random.uniform(rngs[1], (2,), dtype=jnp.float32),
+            )
+            for _ in self.network.clients
+        ]
+        server.update(all_grads)
+        alpha = server.scale(all_grads)
+        chex.assert_tree_no_nones(alpha)
+        if server_name != "std_dagmm":
+            chex.assert_tree_all_finite(alpha)
+        chex.assert_shape(alpha, (len(self.network.clients),))
+        chex.assert_type(alpha, jnp.float32)
 
 
 if __name__ == '__main__':
