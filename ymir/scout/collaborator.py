@@ -1,3 +1,4 @@
+from functools import partial
 import jax
 
 class Collaborator:
@@ -8,15 +9,11 @@ class Collaborator:
         self.epochs = epochs
         self.opt = opt
         self.loss = loss
-        # having the following for each client makes it a bit slower (but substantially faster overall) for the first round due to jit
-        self.update = update(opt, loss)
+        self.update = partial(update, opt, loss)
 
 
-def update(opt, loss):
-    """Do some local training and return the gradient"""
-    @jax.jit
-    def _apply(params, opt_state, X, y):
-        grads = jax.grad(loss)(params, X, y)
-        updates, opt_state = opt.update(grads, opt_state, params)
-        return grads, opt_state, updates
-    return _apply
+@partial(jax.jit, static_argnums=(0, 1,))
+def update(opt, loss, params, opt_state, X, y):
+    grads = jax.grad(loss)(params, X, y)
+    updates, opt_state = opt.update(grads, opt_state, params)
+    return grads, opt_state, updates
