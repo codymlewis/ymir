@@ -17,7 +17,8 @@ import datasets
 
 
 def main(_):
-    adv_percent = [0.1, 0.3, 0.5, 0.8]
+    # adv_percent = [0.1, 0.3, 0.5, 0.8]
+    adv_percent = [0.3, 0.5, 0.8]
     onoff_results = pd.DataFrame(columns=["algorithm", "attack", "dataset"] + [f"{p} mean asr" for p in adv_percent] + [f"{p} std asr" for p in adv_percent])
     print("Starting up...")
     IID = False
@@ -31,11 +32,6 @@ def main(_):
                 else:
                     T = 10
                     ATTACK_FROM, ATTACK_TO = 0, 1
-                ADV_CLASS = {
-                    "labelflip": lambda o, _, b: ymir.scout.adversaries.LabelFlipper(o, DS, b, 1, ATTACK_FROM, ATTACK_TO),
-                    "scaling backdoor": lambda o, _, b: ymir.scout.adversaries.Backdoor(o, DS, b, 1, ATTACK_FROM, ATTACK_TO),
-                    "onoff labelflip": lambda o, d, b: ymir.scout.adversaries.OnOffLabelFlipper(o, d, DS, b, 1, ATTACK_FROM, ATTACK_TO),
-                }[ADV]
                 cur = {"algorithm": ALG, "attack": ADV, "dataset": DATASET}
                 for acal in adv_percent:
                     print(f"Running {ALG} on {DATASET}{'-iid' if IID else ''} with {acal:.0%} {ADV} adversaries")
@@ -62,31 +58,27 @@ def main(_):
                         else:
                             data = DS.fed_split(batch_sizes, [[(i + 1 if i >= 11 else i) % DS.classes, 11] for i in range(T)])
 
-                    network = ymir.mp.network.Network(opt, loss)
-                    network.add_controller(
-                        "main",
-                        con_class= {
-                            "onoff": partial(
-                                ymir.scout.adversaries.OnOffController,
-                                alg=ALG,
-                                num_adversaries=A,
-                                max_alpha=1/N if ALG in ['fed_avg', 'std_dagmm'] else 1,
-                                sharp=ALG in ['fed_avg', 'std_dagmm', 'krum']
-                            ),
-                            "labelflip": ymir.mp.network.Controller,
-                            "scaling": partial(ymir.scout.adversaries.ScalingController, alg=ALG, num_adversaries=A)
-                        }[ADV.split()[0]],
-                        is_server=True
-                    )
+                    network = ymir.mp.network.Network()
+                    network.add_controller("main", is_server=True)
                     for i in range(N):
-                        network.add_host("main", ymir.scout.Collaborator(opt_state, data[i], 1))
+                        network.add_host("main", ymir.scout.Collaborator(opt, opt_state, loss, data[i], 1))
                     for i in range(A):
-                        network.add_host("main", ADV_CLASS(opt_state, data[i + N], batch_sizes[i + N]))
+                        c = ymir.scout.Collaborator(opt, opt_state, loss, data[i + N], batch_sizes[i + N])
+                        if "labelflip" in ADV:
+                            ymir.scout.adversaries.labelflipper.make_labelflipper(c, DS, ATTACK_FROM, ATTACK_TO)
+                        if "onoff" in ADV:
+                            ymir.scout.adversaries.onoff.make_onoff(c)
+                        network.add_host("main", c)
                     controller = network.get_controller("main")
-                    if ADV == "labelflip":
-                        controller.attacking = True
-                    if type(controller).__name__ != "Controller":
-                        controller.init(params)
+                    if "onoff" not in ADV:
+                        toggler = None
+                    else:
+                        toggler = ymir.scout.adversaries.onoff.OnOffController(
+                            network, params, ALG, controller.clients[-A:],
+                            max_alpha=1/N if ALG in ['fed_avg', 'std_dagmm'] else 1,
+                            sharp=ALG in ['fed_avg', 'std_dagmm', 'krum']
+                        )
+                        controller.add_grad_processor(toggler)
 
                     evaluator = metrics.measurer(net)
 
@@ -109,8 +101,9 @@ def main(_):
                     pbar = trange(TOTAL_ROUNDS)
                     for round in pbar:
                         if round % 10 == 0:
-                            metrics.record(results, evaluator, model.params, train_eval, test_eval, {'attacking': controller.attacking}, attack_from=ATTACK_FROM, attack_to=ATTACK_TO)
-                            pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}", 'ASR': f"{results['test asr'][-1]:.3f}", 'ATT': controller.attacking})
+                            attacking = toggler.attacking if toggler else True
+                            metrics.record(results, evaluator, model.params, train_eval, test_eval, {'attacking': attacking}, attack_from=ATTACK_FROM, attack_to=ATTACK_TO)
+                            pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}", 'ASR': f"{results['test asr'][-1]:.3f}", 'ATT': attacking})
 
                         model.step()
                     results = metrics.finalize(results)

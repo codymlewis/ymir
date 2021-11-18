@@ -24,6 +24,11 @@ class TestTreeFunctions(parameterized.TestCase):
         self.length = 50
         self.params = Params(w=jnp.ones(self.length), b=jnp.ones(self.length))
 
+    def test_chain(self):
+        f = lambda x: x - 1
+        g = lambda x: x**3
+        self.assertEqual(ymirlib.chain([f, g], 2), g(f(2)))
+
     @parameterized.named_parameters(
         [
             {"testcase_name": f"_{low=}_{high=}", "low": low, "high": high}

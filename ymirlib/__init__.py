@@ -7,6 +7,11 @@ import numpy as np
 General utility library for ymir
 """
 
+def chain(funclist, x):
+    """Chain a list of function together and return their composition upon x"""
+    for f in funclist:
+        x = f(x)
+    return x
 
 @partial(jax.jit, static_argnums=(1, 2, 3,))
 def tree_uniform(tree, low=0.0, high=1.0, rng=np.random.default_rng()):
