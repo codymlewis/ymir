@@ -18,10 +18,10 @@ class TestCoordinateFunctions(absltest.TestCase):
         self.params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
         opt = optax.sgd(0.1)
         self.opt_state = opt.init(self.params)
-        self.network = ymir.mp.network.Network(opt, ymir.mp.losses.cross_entropy_loss(net, dataset.classes))
+        self.network = ymir.mp.network.Network()
         self.network.add_controller("main", is_server=True)
         for d in data:
-            self.network.add_host("main", ymir.scout.Collaborator(self.opt_state, d, 1))
+            self.network.add_host("main", ymir.scout.Collaborator(opt, self.opt_state, ymir.mp.losses.cross_entropy_loss(net, dataset.classes), d, 1))
         self.model = ymir.Coordinate("fed_avg", opt, self.opt_state, self.params, self.network, rng=rng)
 
     def test_member_variables(self):

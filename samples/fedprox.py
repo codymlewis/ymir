@@ -17,6 +17,7 @@ def main(_):
     # setup
     print("Setting up the system...")
     num_endpoints = 10
+    local_epochs = 10
     dataset = ymir.mp.datasets.load('mnist')
     batch_sizes = [8 for _ in range(num_endpoints)]
     data = dataset.fed_split(batch_sizes, ymir.mp.distributions.lda)
@@ -24,14 +25,14 @@ def main(_):
     test_eval = dataset.get_iter("test")
 
     net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(dataset.classes)(x)))
-    opt = ymir.mp.optimizers.pgd(0.01, 1)
+    opt = ymir.mp.optimizers.pgd(0.01, 1, local_epochs=local_epochs)
     params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
     opt_state = opt.init(params)
     loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
-    network = ymir.mp.network.Network(opt, loss)
+    network = ymir.mp.network.Network()
     network.add_controller("main", is_server=True)
     for d in data:
-        network.add_host("main", ymir.scout.Collaborator(opt_state, d, 10))
+        network.add_host("main", ymir.scout.Collaborator(opt, opt_state, loss, d, local_epochs))
 
     server_opt = optax.sgd(0.01)
     server_opt_state = server_opt.init(params)

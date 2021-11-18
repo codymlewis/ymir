@@ -4,7 +4,7 @@ import haiku as hk
 import optax
 from absl import app
 
-from tqdm import tqdm, trange
+from tqdm import trange
 
 import ymir
 
@@ -30,10 +30,10 @@ def main(_):
     params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
     opt_state = opt.init(params)
     loss = ymir.mp.losses.fedmax_loss(net, net_act, dataset.classes)
-    network = ymir.mp.network.Network(opt, loss)
+    network = ymir.mp.network.Network()
     network.add_controller("main", is_server=True)
     for d in data:
-        network.add_host("main", ymir.scout.Collaborator(opt_state, d, 10))
+        network.add_host("main", ymir.scout.Collaborator(opt, opt_state, loss, d, 10))
 
     model = ymir.Coordinate("fed_avg", opt, opt_state, params, network)
     meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval})

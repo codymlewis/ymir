@@ -31,10 +31,10 @@ def main(_):
     params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
     client_opt_state = client_opt.init(params)
     loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
-    network = ymir.mp.network.Network(client_opt, loss)
+    network = ymir.mp.network.Network()
     network.add_controller("main", is_server=True)
     for d in data:
-        network.add_host("main", ymir.scout.Collaborator(client_opt_state, d, 1))
+        network.add_host("main", ymir.scout.Collaborator(client_opt, client_opt_state, loss, d, 1))
 
     server_opt = optax.sgd(0.1)
     server_opt_state = server_opt.init(params)

@@ -16,13 +16,14 @@ class TestCollaboratorFunctions(absltest.TestCase):
         params = net.init(jax.random.PRNGKey(42), next(self.data)[0])
         opt = optax.sgd(0.1)
         self.opt_state = opt.init(params)
-        self.client = ymir.scout.Collaborator(self.opt_state, self.data, 1)
+        self.client = ymir.scout.Collaborator(None, self.opt_state, None, self.data, 1)
 
     def test_member_variables(self):
         self.assertEqual(self.client.opt_state, self.opt_state)
         self.assertEqual(self.client.data, self.data)
         self.assertEqual(self.client.batch_size, 50)
         self.assertEqual(self.client.epochs, 1)
+        self.assertTrue(callable(self.client.update))
 
 
 if __name__ == '__main__':
