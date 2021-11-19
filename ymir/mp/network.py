@@ -19,7 +19,7 @@ class Controller:
         self.switches = []
         self.C = C
         self.K = 0
-        self.grad_chain = []
+        self.grad_tranform_chain = []
 
     def __len__(self):
         return len(self.clients) + sum([len(s) for s in self.switches])
@@ -33,9 +33,9 @@ class Controller:
         """Connect another controller to this controller"""
         self.switches.append(switch)
     
-    def add_grad_processor(self, grad_processor):
+    def add_grad_transform(self, grad_transform):
         """Add a function to process"""
-        self.grad_chain.append(grad_processor)
+        self.grad_tranform_chain.append(grad_transform)
 
     def __call__(self, params, rng=np.random.default_rng()):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
@@ -51,7 +51,7 @@ class Controller:
                 p = optax.apply_updates(p, updates)
                 sum_grads = grads if sum_grads is None else ymirlib.tree_add(sum_grads, grads)
             all_grads.append(sum_grads)
-        return ymirlib.chain(self.grad_chain, all_grads)
+        return ymirlib.chain(self.grad_tranform_chain, all_grads)
 
 
 class Network:

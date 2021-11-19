@@ -1,8 +1,10 @@
+from functools import partial
+
 from ymir import garrison
 from ymir import mp
 from ymir.scout import collaborator
 
-class OnOffController:
+class GradientTransform:  # maybe add periodic?
     """
     Network controller that toggles an attack on or off respective to the result of the aggregation algorithm
     """
@@ -37,9 +39,9 @@ class OnOffController:
         return all_grads
 
 
-def make_onoff(client):
+def convert(client):
     client.shadow_update = client.update
-    client.update = collaborator.update(client.opt, client.loss)
+    client.update = partial(collaborator.update, client.opt, client.loss)
     client.toggle = toggle.__get__(client)
 
 

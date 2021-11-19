@@ -3,7 +3,7 @@ from ymir import mp
 import ymirlib
 
 
-class MoutherController(mp.network.Controller):
+class GradientTransform:
     """
     Network controller that scales adversaries' gradients by the inverse of aggregation algorithm
     """

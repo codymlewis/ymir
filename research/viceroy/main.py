@@ -1,10 +1,13 @@
+import sys
 from functools import partial
+from itertools import product
 import pickle
 import pandas as pd
 from absl import app
 
 import jax
 import jax.flatten_util
+import jax.numpy as jnp
 import optax
 import haiku as hk
 
@@ -16,16 +19,23 @@ import metrics
 import datasets
 
 
+@jax.jit
+def euclid_dist(a, b):
+    return jnp.sqrt(jnp.sum((a - b)**2, axis=-1))
+
+def unzero(x):
+    return max(x, sys.float_info.epsilon)
+
+
 def main(_):
-    # adv_percent = [0.1, 0.3, 0.5, 0.8]
-    adv_percent = [0.3, 0.5, 0.8]
+    adv_percent = [0.1, 0.3, 0.5, 0.8]
     onoff_results = pd.DataFrame(columns=["algorithm", "attack", "dataset"] + [f"{p} mean asr" for p in adv_percent] + [f"{p} std asr" for p in adv_percent])
+    VICTIM = 0
     print("Starting up...")
-    IID = False
-    for DATASET in ['mnist', 'kddcup99', 'cifar10']:
+    for DATASET, IID in product(['mnist', 'kddcup99', 'cifar10'], [False, True]):
         DS = datasets.load(DATASET)
-        for ALG in ["foolsgold", "krum", "std_dagmm", "viceroy"]:
-            for ADV in ["onoff labelflip", "labelflip", "scaling backdoor"]:
+        for ALG in ["fed_avg", "krum", "std_dagmm", "viceroy"]:
+            for ADV in ["labelflip", "onoff labelflip", "scaling backdoor", "onoff freerider", "bad mouther", "good mouther"]:
                 if DATASET == 'kddcup99':
                     T = 20
                     ATTACK_FROM, ATTACK_TO = 0, 11
@@ -65,20 +75,28 @@ def main(_):
                     for i in range(A):
                         c = ymir.scout.Collaborator(opt, opt_state, loss, data[i + N], batch_sizes[i + N])
                         if "labelflip" in ADV:
-                            ymir.scout.adversaries.labelflipper.make_labelflipper(c, DS, ATTACK_FROM, ATTACK_TO)
+                            ymir.scout.adversaries.labelflipper.convert(c, DS, ATTACK_FROM, ATTACK_TO)
+                        elif "backdoor" in ADV:
+                            ymir.scout.adversaries.backdoor.convert(c, DS, DATASET, ATTACK_FROM, ATTACK_TO)
+                        elif "freerider" in ADV:
+                            ymir.scout.adversaries.freerider.convert(c, "delta", params)
                         if "onoff" in ADV:
-                            ymir.scout.adversaries.onoff.make_onoff(c)
+                            ymir.scout.adversaries.onoff.convert(c)
                         network.add_host("main", c)
                     controller = network.get_controller("main")
+                    if "scaling" in ADV:
+                        controller.add_grad_transform(ymir.scout.adversaries.scaler.GradientTransform(network, params, ALG, A))
+                    if "mouther" in ADV:
+                        controller.add_grad_transform(ymir.scout.adversaries.mouther.GradientTransform(A, VICTIM, ADV))
                     if "onoff" not in ADV:
                         toggler = None
                     else:
-                        toggler = ymir.scout.adversaries.onoff.OnOffController(
+                        toggler = ymir.scout.adversaries.onoff.GradientTransform(
                             network, params, ALG, controller.clients[-A:],
                             max_alpha=1/N if ALG in ['fed_avg', 'std_dagmm'] else 1,
                             sharp=ALG in ['fed_avg', 'std_dagmm', 'krum']
                         )
-                        controller.add_grad_processor(toggler)
+                        controller.add_grad_transform(toggler)
 
                     evaluator = metrics.measurer(net)
 
@@ -86,29 +104,50 @@ def main(_):
                         test_eval = DS.get_iter(
                             "test",
                             map=partial({
-                                "MNIST": ymir.scout.adversaries.mnist_backdoor_map,
-                                "CIFAR10": ymir.scout.adversaries.cifar10_backdoor_map,
-                                "KDDCup99": ymir.scout.adversaries.kddcup_backdoor_map
+                                "mnist": ymir.scout.adversaries.backdoor.mnist_backdoor_map,
+                                "cifar10": ymir.scout.adversaries.backdoor.cifar10_backdoor_map,
+                                "kddcup99": ymir.scout.adversaries.backdoor.kddcup99_backdoor_map
                             }[DATASET], ATTACK_FROM, ATTACK_FROM, no_label=True)
                         )
 
                     model = ymir.Coordinate(ALG, opt, opt_state, params, network)
 
                     results = metrics.create_recorder(['accuracy', 'asr'], train=True, test=True, add_evals=['attacking'])
+                    results["asr"] = []
 
                     # Train/eval loop.
-                    TOTAL_ROUNDS = 5_001
-                    pbar = trange(TOTAL_ROUNDS)
-                    for round in pbar:
+                    TOTAL_ROUNDS = 5_000
+                    for round in (pbar := trange(TOTAL_ROUNDS)):
+                        alpha, all_grads = model.step()
                         if round % 10 == 0:
                             attacking = toggler.attacking if toggler else True
-                            metrics.record(results, evaluator, model.params, train_eval, test_eval, {'attacking': attacking}, attack_from=ATTACK_FROM, attack_to=ATTACK_TO)
-                            pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}", 'ASR': f"{results['test asr'][-1]:.3f}", 'ATT': attacking})
-
-                        model.step()
+                            metrics.record(results, evaluator, params, train_eval, test_eval, {'attacking': attacking}, attack_from=ATTACK_FROM, attack_to=ATTACK_TO)
+                            if "freerider" in ADV:
+                                if attacking:
+                                    if ALG == "krum":
+                                        results['asr'].append(alpha[-A:].mean())
+                                    else:
+                                        results['asr'].append(jnp.minimum(alpha[-A:].mean() / (1 / (alpha > 0).sum()), 1))
+                                else:
+                                    results['asr'].append(0.0)
+                            elif "mouther" in ADV:
+                                if (alpha[-A:] < 0.0001).all():
+                                    asr = -1 if alpha[VICTIM] < 0.0001 else -2
+                                else:
+                                    theta = jax.flatten_util.ravel_pytree(ymir.garrison.sum_grads(all_grads))[0]
+                                    vicdel = euclid_dist(jax.flatten_util.ravel_pytree(all_grads[VICTIM])[0], theta)
+                                    if "good" in ADV:
+                                        numerator = min(euclid_dist(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads]), theta))
+                                        asr = unzero(numerator) / unzero(vicdel)
+                                    else:
+                                        asr = unzero(vicdel) / unzero(max(euclid_dist(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads]), theta)))
+                                results['asr'].append(asr)
+                            else:
+                                results["asr"].append(results["test asr"][-1])
+                            pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}", 'ASR': f"{results['asr'][-1]:.3f}", 'ATT': attacking})
                     results = metrics.finalize(results)
-                    cur[f"{acal} mean asr"] = results['test asr'].mean()
-                    cur[f"{acal} std asr"] = results['test asr'].std()
+                    cur[f"{acal} mean asr"] = results['asr'].mean()
+                    cur[f"{acal} std asr"] = results['asr'].std()
                     print()
                     print("=" * 150)
                     print(f"Server type {ALG}, Dataset {DATASET}, {A / (A + N):.2%} {ADV} adversaries, final accuracy: {results['test accuracy'][-1]:.3%}")

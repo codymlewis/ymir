@@ -1,9 +1,11 @@
+from functools import partial
+
 import ymirlib
 
 import numpy as np
 
 
-def make_freerider(client, attack_type, params, rng=np.random.default_rng()):
+def convert(client, attack_type, params, rng=np.random.default_rng()):
     client.attack_type = attack_type
     client.prev_params = params
     client.rng = rng
