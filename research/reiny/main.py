@@ -20,10 +20,14 @@ Evaluation of heterogeneous techniques applied to viceroy.
 
 
 def main(_):
-    LOCAL_EPOCHS = 10
-    TOTAL_ROUNDS = 500
     adv_percent = [0.3, 0.5]
-    for comp_alg in ["fedmax", "fedprox"]:
+    for comp_alg in ["fedmax", "fedprox", "fedzip", "ae"]:
+        if comp_alg in ["fedmax", "fedprox"]:
+            local_epochs = 10
+            total_rounds = 500
+        else:
+            local_epochs = 1
+            total_rounds = 5000
         full_results = pd.DataFrame(columns=["Dataset", "Compression", "Aggregation", "Attack"] + [f"{a:.0%} Adv." for a in adv_percent])
         for dataset_name in ["mnist", "kddcup99"]:
             dataset = utils.load(dataset_name)
@@ -58,57 +62,51 @@ def main(_):
                         if comp_alg == "fedmax":
                             loss = ymir.mp.losses.fedmax_loss(net, net_act, dataset.classes)
                             client_opt, client_opt_state = opt, opt_state
+                        if comp_alg == "fedprox":
+                            loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
+                            client_opt = ymir.mp.optimizers.pgd(0.01, 1, local_epochs)
+                            client_opt_state = client_opt.init(params)
                         else:
                             loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
-                            client_opt = ymir.mp.optimizers.pgd(0.01, 1, LOCAL_EPOCHS)
-                            client_opt_state = client_opt.init(params)
+                            client_opt, client_opt_state = opt, opt_state
     
-                        network = ymir.mp.network.Network(client_opt, loss)
-                        network.add_controller(
-                            "main",
-                            con_class={
-                                "onoff labelflip": partial(
-                                    ymir.scout.adversaries.OnOffController,
-                                    alg=alg,
-                                    num_adversaries=num_adversaries,
-                                    max_alpha=1/num_endpoints if alg in ['fed_avg', 'std_dagmm'] else 1,
-                                    sharp=alg in ['fed_avg', 'std_dagmm', 'krum']
-                                ),
-                                "labelflip": ymir.mp.network.Controller,
-                                "scaling backdoor": partial(ymir.scout.adversaries.ScalingController, alg=alg, num_adversaries=num_adversaries),
-                                "onoff freerider": partial(
-                                    ymir.scout.adversaries.OnOffFRController,
-                                    alg=alg,
-                                    num_adversaries=num_adversaries,
-                                    max_alpha=1/num_endpoints if alg in ['fed_avg', 'std_dagmm'] else 1,
-                                    sharp=alg in ['fed_avg', 'std_dagmm', 'krum'],
-                                    params=params
-                                ),
-                                "freerider": partial(
-                                    ymir.scout.adversaries.FRController, attack_type="delta", num_adversaries=num_adversaries, params=params
-                                ),
-                                "bad mouther": partial(
-                                    ymir.scout.adversaries.MoutherController, num_adversaries=num_adversaries, victim=victim, attack_type=attack
-                                )
-                            }[attack],
-                            is_server=True
-                        )
+                        network = ymir.mp.network.Network()
+                        network.add_controller("main", is_server=True)
                         for i in range(num_clients):
-                            network.add_host("main", ymir.scout.Collaborator(client_opt_state, data[i], LOCAL_EPOCHS))
-                        adv_class = {
-                            "labelflip": lambda o, _, b, e: ymir.scout.adversaries.LabelFlipper(o, dataset, b, e, attack_from, attack_to),
-                            "scaling backdoor": lambda o, _, b, e: ymir.scout.adversaries.Backdoor(o, dataset, b, e, attack_from, attack_to),
-                            "onoff labelflip": lambda o, d, b, e: ymir.scout.adversaries.OnOffLabelFlipper(o, d, dataset, b, e, attack_from, attack_to),
-                            "onoff freerider": lambda o, d, _, e: ymir.scout.Collaborator(o, d, e),
-                            "bad mouther": lambda o, d, _, e: ymir.scout.Collaborator(o, d, e),
-                        }[attack]
+                            network.add_host("main", ymir.scout.Collaborator(client_opt, client_opt_state, loss, data[i], local_epochs))
+
                         for i in range(num_adversaries):
-                            network.add_host("main", adv_class(client_opt_state, data[i + num_clients], batch_sizes[i + num_clients], LOCAL_EPOCHS))
+                            c = ymir.scout.Collaborator(client_opt, client_opt_state, loss, data[i + num_clients], batch_sizes[i + num_clients])
+                            if "labelflip" in attack:
+                                ymir.scout.adversaries.labelflipper.convert(c, dataset, attack_from, attack_to)
+                            elif "backdoor" in attack:
+                                ymir.scout.adversaries.backdoor.convert(c, dataset, dataset_name, attack_from, attack_to)
+                            elif "freerider" in attack:
+                                ymir.scout.adversaries.freerider.convert(c, "delta", params)
+                            if "onoff" in attack:
+                                ymir.scout.adversaries.onoff.convert(c)
+                            network.add_host("main", c)
                         controller = network.get_controller("main")
-                        if attack != "labelflip" and attack != "bad mouther":
-                            controller.init(params)
+                        if "scaling" in attack:
+                            controller.add_grad_transform(ymir.scout.adversaries.scaler.GradientTransform(network, params, alg, num_adversaries))
+                        if "mouther" in attack:
+                            controller.add_grad_transform(ymir.scout.adversaries.mouther.GradientTransform(num_adversaries, victim, num_adversaries))
                         if "onoff" not in attack:
-                            controller.attacking = True
+                            toggler = None
+                        else:
+                            toggler = ymir.scout.adversaries.onoff.GradientTransform(
+                                network, params, alg, controller.clients[-num_adversaries:],
+                                max_alpha=1/num_endpoints if alg in ['fed_avg', 'std_dagmm'] else 1,
+                                sharp=alg in ['fed_avg', 'std_dagmm', 'krum']
+                            )
+                            controller.add_grad_transform(toggler)
+                        if comp_alg == "ae":
+                            coder = ymir.mp.compression.ae.Coder(params, num_endpoints)
+                            controller.add_grad_transform(ymir.mp.compression.ae.Encode(coder))
+                            controller.add_grad_transform(ymir.mp.compression.ae.Decode(params, coder))
+                        if comp_alg == "fedzip":
+                            controller.add_grad_transform(ymir.mp.compression.fedzip.encode)
+                            controller.add_grad_transform(ymir.mp.compression.fedzip.Decode(params))
 
                         model = ymir.Coordinate(alg, opt, opt_state, params, network)
                         meter = utils.Neurometer(
@@ -123,15 +121,16 @@ def main(_):
                         print("Done, beginning training.")
 
                         # Train/eval loop.
-                        pbar = trange(TOTAL_ROUNDS)
+                        pbar = trange(total_rounds)
                         for _ in pbar:
+                            attacking = toggler.attacking if toggler else True
                             if "labelflip" in attack:
                                 results = meter.add_record(model.params)
-                                pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}", 'ASR': f"{results['test asr']:.3f}", 'ATT': f"{controller.attacking}"})
+                                pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}", 'ASR': f"{results['test asr']:.3f}", 'ATT': f"{attacking}"})
                             alpha, all_grads = model.step()
                             if "labelflip" not in attack:
                                 if "freerider" in attack:
-                                    if controller.attacking:
+                                    if attacking:
                                         if alg == "krum":
                                             meter.add('asr', alpha[-num_adversaries:].mean())
                                         else:
@@ -151,7 +150,7 @@ def main(_):
                                             asr = utils.unzero(vicdel) / utils.unzero(max(utils.euclid_dist(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads]), theta)))
                                     meter.add('asr', asr)
                                 results = meter.add_record(model.params)
-                                pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}", 'ASR': f"{results['asr']:.3f}", 'ATT': f"{controller.attacking}"})
+                                pbar.set_postfix({'ACC': f"{results['test accuracy']:.3f}", 'ASR': f"{results['asr']:.3f}", 'ATT': f"{attacking}"})
                         final_results = meter.get_results()
                         asrs = final_results['test asr'] if "labelflip" in attack else final_results['asr']
                         accs = meter.get_results()['test accuracy']

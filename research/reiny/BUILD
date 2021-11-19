@@ -1,13 +1,6 @@
 py_binary(
-    name = "compression",
+    name = "main",
     deps = ['//:ymir'],
-    srcs = ["compression.py", "utils.py"],
-    main = "compression.py",
-)
-
-py_binary(
-    name = "tutelage",
-    deps = ['//:ymir'],
-    srcs = ["tutelage.py", "utils.py"],
-    main = "tutelage.py",
+    srcs = ["main.py", "utils.py"],
+    main = "main.py",
 )

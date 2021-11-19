@@ -16,10 +16,10 @@ for example, to run the federated averaging sample, execute:
 bazel run samples/fedavg
 ~~~
 
-And for the labelflip experiment from the viceroy research project, execute:
+And for the main experiment from the viceroy research project, execute:
 
 ~~~sh
-bazel run research/viceroy/labelflip
+bazel run research/viceroy/main
 ~~~
 
 ## Usage
