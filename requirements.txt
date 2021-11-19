@@ -1,6 +1,6 @@
-optax
-dm-haiku
-chex
-absl-py
-scikit-learn
-numpy
+optax==0.1.0
+dm-haiku==0.0.5
+chex==0.1.0
+absl-py==1.0.0
+scikit-learn==1.0.1
+numpy==1.21.4

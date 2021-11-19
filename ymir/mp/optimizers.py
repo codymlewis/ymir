@@ -1,3 +1,5 @@
+from typing import NamedTuple
+
 import jax
 import jax.numpy as jnp
 import optax
@@ -19,7 +21,7 @@ def pgd(learning_rate, mu, local_epochs=1):
     )
 
 
-class PgdState(optax.OptState):
+class PgdState(NamedTuple):
     params: optax.Params
     counter: chex.Array
 
