@@ -30,7 +30,7 @@ def main(_):
     opt_state = opt.init(params)
     loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
     network = ymir.mp.network.Network()
-    network.add_controller("main", is_server=True)
+    network.add_controller("main", server=True)
     for d in data:
         network.add_host("main", ymir.scout.Collaborator(opt, opt_state, loss, d, local_epochs))
 

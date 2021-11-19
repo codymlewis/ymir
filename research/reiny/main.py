@@ -71,7 +71,7 @@ def main(_):
                             client_opt, client_opt_state = opt, opt_state
     
                         network = ymir.mp.network.Network()
-                        network.add_controller("main", is_server=True)
+                        network.add_controller("main", server=True)
                         for i in range(num_clients):
                             network.add_host("main", ymir.scout.Collaborator(client_opt, client_opt_state, loss, data[i], local_epochs))
 

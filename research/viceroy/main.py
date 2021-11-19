@@ -69,7 +69,7 @@ def main(_):
                             data = DS.fed_split(batch_sizes, [[(i + 1 if i >= 11 else i) % DS.classes, 11] for i in range(T)])
 
                     network = ymir.mp.network.Network()
-                    network.add_controller("main", is_server=True)
+                    network.add_controller("main", server=True)
                     for i in range(N):
                         network.add_host("main", ymir.scout.Collaborator(opt, opt_state, loss, data[i], 1))
                     for i in range(A):

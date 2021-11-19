@@ -66,10 +66,10 @@ class Network:
         """Get the number of clients in the network"""
         return len(self.clients)
 
-    def add_controller(self, name, is_server=False):
+    def add_controller(self, name, server=False):
         """Add a new controller with name into this network"""
         self.controllers[name] = Controller(self.C)
-        if is_server:
+        if server:
             self.server_name = name
     
     def get_controller(self, name):
