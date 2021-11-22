@@ -97,7 +97,7 @@
 <span class="sd">    This is a curried function, so first initialize with the selected optimizer.</span>
 <span class="sd">    The return function may then be used to update the global parameters based on the endpoint gradients</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">grads</span><span class="p">):</span>
         <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
         <span class="n">new_params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
@@ -133,7 +133,7 @@
 <span class="sd">    This is a curried function, so first initialize with the selected optimizer.</span>
 <span class="sd">    The return function may then be used to update the global parameters based on the endpoint gradients</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+    <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">grads</span><span class="p">):</span>
         <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
         <span class="n">new_params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>

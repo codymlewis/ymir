@@ -87,7 +87,7 @@
             <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">NamedTuple</span>
 
 <span class="kn">import</span> <span class="nn">jax</span>
-<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
+<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="kn">as</span> <span class="nn">jnp</span>
 <span class="kn">import</span> <span class="nn">optax</span>
 <span class="kn">import</span> <span class="nn">chex</span>
 
@@ -120,12 +120,12 @@
     <span class="k">def</span> <span class="nf">init_fn</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">Params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PgdState</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">PgdState</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">update_fn</span><span class="p">(</span><span class="n">grads</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">Updates</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">PgdState</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">Params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">optax</span><span class="o">.</span><span class="n">Updates</span><span class="p">,</span> <span class="n">PgdState</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">update_fn</span><span class="p">(</span><span class="n">grads</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">Updates</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">PgdState</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">Params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;params argument required for this transform&quot;</span><span class="p">)</span>
         <span class="n">updates</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_multimap</span><span class="p">(</span><span class="k">lambda</span> <span class="n">g</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">wt</span><span class="p">:</span> <span class="n">g</span> <span class="o">+</span> <span class="n">mu</span> <span class="o">*</span> <span class="p">((</span><span class="n">w</span> <span class="o">-</span> <span class="n">g</span><span class="p">)</span> <span class="o">-</span> <span class="n">wt</span><span class="p">),</span> <span class="n">grads</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">updates</span><span class="p">,</span> <span class="n">PgdState</span><span class="p">(</span>
-            <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">counter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">params</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">state</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">counter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">local_epochs</span>
+            <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">counter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">params</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">state</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">counter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">local_epochs</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">optax</span><span class="o">.</span><span class="n">GradientTransformation</span><span class="p">(</span><span class="n">init_fn</span><span class="p">,</span> <span class="n">update_fn</span><span class="p">)</span>
@@ -167,7 +167,7 @@
 
         
         <span class="def">class</span>
-        <span class="name">PgdState</span><wbr>(<span class="base">typing.NamedTuple</span>):
+        <span class="name">PgdState</span><wbr>(<span class="base">builtins.tuple</span>):
     </div>
 
                 <details>

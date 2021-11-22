@@ -87,7 +87,7 @@
 
 
 <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
-    <span class="n">bd_map</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s2">_backdoor_map&quot;</span><span class="p">],</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">)</span>
+    <span class="n">bd_map</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="n">f</span><span class="s2">&quot;{dataset_name}_backdoor_map&quot;</span><span class="p">],</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span>
         <span class="s2">&quot;train&quot;</span><span class="p">,</span>
         <span class="n">client</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
@@ -97,14 +97,14 @@
     <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">mnist_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">mnist_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
     <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>
         <span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">attack_to</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">cifar10_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">cifar10_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
     <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>
@@ -112,7 +112,7 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">kddcup99_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">kddcup99_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
     <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>
@@ -141,7 +141,7 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
-    <span class="n">bd_map</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dataset_name</span><span class="si">}</span><span class="s2">_backdoor_map&quot;</span><span class="p">],</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">)</span>
+    <span class="n">bd_map</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="n">f</span><span class="s2">&quot;{dataset_name}_backdoor_map&quot;</span><span class="p">],</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span>
         <span class="s2">&quot;train&quot;</span><span class="p">,</span>
         <span class="n">client</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
@@ -166,7 +166,7 @@
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">mnist_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">mnist_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
     <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>
@@ -189,7 +189,7 @@
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">cifar10_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">cifar10_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
     <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>
@@ -212,7 +212,7 @@
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">kddcup99_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">kddcup99_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
     <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>

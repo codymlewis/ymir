@@ -96,11 +96,11 @@
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">optax</span><span class="o">.</span><span class="n">Params</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">optax</span><span class="o">.</span><span class="n">Params</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">jaxlib</span><span class="o">.</span><span class="n">xla_extension</span><span class="o">.</span><span class="n">DeviceArray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jaxlib</span><span class="o">.</span><span class="n">xla_extension</span><span class="o">.</span><span class="n">DeviceArray</span><span class="p">:</span>
         <span class="k">pass</span>
 </pre></div>
 
@@ -124,11 +124,11 @@
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">optax</span><span class="o">.</span><span class="n">Params</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">optax</span><span class="o">.</span><span class="n">Params</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">jaxlib</span><span class="o">.</span><span class="n">xla_extension</span><span class="o">.</span><span class="n">DeviceArray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jaxlib</span><span class="o">.</span><span class="n">xla_extension</span><span class="o">.</span><span class="n">DeviceArray</span><span class="p">:</span>
         <span class="k">pass</span>
 </pre></div>
 
@@ -145,16 +145,13 @@ inheritance.</p>
                 <div class="decorator">@abstractmethod</div>
 
             <span class="def">def</span>
-            <span class="name">update</span><span class="signature">(
-    self,
-    all_grads: Iterable[Union[jax._src.numpy.lax_numpy.ndarray, Iterable[ForwardRef(&#39;ArrayTree&#39;)], Mapping[Any, ForwardRef(&#39;ArrayTree&#39;)]]]
-)</span>:
+            <span class="name">update</span><span class="signature">(self, all_grads: Iterable)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">optax</span><span class="o">.</span><span class="n">Params</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
         <span class="k">pass</span>
 </pre></div>
 
@@ -169,16 +166,13 @@ inheritance.</p>
                 <div class="decorator">@abstractmethod</div>
 
             <span class="def">def</span>
-            <span class="name">scale</span><span class="signature">(
-    self,
-    all_grads: Iterable[Union[jax._src.numpy.lax_numpy.ndarray, Iterable[ForwardRef(&#39;ArrayTree&#39;)], Mapping[Any, ForwardRef(&#39;ArrayTree&#39;)]]]
-) -&gt; jaxlib.xla_extension.DeviceArray</span>:
+            <span class="name">scale</span><span class="signature">(self, all_grads: Iterable) -&gt; jaxlib.xla_extension.DeviceArray</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">optax</span><span class="o">.</span><span class="n">Params</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">jaxlib</span><span class="o">.</span><span class="n">xla_extension</span><span class="o">.</span><span class="n">DeviceArray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jaxlib</span><span class="o">.</span><span class="n">xla_extension</span><span class="o">.</span><span class="n">DeviceArray</span><span class="p">:</span>
         <span class="k">pass</span>
 </pre></div>
 
