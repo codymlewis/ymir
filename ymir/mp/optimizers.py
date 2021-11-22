@@ -34,7 +34,7 @@ def _add_prox(mu: float, local_epochs: int) -> optax.GradientTransformation:
     def init_fn(params: optax.Params) -> PgdState:
         return PgdState(params, jnp.array(0))
 
-    def update_fn(grads: optax.Updates, state: PgdState, params: optax.Params) -> tuple[optax.Updates, PgdState]:
+    def update_fn(grads: optax.Updates, state: PgdState, params: optax.Params) -> tuple:
         if params is None:
             raise ValueError("params argument required for this transform")
         updates = jax.tree_multimap(lambda g, w, wt: g + mu * ((w - g) - wt), grads, params, state.params)

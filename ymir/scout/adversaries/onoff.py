@@ -4,7 +4,7 @@ from ymir import garrison
 from ymir import mp
 from ymir.scout import collaborator
 
-class GradientTransform:  # maybe add periodic?
+class GradientTransform:
     """
     Network controller that toggles an attack on or off respective to the result of the aggregation algorithm
     """

@@ -40,11 +40,11 @@ class Dataset:
         self.X, self.y, self.train_idx = X, y, train
         self.classes = np.unique(self.y).shape[0]
 
-    def train(self) -> tuple[np.ndarray, np.ndarray]:
+    def train(self):
         """Get the training subset"""
         return self.X[self.train_idx], self.y[self.train_idx]
 
-    def test(self) -> tuple[np.ndarray, np.ndarray]:
+    def test(self):
         """Get the testing subset"""
         return self.X[~self.train_idx], self.y[~self.train_idx]
 

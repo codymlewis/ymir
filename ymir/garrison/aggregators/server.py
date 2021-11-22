@@ -16,9 +16,9 @@ class AggServer(ABC):
         pass
 
     @abstractmethod
-    def update(self, all_grads: Iterable[optax.Params]):
+    def update(self, all_grads: Iterable):
         pass
 
     @abstractmethod
-    def scale(self, all_grads: Iterable[optax.Params]) -> jaxlib.xla_extension.DeviceArray:
+    def scale(self, all_grads: Iterable) -> jaxlib.xla_extension.DeviceArray:
         pass
