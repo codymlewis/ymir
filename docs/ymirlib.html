@@ -86,7 +86,7 @@ ymirlib    </h1>
             <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
 <span class="kn">import</span> <span class="nn">jax</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">General utility library for ymir</span>
@@ -110,13 +110,13 @@ ymirlib    </h1>
     <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">tree</span><span class="p">)</span>
 
 
-<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="nd">@jax.jit</span>
 <span class="k">def</span> <span class="nf">tree_mul</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Multiply the elements of a pytree by the value of scale&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
 
 
-<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+<span class="nd">@jax.jit</span>
 <span class="k">def</span> <span class="nf">tree_add</span><span class="p">(</span><span class="o">*</span><span class="n">trees</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Element-wise add any number of pytrees&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_multimap</span><span class="p">(</span><span class="k">lambda</span> <span class="o">*</span><span class="n">xs</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">xs</span><span class="p">),</span> <span class="o">*</span><span class="n">trees</span><span class="p">)</span>
@@ -155,7 +155,7 @@ ymirlib    </h1>
                 <div class="decorator">@partial(jax.jit, static_argnums=(1, 2, 3))</div>
 
             <span class="def">def</span>
-            <span class="name">tree_uniform</span><span class="signature">(tree, low=0.0, high=1.0, rng=Generator(PCG64) at 0x7FB656487E40)</span>:
+            <span class="name">tree_uniform</span><span class="signature">(tree, low=0.0, high=1.0, rng=Generator(PCG64) at 0x7F09D8273E40)</span>:
     </div>
 
                 <details>
@@ -179,7 +179,7 @@ ymirlib    </h1>
                 <div class="decorator">@partial(jax.jit, static_argnums=(1, 2, 3))</div>
 
             <span class="def">def</span>
-            <span class="name">tree_add_normal</span><span class="signature">(tree, loc=0.0, scale=1.0, rng=Generator(PCG64) at 0x7FB635588040)</span>:
+            <span class="name">tree_add_normal</span><span class="signature">(tree, loc=0.0, scale=1.0, rng=Generator(PCG64) at 0x7F09D8273BA0)</span>:
     </div>
 
                 <details>
@@ -208,7 +208,7 @@ ymirlib    </h1>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+            <div class="codehilite"><pre><span></span><span class="nd">@jax.jit</span>
 <span class="k">def</span> <span class="nf">tree_mul</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Multiply the elements of a pytree by the value of scale&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
@@ -232,7 +232,7 @@ ymirlib    </h1>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
+            <div class="codehilite"><pre><span></span><span class="nd">@jax.jit</span>
 <span class="k">def</span> <span class="nf">tree_add</span><span class="p">(</span><span class="o">*</span><span class="n">trees</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Element-wise add any number of pytrees&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_multimap</span><span class="p">(</span><span class="k">lambda</span> <span class="o">*</span><span class="n">xs</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">xs</span><span class="p">),</span> <span class="o">*</span><span class="n">trees</span><span class="p">)</span>
