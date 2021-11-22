@@ -12,15 +12,15 @@ Finally, any of programs in the `samples` and `research` folders may be run/buil
 Simply execute a bazel command directed towards the path of the file (without extensions) you wish to run,
 for example, to run the federated averaging sample, execute:
 
-~~~sh
+```sh
 bazel run samples/fedavg
-~~~
+```
 
 And for the main experiment from the viceroy research project, execute:
 
-~~~sh
+```sh
 bazel run research/viceroy/main
-~~~
+```
 
 ## Usage
 We provide examples of the library's usage in the `samples` folder. Though, generally
@@ -28,7 +28,7 @@ a program involves initializing shared values and the network architecture, then
 of our `Coordinate` object, and finally calling step from that object.
 
 The following is a generic example snippet
-~~~python
+```python
 # setup
 dataset = ymir.mp.datasets.load(DATASET)
 data = dataset.fed_split(batch_sizes, DIST_LIST)
@@ -50,4 +50,4 @@ model = ymir.Coordinate(AGG_ALG, opt, opt_state, params, network)
 # Train/eval loop.
 for round in range(TOTAL_EPOCHS):
     model.step()
-~~~
+```

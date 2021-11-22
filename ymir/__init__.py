@@ -1,13 +1,12 @@
+r"""
+.. include:: README.md
+"""
+
 import numpy as np
 
 from . import garrison
 from . import mp
 from . import scout
-
-
-"""
-The generic high level API
-"""
 
 
 class Coordinate:
