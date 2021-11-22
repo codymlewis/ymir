@@ -1,4 +1,4 @@
-name: Generate documentation
+name: Generate Docs -> Test libraries
 
 # Controls when the workflow will run
 on:
@@ -13,7 +13,6 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "docs"
   docs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -26,7 +25,6 @@ jobs:
       # Runs a single command using the runners shell
       - name: Create/update docs
         run: |
-          apt install -y python3 python3-pip python-is-python3
           pip install jax jaxlib pdoc
           pip install -r requirements.txt
           pdoc --math -d restructuredtext -o docs ymir ymirlib
@@ -34,3 +32,24 @@ jobs:
           git config --global user.email 'codymlewis@users.noreply.github.com'
           git commit -am "Update docs"
           git push
+  test:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    container: openjdk:8
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: Test ymir library
+        run: |
+          apt install apt-transport-https curl gnupg
+          curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
+          mv bazel.gpg /etc/apt/trusted.gpg.d/
+          echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
+          apt update && apt install --yes build-essential bazel graphviz python3-pip python3 python-is-python3
+          pip install --upgrade pip
+          pip install jax jaxlib
+          bazel test tests/...
