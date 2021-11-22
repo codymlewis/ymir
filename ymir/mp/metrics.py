@@ -31,7 +31,7 @@ class Neurometer:
         self.evaluator = evaluator(net)
         self.classes = {d: ds.classes for d, ds in datasets.items()}
     
-    def measure(self, params, accs: list[str] = None):
+    def measure(self, params, accs: list = None):
         """Add a measurement of the chosen aspects with respect to the current params, return the latest results"""
         for ds_type, ds in self.datasets.items():
             self.results[ds_type].append(self.evaluator(params, *next(ds)))
