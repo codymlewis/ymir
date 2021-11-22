@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v2
 
       # Runs a single command using the runners shell
-      - name: Test ymirlib
+      - name: Test ymir library
         run: |
           apt install apt-transport-https curl gnupg
           curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg

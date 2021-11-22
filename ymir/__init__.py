@@ -12,6 +12,7 @@ from . import scout
 class Coordinate:
     """Class for the high-level API for federated learning"""
     def __init__(self, alg, opt, opt_state, params, network, rng=np.random.default_rng(), **kwargs):
+        """Construct the FL management object"""
         self.server = getattr(garrison.aggregators, alg).Server(params, network, **kwargs)
         self.params = params
         self.opt_state = opt_state
