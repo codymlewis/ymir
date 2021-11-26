@@ -47,3 +47,10 @@ def shard(X, y, nendpoints, nclasses, rng, shards_per_endpoint=2):
     shards = np.split(idx, [round(i * (len(y) // (nendpoints * shards_per_endpoint))) for i in range(1, nendpoints * shards_per_endpoint)])
     assignment = rng.choice(np.arange(len(shards)), (nendpoints, shards_per_endpoint), replace=False)
     return [list(itertools.chain(*[shards[assignment[i][j]] for j in range(shards_per_endpoint)])) for i in range(nendpoints)]
+
+
+def assign_classes(X, y, nendpoints, nclasses, rng, classes=None):
+    """Assign each endpoint only the data from the list specified class"""
+    if classes is None:
+        raise ValueError("Classes not specified in distribution")
+    return [np.isin(y, classes[i]) for i in range(nendpoints)]

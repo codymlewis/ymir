@@ -61,6 +61,12 @@ class TestDistributions(parameterized.TestCase):
         for d in dist:
             chex.assert_trees_all_close(np.unique(self.y[d]), np.unique(self.y))
 
+    def test_assign_classes(self):
+        dist = ymir.mp.distributions.assign_classes(self.X, self.y, 2, 2, self.rng, classes=[0, 1])
+        self.assertEqual(len(dist), 2)
+        for i, d in enumerate(dist):
+            chex.assert_trees_all_close(np.unique(self.y[d]), i)
+
 
 if __name__ == '__main__':
     absltest.main()
