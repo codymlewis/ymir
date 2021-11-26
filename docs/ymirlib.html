@@ -64,6 +64,9 @@
             <li>
                     <a class="function" href="#tree_add">tree_add</a>
             </li>
+            <li>
+                    <a class="function" href="#tree_flatten">tree_flatten</a>
+            </li>
     </ul>
 
 
@@ -120,6 +123,12 @@ ymirlib    </h1>
 <span class="k">def</span> <span class="nf">tree_add</span><span class="p">(</span><span class="o">*</span><span class="n">trees</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Element-wise add any number of pytrees&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_multimap</span><span class="p">(</span><span class="k">lambda</span> <span class="o">*</span><span class="n">xs</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">xs</span><span class="p">),</span> <span class="o">*</span><span class="n">trees</span><span class="p">)</span>
+
+
+<span class="nd">@jax.jit</span>
+<span class="k">def</span> <span class="nf">tree_flatten</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Flatten a pytree into a vector&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">tree</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 
         </details>
@@ -155,7 +164,7 @@ ymirlib    </h1>
                 <div class="decorator">@partial(jax.jit, static_argnums=(1, 2, 3))</div>
 
             <span class="def">def</span>
-            <span class="name">tree_uniform</span><span class="signature">(tree, low=0.0, high=1.0, rng=Generator(PCG64) at 0x7F2184AD9E40)</span>:
+            <span class="name">tree_uniform</span><span class="signature">(tree, low=0.0, high=1.0, rng=Generator(PCG64) at 0x7FB88EC5BE40)</span>:
     </div>
 
                 <details>
@@ -179,7 +188,7 @@ ymirlib    </h1>
                 <div class="decorator">@partial(jax.jit, static_argnums=(1, 2, 3))</div>
 
             <span class="def">def</span>
-            <span class="name">tree_add_normal</span><span class="signature">(tree, loc=0.0, scale=1.0, rng=Generator(PCG64) at 0x7F2184AD9BA0)</span>:
+            <span class="name">tree_add_normal</span><span class="signature">(tree, loc=0.0, scale=1.0, rng=Generator(PCG64) at 0x7FB88EC5BBA0)</span>:
     </div>
 
                 <details>
@@ -241,6 +250,30 @@ ymirlib    </h1>
         </details>
 
             <div class="docstring"><p>Element-wise add any number of pytrees</p>
+</div>
+
+
+                </section>
+                <section id="tree_flatten">
+                            <div class="attr function"><a class="headerlink" href="#tree_flatten">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@jax.jit</div>
+
+            <span class="def">def</span>
+            <span class="name">tree_flatten</span><span class="signature">(tree)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="nd">@jax.jit</span>
+<span class="k">def</span> <span class="nf">tree_flatten</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Flatten a pytree into a vector&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">tree</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Flatten a pytree into a vector</p>
 </div>
 
 

@@ -65,6 +65,9 @@
                 </ul>
 
             </li>
+            <li>
+                    <a class="function" href="#smp_opt">smp_opt</a>
+            </li>
     </ul>
 
 
@@ -127,6 +130,32 @@
         <span class="k">return</span> <span class="n">updates</span><span class="p">,</span> <span class="n">PgdState</span><span class="p">(</span>
             <span class="n">jax</span><span class="o">.</span><span class="n">lax</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">counter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">params</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">state</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">counter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">local_epochs</span>
         <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">optax</span><span class="o">.</span><span class="n">GradientTransformation</span><span class="p">(</span><span class="n">init_fn</span><span class="p">,</span> <span class="n">update_fn</span><span class="p">)</span>
+
+
+
+<span class="k">def</span> <span class="nf">smp_opt</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">rho</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Optimizer for stealthy model poisoning https://arxiv.org/abs/1811.12470&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">optax</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span>
+        <span class="n">_add_stealth</span><span class="p">(</span><span class="n">rho</span><span class="p">),</span>
+        <span class="n">opt</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_add_stealth</span><span class="p">(</span><span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">optax</span><span class="o">.</span><span class="n">GradientTransformation</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a stealth regularization term to the optimizer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">init_fn</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">Params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">update_fn</span><span class="p">(</span><span class="n">grads</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">Updates</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">OptState</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">Params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;params argument required for this transform&quot;</span><span class="p">)</span>
+        <span class="n">updates</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_multimap</span><span class="p">(</span><span class="k">lambda</span> <span class="n">g</span><span class="p">,</span> <span class="n">w</span><span class="p">:</span> <span class="n">g</span> <span class="o">+</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">((</span><span class="n">w</span> <span class="o">-</span> <span class="n">g</span><span class="p">)</span> <span class="o">-</span> <span class="n">w</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">grads</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">updates</span><span class="p">,</span> <span class="n">state</span>
 
     <span class="k">return</span> <span class="n">optax</span><span class="o">.</span><span class="n">GradientTransformation</span><span class="p">(</span><span class="n">init_fn</span><span class="p">,</span> <span class="n">update_fn</span><span class="p">)</span>
 </pre></div>
@@ -231,6 +260,31 @@
             </div>
                                 </dl>
                             </div>
+                </section>
+                <section id="smp_opt">
+                            <div class="attr function"><a class="headerlink" href="#smp_opt">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">smp_opt</span><span class="signature">(opt, rho)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">smp_opt</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">rho</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Optimizer for stealthy model poisoning https://arxiv.org/abs/1811.12470&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">optax</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span>
+        <span class="n">_add_stealth</span><span class="p">(</span><span class="n">rho</span><span class="p">),</span>
+        <span class="n">opt</span>
+    <span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Optimizer for stealthy model poisoning https://arxiv.org/abs/1811.12470</p>
+</div>
+
+
                 </section>
     </main>
 <script>

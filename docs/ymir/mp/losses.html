@@ -56,6 +56,15 @@
             <li>
                     <a class="function" href="#fedmax_loss">fedmax_loss</a>
             </li>
+            <li>
+                    <a class="function" href="#smp_loss">smp_loss</a>
+            </li>
+            <li>
+                    <a class="function" href="#constrain_distance_loss">constrain_distance_loss</a>
+            </li>
+            <li>
+                    <a class="function" href="#constrain_cosine_loss">constrain_cosine_loss</a>
+            </li>
     </ul>
 
 
@@ -78,6 +87,8 @@
             <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">jax</span>
 <span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="kn">as</span> <span class="nn">jnp</span>
 <span class="kn">import</span> <span class="nn">optax</span>
+
+<span class="kn">import</span> <span class="nn">ymirlib</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Loss functions for ML models</span>
@@ -113,6 +124,40 @@
         <span class="n">zero_mat</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">act</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="n">kld</span> <span class="o">=</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">*</span> <span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">x</span><span class="p">))(</span><span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">log_softmax</span><span class="p">(</span><span class="n">act</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">zero_mat</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">optax</span><span class="o">.</span><span class="n">softmax_cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">))</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">kld</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_apply</span>
+
+
+<span class="k">def</span> <span class="nf">smp_loss</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">val_X</span><span class="p">,</span> <span class="n">val_y</span><span class="p">,</span> <span class="n">classes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loss function for stealthy model poisoning https://arxiv.org/abs/1811.12470, assumes a classification task&quot;&quot;&quot;</span>
+    <span class="nd">@jax.jit</span>
+    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">val_logits</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">val_X</span><span class="p">)</span>
+        <span class="n">val_labels</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">val_y</span><span class="p">,</span> <span class="n">classes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">loss</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">optax</span><span class="o">.</span><span class="n">softmax_cross_entropy</span><span class="p">(</span><span class="n">val_logits</span><span class="p">,</span> <span class="n">val_labels</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_apply</span>
+
+
+<span class="k">def</span> <span class="nf">constrain_distance_loss</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459&quot;&quot;&quot;</span>
+    <span class="nd">@jax.jit</span>
+    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">global_params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">updates</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">loss</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">optax</span><span class="o">.</span><span class="n">l2_loss</span><span class="p">(</span><span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_flatten</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_flatten</span><span class="p">(</span><span class="n">global_params</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">_apply</span>
+
+
+<span class="k">def</span> <span class="nf">constrain_cosine_loss</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459&quot;&quot;&quot;</span>
+    <span class="nd">@jax.jit</span>
+    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">global_params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">updates</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">loss</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">optax</span><span class="o">.</span><span class="n">cosine_similarity</span><span class="p">(</span><span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_flatten</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_flatten</span><span class="p">(</span><span class="n">global_params</span><span class="p">)))</span>
     <span class="k">return</span> <span class="n">_apply</span>
 </pre></div>
 
@@ -198,6 +243,91 @@
         </details>
 
             <div class="docstring"><p>Loss function used for the FedMAX algorithm proposed in https://arxiv.org/abs/2004.03657</p>
+</div>
+
+
+                </section>
+                <section id="smp_loss">
+                            <div class="attr function"><a class="headerlink" href="#smp_loss">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">smp_loss</span><span class="signature">(net, scale, loss, val_X, val_y, classes)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">smp_loss</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">val_X</span><span class="p">,</span> <span class="n">val_y</span><span class="p">,</span> <span class="n">classes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loss function for stealthy model poisoning https://arxiv.org/abs/1811.12470, assumes a classification task&quot;&quot;&quot;</span>
+    <span class="nd">@jax.jit</span>
+    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">val_logits</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">val_X</span><span class="p">)</span>
+        <span class="n">val_labels</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">val_y</span><span class="p">,</span> <span class="n">classes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">loss</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">optax</span><span class="o">.</span><span class="n">softmax_cross_entropy</span><span class="p">(</span><span class="n">val_logits</span><span class="p">,</span> <span class="n">val_labels</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_apply</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Loss function for stealthy model poisoning https://arxiv.org/abs/1811.12470, assumes a classification task</p>
+</div>
+
+
+                </section>
+                <section id="constrain_distance_loss">
+                            <div class="attr function"><a class="headerlink" href="#constrain_distance_loss">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">constrain_distance_loss</span><span class="signature">(alpha, loss, opt, opt_state)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">constrain_distance_loss</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459&quot;&quot;&quot;</span>
+    <span class="nd">@jax.jit</span>
+    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">global_params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">updates</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">loss</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">optax</span><span class="o">.</span><span class="n">l2_loss</span><span class="p">(</span><span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_flatten</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_flatten</span><span class="p">(</span><span class="n">global_params</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">_apply</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459</p>
+</div>
+
+
+                </section>
+                <section id="constrain_cosine_loss">
+                            <div class="attr function"><a class="headerlink" href="#constrain_cosine_loss">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">constrain_cosine_loss</span><span class="signature">(alpha, loss, opt, opt_state)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">constrain_cosine_loss</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459&quot;&quot;&quot;</span>
+    <span class="nd">@jax.jit</span>
+    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">global_params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">updates</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">)</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">loss</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">optax</span><span class="o">.</span><span class="n">cosine_similarity</span><span class="p">(</span><span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_flatten</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_flatten</span><span class="p">(</span><span class="n">global_params</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">_apply</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459</p>
 </div>
 
 
