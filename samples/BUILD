@@ -18,3 +18,10 @@ py_binary(
   srcs = ["fedprox.py"],
   main = "fedprox.py",
 )
+
+py_binary(
+  name = "parameter_poisoning",
+  deps = ['//:ymir'],
+  srcs = ["parameter_poisoning.py"],
+  main = "parameter_poisoning.py",
+)

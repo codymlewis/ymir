@@ -37,3 +37,13 @@ def fedmax_loss(net, net_act, classes):
         kld = (lambda x, y: y * (jnp.log(y) - x))(jax.nn.log_softmax(act), jax.nn.softmax(zero_mat))
         return jnp.mean(optax.softmax_cross_entropy(logits, labels)) + jnp.mean(kld)
     return _apply
+
+
+def smp_loss(net, scale, loss, val_X, val_y, classes):
+    """Loss function for stealthy model poisoning https://arxiv.org/abs/1811.12470, assumes a classification task"""
+    @jax.jit
+    def _apply(params, X, y):
+        val_logits = net.apply(params, val_X)
+        val_labels = jax.nn.one_hot(val_y, classes)
+        return scale * loss(params, X, y) + jnp.mean(optax.softmax_cross_entropy(val_logits, val_labels))
+    return _apply

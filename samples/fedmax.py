@@ -43,7 +43,7 @@ def main(_):
     # Train/eval loop.
     for _ in (pbar := trange(500)):
         results = meter.measure(model.params, ['test'])
-        pbar.set_postfix({'ACC': f"{results['test']:.3f}"})
+        pbar.set_postfix({'ACC': f"{results['test acc']:.3f}"})
         model.step()
 
 

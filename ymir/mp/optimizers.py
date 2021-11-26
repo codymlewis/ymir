@@ -43,3 +43,29 @@ def _add_prox(mu: float, local_epochs: int) -> optax.GradientTransformation:
         )
 
     return optax.GradientTransformation(init_fn, update_fn)
+
+
+
+def smp_opt(opt, rho):
+    """Optimizer for stealthy model poisoning https://arxiv.org/abs/1811.12470"""
+    return optax.chain(
+        _add_stealth(rho),
+        opt
+    )
+
+
+def _add_stealth(rho):
+    """
+    Adds a stealth regularization term to the optimizer.
+    """
+
+    def init_fn(params: optax.Params) -> None:
+        return None
+
+    def update_fn(grads: optax.Updates, state: optax.OptState, params: optax.Params) -> tuple:
+        if params is None:
+            raise ValueError("params argument required for this transform")
+        updates = jax.tree_multimap(lambda g, w: g + rho * jnp.linalg.norm((w - g) - w, ord=2), grads, params)
+        return updates, state
+
+    return optax.GradientTransformation(init_fn, update_fn)
