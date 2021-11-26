@@ -54,7 +54,7 @@ def smp_opt(opt, rho):
     )
 
 
-def _add_stealth(rho):
+def _add_stealth(rho: float) -> optax.GradientTransformation:
     """
     Adds a stealth regularization term to the optimizer.
     """

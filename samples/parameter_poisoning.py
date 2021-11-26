@@ -16,8 +16,9 @@ Example of parameter poisoning on Federated Averaging
 def main(_):
     print("Setting up the system...")
     num_endpoints = 10
-    num_adversaries = 3
+    num_adversaries = 2
     num_clients = num_endpoints - num_adversaries
+    attack = "smp"
     rng = np.random.default_rng(0)
 
     # Setup the dataset
@@ -37,13 +38,24 @@ def main(_):
     network.add_controller("main", server=True)
     for i in range(num_clients):
         network.add_host("main", ymir.scout.Collaborator(client_opt, client_opt_state, loss, data[i], 1))
-    adv_loss = ymir.mp.losses.smp_loss(net, 10, loss, test_eval.X[:100], test_eval.y[:100], 10)
-    adv_opt = ymir.mp.optimizers.smp_opt(client_opt, 0.001)
-    adv_opt_state = adv_opt.init(params)
-    for i in range(num_adversaries):
-        c = ymir.scout.Collaborator(adv_opt, adv_opt_state, adv_loss, data[i + num_clients], 1)
-        ymir.scout.adversaries.labelflipper.convert(c, dataset, 0, 1)
-        network.add_host("main", c)
+    
+    if attack == "smp":
+        # Setup for the stealthy model poisoning attack
+        adv_loss = ymir.mp.losses.smp_loss(net, 10, loss, test_eval.X[:100], test_eval.y[:100], 10)
+        adv_opt = ymir.mp.optimizers.smp_opt(client_opt, 0.0001)
+        adv_opt_state = adv_opt.init(params)
+        for i in range(num_adversaries):
+            c = ymir.scout.Collaborator(adv_opt, adv_opt_state, adv_loss, data[i + num_clients], 1)
+            ymir.scout.adversaries.labelflipper.convert(c, dataset, 0, 1)
+            network.add_host("main", c)
+    else:
+        # setup for the alternating minimization attack
+        stealth_data = dataset.get_iter("test", 8, rng=rng)
+        for i in range(num_adversaries):
+            c = ymir.scout.Collaborator(client_opt, client_opt_state, loss, data[i + num_clients], 10)
+            ymir.scout.adversaries.labelflipper.convert(c, dataset, 0, 1, 10)
+            ymir.scout.adversaries.alternating_minimization.convert(c, 1, 10, stealth_data)
+            network.add_host("main", c)
 
     server_opt = optax.sgd(0.1)
     server_opt_state = server_opt.init(params)

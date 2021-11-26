@@ -6,6 +6,7 @@ import optax
 
 from functools import partial
 
+from . import alternating_minimization
 from . import backdoor
 from . import scaler
 from . import onoff
