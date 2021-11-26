@@ -25,3 +25,10 @@ py_binary(
   srcs = ["parameter_poisoning.py"],
   main = "parameter_poisoning.py",
 )
+
+py_binary(
+  name = "backdoor",
+  deps = ['//:ymir'],
+  srcs = ["backdoor.py"],
+  main = "backdoor.py",
+)

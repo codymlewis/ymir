@@ -2,6 +2,8 @@ import jax
 import jax.numpy as jnp
 import optax
 
+import ymirlib
+
 """
 Loss functions for ML models
 """
@@ -46,4 +48,28 @@ def smp_loss(net, scale, loss, val_X, val_y, classes):
         val_logits = net.apply(params, val_X)
         val_labels = jax.nn.one_hot(val_y, classes)
         return scale * loss(params, X, y) + jnp.mean(optax.softmax_cross_entropy(val_logits, val_labels))
+    return _apply
+
+
+def constrain_distance_loss(alpha, loss, opt, opt_state):
+    """Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459"""
+    @jax.jit
+    def _apply(params, X, y):
+        global_params = params
+        grads = jax.grad(loss)(params, X, y)
+        updates, _ = opt.update(grads, opt_state)
+        params = optax.apply_updates(params, updates)
+        return alpha * loss(params, X, y) + (1 - alpha) * jnp.mean(optax.l2_loss(ymirlib.tree_flatten(params), ymirlib.tree_flatten(global_params)))
+    return _apply
+
+
+def constrain_cosine_loss(alpha, loss, opt, opt_state):
+    """Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459"""
+    @jax.jit
+    def _apply(params, X, y):
+        global_params = params
+        grads = jax.grad(loss)(params, X, y)
+        updates, _ = opt.update(grads, opt_state)
+        params = optax.apply_updates(params, updates)
+        return alpha * loss(params, X, y) + (1 - alpha) * (1 - optax.cosine_similarity(ymirlib.tree_flatten(params), ymirlib.tree_flatten(global_params)))
     return _apply
