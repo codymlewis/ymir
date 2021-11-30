@@ -14,14 +14,13 @@ from tqdm import trange
 import ymir
 
 import metrics
-import datasets
 
 
 def main(_):
     grid_results = pd.DataFrame(columns=["beta", "gamma", "0.3 mean asr", "0.3 std asr", "0.5 mean asr", "0.5 std asr"])
     print("Starting up...")
     IID = False
-    DS = datasets.load('mnist')
+    DS = ymir.mp.datasets.load('mnist')
     T = 10
     ATTACK_FROM, ATTACK_TO = 0, 1
     ALG = "foolsgold"
@@ -44,9 +43,12 @@ def main(_):
             N = T - A
             batch_sizes = [8 for _ in range(N + A)]
             if IID:
-                data = DS.fed_split(batch_sizes)
+                data = DS.fed_split(batch_sizes, ymir.mp.distributions.extreme_heterogeneous)
             else:
-                data = DS.fed_split(batch_sizes, [[(i + 1 if i >= 11 else i) % DS.classes, 11] for i in range(T)])
+                data = DS.fed_split(
+                    batch_sizes,
+                    partial(ymir.mp.distributions.assign_classes, classes=[[(i + 1 if i >= 11 else i) % DS.classes, 11] for i in range(T)])
+                )
 
             network = ymir.mp.network.Network()
             network.add_controller("main", server=True)

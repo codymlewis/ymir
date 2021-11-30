@@ -30,7 +30,7 @@ def lda(X, y, nendpoints, nclasses, rng, alpha=0.5):
         rng.shuffle(idx_c)
         dists_c = np.split(idx_c, np.round(np.cumsum(proportions[c]) * len(idx_c)).astype(int)[:-1])
         distribution = [distribution[i] + d.tolist() for i, d in enumerate(dists_c)]
-    logging.debug(f"distribution: {proportions.tolist()}")
+    logging.debug(f"distribution: {proportions}")
     return distribution
 
 

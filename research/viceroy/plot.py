@@ -48,7 +48,6 @@ def attack_points(attacking):
     return points
 
 
-
 if __name__ == "__main__":
     with open('results.pkl', 'rb') as f:
         results = pickle.load(f)
