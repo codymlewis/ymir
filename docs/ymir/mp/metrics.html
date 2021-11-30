@@ -54,6 +54,9 @@
                     <a class="function" href="#accuracy_score">accuracy_score</a>
             </li>
             <li>
+                    <a class="function" href="#asr_score">asr_score</a>
+            </li>
+            <li>
                     <a class="class" href="#Neurometer">Neurometer</a>
                             <ul class="memberlist">
                         <li>
@@ -111,6 +114,10 @@
 <span class="k">def</span> <span class="nf">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y_true</span> <span class="o">==</span> <span class="n">y_pred</span><span class="p">)</span>
 
+<span class="nd">@jax.jit</span>
+<span class="k">def</span> <span class="nf">asr_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">y_true</span> <span class="o">==</span> <span class="n">attack_from</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">attack_to</span><span class="p">)</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">Neurometer</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Measure aspects of the model&quot;&quot;&quot;</span>
@@ -120,12 +127,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span> <span class="o">=</span> <span class="n">evaluator</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="n">ds</span><span class="o">.</span><span class="n">classes</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">datasets</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
     
-    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">accs</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">accs</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">asrs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a measurement of the chosen aspects with respect to the current params, return the latest results&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">ds_type</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">ds_type</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">ds</span><span class="p">)))</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">accs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="n">a</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">accs</span><span class="p">}</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="s2">&quot;{a} acc&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">accs</span><span class="p">})</span>
+        <span class="k">if</span> <span class="n">asrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="s2">&quot;{d} asr&quot;</span><span class="p">:</span> <span class="n">asr_score</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">d</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">asrs</span><span class="p">[</span><span class="s1">&#39;from&#39;</span><span class="p">],</span> <span class="n">asrs</span><span class="p">[</span><span class="s1">&#39;to&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">asrs</span><span class="p">[</span><span class="s1">&#39;datasets&#39;</span><span class="p">]})</span>
+        <span class="k">return</span> <span class="n">results</span>
 
     <span class="k">def</span> <span class="nf">conclude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return overall results formatted into jax.numpy arrays&quot;&quot;&quot;</span>
@@ -185,6 +196,28 @@
     
 
                 </section>
+                <section id="asr_score">
+                            <div class="attr function"><a class="headerlink" href="#asr_score">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@jax.jit</div>
+
+            <span class="def">def</span>
+            <span class="name">asr_score</span><span class="signature">(y_true, y_pred, attack_from, attack_to)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="nd">@jax.jit</span>
+<span class="k">def</span> <span class="nf">asr_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">y_true</span> <span class="o">==</span> <span class="n">attack_from</span>
+    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">attack_to</span><span class="p">)</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                </section>
                 <section id="Neurometer">
                                 <div class="attr class">
         <a class="headerlink" href="#Neurometer">#&nbsp;&nbsp</a>
@@ -204,12 +237,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span> <span class="o">=</span> <span class="n">evaluator</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="n">ds</span><span class="o">.</span><span class="n">classes</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">datasets</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
     
-    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">accs</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">accs</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">asrs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a measurement of the chosen aspects with respect to the current params, return the latest results&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">ds_type</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">ds_type</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">ds</span><span class="p">)))</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">accs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="n">a</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">accs</span><span class="p">}</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="s2">&quot;{a} acc&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">accs</span><span class="p">})</span>
+        <span class="k">if</span> <span class="n">asrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="s2">&quot;{d} asr&quot;</span><span class="p">:</span> <span class="n">asr_score</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">d</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">asrs</span><span class="p">[</span><span class="s1">&#39;from&#39;</span><span class="p">],</span> <span class="n">asrs</span><span class="p">[</span><span class="s1">&#39;to&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">asrs</span><span class="p">[</span><span class="s1">&#39;datasets&#39;</span><span class="p">]})</span>
+        <span class="k">return</span> <span class="n">results</span>
 
     <span class="k">def</span> <span class="nf">conclude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return overall results formatted into jax.numpy arrays&quot;&quot;&quot;</span>
@@ -250,17 +287,21 @@
 
         
             <span class="def">def</span>
-            <span class="name">measure</span><span class="signature">(self, params, accs: list = None)</span>:
+            <span class="name">measure</span><span class="signature">(self, params, accs: list = None, asrs: dict = None)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">accs</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">accs</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">asrs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a measurement of the chosen aspects with respect to the current params, return the latest results&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">ds_type</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">ds_type</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">ds</span><span class="p">)))</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">accs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="n">a</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">accs</span><span class="p">}</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="s2">&quot;{a} acc&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">accs</span><span class="p">})</span>
+        <span class="k">if</span> <span class="n">asrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="s2">&quot;{d} asr&quot;</span><span class="p">:</span> <span class="n">asr_score</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">d</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">asrs</span><span class="p">[</span><span class="s1">&#39;from&#39;</span><span class="p">],</span> <span class="n">asrs</span><span class="p">[</span><span class="s1">&#39;to&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">asrs</span><span class="p">[</span><span class="s1">&#39;datasets&#39;</span><span class="p">]})</span>
+        <span class="k">return</span> <span class="n">results</span>
 </pre></div>
 
         </details>
