@@ -51,7 +51,7 @@ def main(_):
                     N = T - A
                     batch_sizes = [8 for _ in range(N + A)]
                     if DATASET != 'kddcup99':
-                        data = DS.fed_split(batch_sizes, partial(ymir.mp.distributions.lda, alpha=0.5 if ALG in ['foolsgold', 'viceroy'] else 1000), rng)
+                        data = DS.fed_split(batch_sizes, partial(ymir.mp.distributions.lda, alpha=0.5 if ALG in ['contra', 'foolsgold', 'viceroy'] else 1000), rng)
                     else:
                         data = DS.fed_split(
                             batch_sizes,
@@ -75,6 +75,8 @@ def main(_):
 
                     if ALG == "krum":
                         model = ymir.Coordinate(ALG, opt, opt_state, params, network, rng, clip=A)
+                    elif ALG == "contra":
+                        model = ymir.Coordinate(ALG, opt, opt_state, params, network, rng, k=N)
                     else:
                         model = ymir.Coordinate(ALG, opt, opt_state, params, network, rng)
 
@@ -82,7 +84,7 @@ def main(_):
                     results["asr"] = []
 
                     # Train/eval loop.
-                    TOTAL_ROUNDS = 1000
+                    TOTAL_ROUNDS = 5000
                     for round in (pbar := trange(TOTAL_ROUNDS)):
                         alpha, all_grads = model.step()
                         if round % 1 == 0:
@@ -118,6 +120,12 @@ def write_results(results, fn):
 
 
 def create_network(num_honest, num_adv, attack, params, opt, opt_state, loss, data, batch_sizes, ds, dataset, alg, att_from, att_to, victim):
+    if alg == "krum":
+        server_kwargs = {"clip": num_adv, "timer": True}
+    elif alg == "contra":
+        server_kwargs = {"k": num_honest, "timer": True}
+    else:
+        server_kwargs = {}
     network = ymir.mp.network.Network()
     network.add_controller("main", server=True)
     for i in range(num_honest):
@@ -135,16 +143,17 @@ def create_network(num_honest, num_adv, attack, params, opt, opt_state, loss, da
         network.add_host("main", c)
     controller = network.get_controller("main")
     if "scaling" in attack:
-        controller.add_update_transform(ymir.scout.adversaries.scaler.GradientTransform(network, params, alg, num_adv))
+        controller.add_update_transform(ymir.scout.adversaries.scaler.GradientTransform(params, opt, opt_state, network, alg, num_adv, **server_kwargs))
     if "mouther" in attack:
         controller.add_update_transform(ymir.scout.adversaries.mouther.GradientTransform(num_adv, victim, attack))
     if "onoff" not in attack:
         toggler = None
     else:
         toggler = ymir.scout.adversaries.onoff.GradientTransform(
-            network, params, alg, controller.clients[-num_adv:],
+            params, opt, opt_state, network, alg, controller.clients[-num_adv:],
             max_alpha=1/num_honest if alg in ['fed_avg', 'std_dagmm'] else 1,
-            sharp=alg in ['fed_avg', 'std_dagmm', 'krum']
+            sharp=alg in ['fed_avg', 'std_dagmm', 'krum'],
+            **server_kwargs
         )
         controller.add_update_transform(toggler)
     return network, toggler

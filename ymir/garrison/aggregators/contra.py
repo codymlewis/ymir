@@ -15,7 +15,7 @@ class Server(server.AggServer):
         super().__init__(params, opt, opt_state, network, rng)
         self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
         self.C = C
-        self.k = k
+        self.k = round(k * C)
         self.lamb = C * (1 - C)
         self.delta = delta
         self.t = t

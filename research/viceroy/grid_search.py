@@ -61,7 +61,7 @@ def main(_):
                 network.add_host("main", c)
             controller = network.get_controller("main")
             toggler = ymir.scout.adversaries.onoff.GradientTransform(
-                network, params, ALG, controller.clients[-A:],
+                params, opt, opt_state, network, ALG, controller.clients[-A:],
                 max_alpha=1/N if ALG in ['fed_avg', 'std_dagmm'] else 1,
                 sharp=ALG in ['fed_avg', 'std_dagmm', 'krum']
             )
