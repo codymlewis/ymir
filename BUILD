@@ -29,6 +29,7 @@ py_library(
         requirement('absl-py'),
         requirement('scikit-learn'),
         requirement('numpy'),
+        requirement('hdbscan'),
     ],
     visibility = ["//:__subpackages__"],
 )

@@ -135,9 +135,9 @@ def create_network(num_honest, num_adv, attack, params, opt, opt_state, loss, da
         network.add_host("main", c)
     controller = network.get_controller("main")
     if "scaling" in attack:
-        controller.add_grad_transform(ymir.scout.adversaries.scaler.GradientTransform(network, params, alg, num_adv))
+        controller.add_update_transform(ymir.scout.adversaries.scaler.GradientTransform(network, params, alg, num_adv))
     if "mouther" in attack:
-        controller.add_grad_transform(ymir.scout.adversaries.mouther.GradientTransform(num_adv, victim, attack))
+        controller.add_update_transform(ymir.scout.adversaries.mouther.GradientTransform(num_adv, victim, attack))
     if "onoff" not in attack:
         toggler = None
     else:
@@ -146,7 +146,7 @@ def create_network(num_honest, num_adv, attack, params, opt, opt_state, loss, da
             max_alpha=1/num_honest if alg in ['fed_avg', 'std_dagmm'] else 1,
             sharp=alg in ['fed_avg', 'std_dagmm', 'krum']
         )
-        controller.add_grad_transform(toggler)
+        controller.add_update_transform(toggler)
     return network, toggler
 
 

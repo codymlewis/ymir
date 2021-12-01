@@ -1,7 +1,10 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 
+import numpy as np
+
 import chex
+import optax
 import jax
 import jax.numpy as jnp
 
@@ -29,6 +32,9 @@ class TestAggregators(parameterized.TestCase):
     def setUp(self):
         self.params = Params(w=jnp.ones(10), b=jnp.ones(2))
         self.network = Network([Client(batch_size=32, epochs=10) for _ in range(10)])
+        self.opt = optax.sgd(0.1)
+        self.opt_state = self.opt.init(self.params)
+        self.rng = np.random.default_rng()
 
     @parameterized.named_parameters(
         [
@@ -37,7 +43,7 @@ class TestAggregators(parameterized.TestCase):
         ]
     )
     def test_aggregator(self, server_name):
-        server = getattr(ymir.garrison.aggregators, server_name).Server(self.params, self.network)
+        server = getattr(ymir.garrison.aggregators, server_name).Server(self.params, self.opt, self.opt_state, self.network, self.rng)
         rngs = jax.random.split(jax.random.PRNGKey(0))
         all_grads = [
             Params(

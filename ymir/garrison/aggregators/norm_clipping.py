@@ -11,7 +11,8 @@ Static norm clipping aggregator.
 
 
 class Server(server.AggServer):
-    def __init__(self, params, network, C=1.0, M=1.0):
+    def __init__(self, params, opt, opt_state, network, rng, C=1.0, M=1.0):
+        super().__init__(params, opt, opt_state, network, rng)
         self.M = M
         self.C = C
         self.K = len(network)

@@ -4,3 +4,4 @@ chex==0.1.0
 absl-py==1.0.0
 scikit-learn==1.0.1
 numpy==1.21.4
+hdbscan==0.8.27

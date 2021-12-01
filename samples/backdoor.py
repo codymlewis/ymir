@@ -46,7 +46,7 @@ def main(_):
         c = ymir.scout.Collaborator(client_opt, client_opt_state, adv_loss, data[i + num_clients], 1)
         ymir.scout.adversaries.backdoor.convert(c, dataset, "mnist", 0, 1)
         network.add_host("main", c)
-    network.get_controller("main").add_grad_transform(ymir.scout.adversaries.scaler.GradientTransform(network, params, "foolsgold", num_adversaries))
+    network.get_controller("main").add_update_transform(ymir.scout.adversaries.scaler.GradientTransform(network, params, "foolsgold", num_adversaries))
 
     backdoor_eval = dataset.get_iter("test", map=partial(ymir.scout.adversaries.backdoor.mnist_backdoor_map, 0, 1, no_label=True))
 

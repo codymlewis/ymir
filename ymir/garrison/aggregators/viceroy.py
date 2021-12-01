@@ -18,7 +18,8 @@ The viceroy algorithm
 from absl import logging
 
 class Server(server.AggServer):
-    def __init__(self, params, network, tau_0=56, tau_1=5):
+    def __init__(self, params, opt, opt_state, network, rng, tau_0=56, tau_1=5):
+        super().__init__(params, opt, opt_state, network, rng)
         self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
         self.reps = np.array([1.0 for _ in range(len(network))])
         self.round = 1

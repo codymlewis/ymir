@@ -65,7 +65,7 @@ def main(_):
                 max_alpha=1/N if ALG in ['fed_avg', 'std_dagmm'] else 1,
                 sharp=ALG in ['fed_avg', 'std_dagmm', 'krum']
             )
-            controller.add_grad_transform(toggler)
+            controller.add_update_transform(toggler)
 
             evaluator = metrics.measurer(net)
             model = ymir.Coordinate(ALG, opt, opt_state, params, network)

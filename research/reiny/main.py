@@ -88,9 +88,9 @@ def main(_):
                             network.add_host("main", c)
                         controller = network.get_controller("main")
                         if "scaling" in attack:
-                            controller.add_grad_transform(ymir.scout.adversaries.scaler.GradientTransform(network, params, alg, num_adversaries))
+                            controller.add_update_transform(ymir.scout.adversaries.scaler.GradientTransform(network, params, alg, num_adversaries))
                         if "mouther" in attack:
-                            controller.add_grad_transform(ymir.scout.adversaries.mouther.GradientTransform(num_adversaries, victim, num_adversaries))
+                            controller.add_update_transform(ymir.scout.adversaries.mouther.GradientTransform(num_adversaries, victim, num_adversaries))
                         if "onoff" not in attack:
                             toggler = None
                         else:
@@ -99,14 +99,14 @@ def main(_):
                                 max_alpha=1/num_endpoints if alg in ['fed_avg', 'std_dagmm'] else 1,
                                 sharp=alg in ['fed_avg', 'std_dagmm', 'krum']
                             )
-                            controller.add_grad_transform(toggler)
+                            controller.add_update_transform(toggler)
                         if comp_alg == "ae":
                             coder = ymir.mp.compression.ae.Coder(params, num_endpoints)
-                            controller.add_grad_transform(ymir.mp.compression.ae.Encode(coder))
-                            controller.add_grad_transform(ymir.mp.compression.ae.Decode(params, coder))
+                            controller.add_update_transform(ymir.mp.compression.ae.Encode(coder))
+                            controller.add_update_transform(ymir.mp.compression.ae.Decode(params, coder))
                         if comp_alg == "fedzip":
-                            controller.add_grad_transform(ymir.mp.compression.fedzip.encode)
-                            controller.add_grad_transform(ymir.mp.compression.fedzip.Decode(params))
+                            controller.add_update_transform(ymir.mp.compression.fedzip.encode)
+                            controller.add_update_transform(ymir.mp.compression.fedzip.Decode(params))
 
                         model = ymir.Coordinate(alg, opt, opt_state, params, network)
                         meter = utils.Neurometer(

@@ -13,7 +13,8 @@ The FoolsGold algorithm proposed in https://arxiv.org/abs/1808.04866
 """
 
 class Server(server.AggServer):
-    def __init__(self, params, network, kappa=1.0):
+    def __init__(self, params, opt, opt_state, network, rng, kappa=1.0):
+        super().__init__(params, opt, opt_state, network, rng)
         self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
         self.kappa = kappa
 

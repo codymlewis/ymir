@@ -82,15 +82,15 @@ def predict(params, net, gmm, X):
 
 
 class Server(server.AggServer):
-    def __init__(self, params, network):
+    def __init__(self, params, opt, opt_state, network, rng):
+        super().__init__(params, opt, opt_state, network, rng)
         self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in network.clients])
-        self.network = network
         x = jnp.array([jax.flatten_util.ravel_pytree(params)[0]])
         self.da = hk.without_apply_rng(hk.transform(lambda x: DA(x[0].shape[0])(x)))
         rng = jax.random.PRNGKey(42)
-        self.params = self.da.init(rng, x)
+        self.da_params = self.da.init(rng, x)
         opt = optax.adamw(0.001, weight_decay=0.0001)
-        self.opt_state = opt.init(self.params)
+        self.da_opt_state = opt.init(self.da_params)
         self.da_update = da_update(opt, loss(self.da))
 
         self.gmm = mixture.GaussianMixture(4, random_state=0, warm_start=True)
@@ -98,8 +98,8 @@ class Server(server.AggServer):
     def update(self, all_grads):
         self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in self.network.clients])
         grads = jnp.array([jax.flatten_util.ravel_pytree(g)[0].tolist() for g in all_grads])
-        self.params, self.opt_state = self.da_update(self.params, self.opt_state, grads)
-        enc, dec = self.da.apply(self.params, grads)
+        self.da_params, self.da_opt_state = self.da_update(self.da_params, self.da_opt_state, grads)
+        enc, dec = self.da.apply(self.da_params, grads)
         z = jnp.array([[
             jnp.squeeze(e),
             relative_euclidean_distance(x, d),
@@ -110,7 +110,7 @@ class Server(server.AggServer):
 
     def scale(self, all_grads):
         grads = jnp.array([jax.flatten_util.ravel_pytree(g)[0].tolist() for g in all_grads])
-        energies = predict(self.params, self.da, self.gmm, grads)
+        energies = predict(self.da_params, self.da, self.gmm, grads)
         std = jnp.std(energies)
         avg = jnp.mean(energies)
         mask = jnp.where((energies >= avg - std) * (energies <= avg + std), 1, 0)

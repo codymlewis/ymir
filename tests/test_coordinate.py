@@ -27,16 +27,12 @@ class TestCoordinateFunctions(absltest.TestCase):
     def test_member_variables(self):
         self.assertIsInstance(self.model.server, ymir.garrison.aggregators.fed_avg.Server)
         self.assertEqual(self.model.params, self.params)
-        self.assertEqual(self.model.opt_state, self.opt_state)
-        self.assertTrue(callable(self.model.server_update))
         self.assertEqual(self.model.network, self.network)
         self.assertEqual(len(self.model.network), 10)
-        self.assertIsInstance(self.model.rng, np.random.Generator)
 
     def test_step(self):
         alpha, all_grads = self.model.step()
         chex.assert_tree_no_nones(alpha)
-        self.params, self.opt_state = self.model.server_update(self.params, self.opt_state, ymir.garrison.sum_grads(all_grads))
         chex.assert_trees_all_close(self.model.params, self.params)
 
 

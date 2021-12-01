@@ -19,7 +19,7 @@ class Controller:
         self.switches = []
         self.C = C
         self.K = 0
-        self.grad_tranform_chain = []
+        self.update_transform_chain = []
 
     def __len__(self):
         return len(self.clients) + sum([len(s) for s in self.switches])
@@ -33,15 +33,15 @@ class Controller:
         """Connect another controller to this controller"""
         self.switches.append(switch)
     
-    def add_grad_transform(self, grad_transform):
+    def add_update_transform(self, update_transform):
         """Add a function to process"""
-        self.grad_tranform_chain.append(grad_transform)
+        self.update_transform_chain.append(update_transform)
 
-    def __call__(self, params, rng=np.random.default_rng()):
+    def __call__(self, params, rng=np.random.default_rng(), return_weights=False):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        all_grads = []
+        all_updates = []
         for switch in self.switches:
-            all_grads.extend(switch(params))
+            all_updates.extend(switch(params, rng, return_weights))
         idx = rng.choice(self.K, size=int(self.C * self.K), replace=False)
         for i in idx:
             p = params
@@ -50,8 +50,8 @@ class Controller:
                 grads, self.clients[i].opt_state, updates = self.clients[i].update(p, self.clients[i].opt_state, *next(self.clients[i].data))
                 p = optax.apply_updates(p, updates)
                 sum_grads = grads if sum_grads is None else ymirlib.tree_add(sum_grads, grads)
-            all_grads.append(sum_grads)
-        return ymirlib.chain(self.grad_tranform_chain, all_grads)
+            all_updates.append(p if return_weights else sum_grads)
+        return ymirlib.chain(self.update_transform_chain, all_updates)
 
 
 class Network:
@@ -84,6 +84,6 @@ class Network:
         """Connect two controllers in this network"""
         self.controllers[from_con].add_switch(self.controllers[to_con])
 
-    def __call__(self, params, rng=np.random.default_rng()):
+    def __call__(self, params, rng=np.random.default_rng(), return_weights=False):
         """Perform an update step across the network and return the respective gradients"""
-        return self.controllers[self.server_name](params, rng)
+        return self.controllers[self.server_name](params, rng, return_weights)

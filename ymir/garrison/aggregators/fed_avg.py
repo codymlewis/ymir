@@ -11,9 +11,9 @@ Basic federated averaging proposed in https://arxiv.org/abs/1602.05629
 
 
 class Server(server.AggServer):
-    def __init__(self, params, network):
-        self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in network.clients])
-        self.network = network
+    def __init__(self, params, opt, opt_state, network, rng):
+        super().__init__(params, opt, opt_state, network, rng)
+        self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in network.clients])\
     
     def update(self, all_grads):
         self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in self.network.clients])

@@ -3,6 +3,7 @@ Export the various aggregation algorithms
 """
 
 from . import fed_avg
+from . import flguard
 from . import foolsgold
 from . import krum
 from . import norm_clipping
