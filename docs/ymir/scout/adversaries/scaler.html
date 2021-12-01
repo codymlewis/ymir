@@ -75,21 +75,21 @@
                 
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">ymir</span> <span class="kn">import</span> <span class="n">garrison</span>
+            <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">ymir</span> <span class="kn">import</span> <span class="n">garrison</span>
 
 <span class="kn">import</span> <span class="nn">ymirlib</span>
-
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 
 <span class="k">class</span> <span class="nc">GradientTransform</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Network controller that scales adversaries&#39; gradients by the inverse of aggregation algorithm</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span> <span class="o">=</span> <span class="n">num_adversaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="o">.</span><span class="n">aggregators</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="o">.</span><span class="n">aggregators</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update each connected client and return the generated gradients. Recursively call in connected controllers&quot;&quot;&quot;</span>
@@ -120,10 +120,10 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Network controller that scales adversaries&#39; gradients by the inverse of aggregation algorithm</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span> <span class="o">=</span> <span class="n">num_adversaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="o">.</span><span class="n">aggregators</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="o">.</span><span class="n">aggregators</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update each connected client and return the generated gradients. Recursively call in connected controllers&quot;&quot;&quot;</span>
@@ -146,15 +146,24 @@
                                         <div class="attr function"><a class="headerlink" href="#GradientTransform.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">GradientTransform</span><span class="signature">(network, params, alg, num_adversaries)</span>
+            <span class="name">GradientTransform</span><span class="signature">(
+    params,
+    opt,
+    opt_state,
+    network,
+    alg,
+    num_adversaries,
+    rng=Generator(PCG64) at 0x7FE0E4E29660,
+    **kwargs
+)</span>
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span> <span class="o">=</span> <span class="n">num_adversaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="o">.</span><span class="n">aggregators</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="o">.</span><span class="n">aggregators</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 
         </details>
