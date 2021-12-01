@@ -94,9 +94,9 @@
 
 
 <span class="k">class</span> <span class="nc">Server</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">AggServer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>\
     
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
@@ -120,9 +120,9 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Server</span><span class="p">(</span><span class="n">server</span><span class="o">.</span><span class="n">AggServer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>\
     
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
@@ -142,14 +142,15 @@ inheritance.</p>
                                         <div class="attr function"><a class="headerlink" href="#Server.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">Server</span><span class="signature">(params, network)</span>
+            <span class="name">Server</span><span class="signature">(params, opt, opt_state, network, rng)</span>
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>\
+    
 </pre></div>
 
         </details>
@@ -194,6 +195,15 @@ inheritance.</p>
 
     
 
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="server.html#AggServer">ymir.garrison.aggregators.server.AggServer</a></dt>
+                                <dd id="Server.step" class="function"><a href="server.html#AggServer.step">step</a></dd>
+
+            </div>
+                                </dl>
                             </div>
                 </section>
     </main>

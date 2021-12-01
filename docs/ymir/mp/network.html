@@ -60,7 +60,7 @@
                                 <a class="function" href="#Controller.add_switch">add_switch</a>
                         </li>
                         <li>
-                                <a class="function" href="#Controller.add_grad_transform">add_grad_transform</a>
+                                <a class="function" href="#Controller.add_update_transform">add_update_transform</a>
                         </li>
                 </ul>
 
@@ -126,7 +126,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">switches</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grad_tranform_chain</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">])</span>
@@ -140,15 +140,15 @@
         <span class="sd">&quot;&quot;&quot;Connect another controller to this controller&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">switch</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">add_grad_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad_transform</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add_update_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_transform</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a function to process&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grad_tranform_chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grad_transform</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">update_transform</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">return_weights</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update each connected client and return the generated gradients. Recursively call in connected controllers&quot;&quot;&quot;</span>
-        <span class="n">all_grads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">all_updates</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">:</span>
-            <span class="n">all_grads</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">switch</span><span class="p">(</span><span class="n">params</span><span class="p">))</span>
+            <span class="n">all_updates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">switch</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">))</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">idx</span><span class="p">:</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">params</span>
@@ -157,8 +157,8 @@
                 <span class="n">grads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">opt_state</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
                 <span class="n">p</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
                 <span class="n">sum_grads</span> <span class="o">=</span> <span class="n">grads</span> <span class="k">if</span> <span class="n">sum_grads</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_add</span><span class="p">(</span><span class="n">sum_grads</span><span class="p">,</span> <span class="n">grads</span><span class="p">)</span>
-            <span class="n">all_grads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sum_grads</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grad_tranform_chain</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">)</span>
+            <span class="n">all_updates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span> <span class="k">if</span> <span class="n">return_weights</span> <span class="k">else</span> <span class="n">sum_grads</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span><span class="p">,</span> <span class="n">all_updates</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">Network</span><span class="p">:</span>
@@ -191,9 +191,9 @@
         <span class="sd">&quot;&quot;&quot;Connect two controllers in this network&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">from_con</span><span class="p">]</span><span class="o">.</span><span class="n">add_switch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">to_con</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">return_weights</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform an update step across the network and return the respective gradients&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">](</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">](</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -221,7 +221,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">switches</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grad_tranform_chain</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">])</span>
@@ -235,15 +235,15 @@
         <span class="sd">&quot;&quot;&quot;Connect another controller to this controller&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">switch</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">add_grad_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad_transform</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add_update_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_transform</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a function to process&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grad_tranform_chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grad_transform</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">update_transform</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">return_weights</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update each connected client and return the generated gradients. Recursively call in connected controllers&quot;&quot;&quot;</span>
-        <span class="n">all_grads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">all_updates</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">:</span>
-            <span class="n">all_grads</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">switch</span><span class="p">(</span><span class="n">params</span><span class="p">))</span>
+            <span class="n">all_updates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">switch</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">))</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">idx</span><span class="p">:</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">params</span>
@@ -252,8 +252,8 @@
                 <span class="n">grads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">opt_state</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
                 <span class="n">p</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
                 <span class="n">sum_grads</span> <span class="o">=</span> <span class="n">grads</span> <span class="k">if</span> <span class="n">sum_grads</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_add</span><span class="p">(</span><span class="n">sum_grads</span><span class="p">,</span> <span class="n">grads</span><span class="p">)</span>
-            <span class="n">all_grads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sum_grads</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grad_tranform_chain</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">)</span>
+            <span class="n">all_updates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span> <span class="k">if</span> <span class="n">return_weights</span> <span class="k">else</span> <span class="n">sum_grads</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span><span class="p">,</span> <span class="n">all_updates</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -278,7 +278,7 @@ up the chain.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">switches</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grad_tranform_chain</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span> <span class="o">=</span> <span class="p">[]</span>
 </pre></div>
 
         </details>
@@ -331,19 +331,19 @@ up the chain.</p>
 
 
                             </div>
-                            <div id="Controller.add_grad_transform" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#Controller.add_grad_transform">#&nbsp;&nbsp</a>
+                            <div id="Controller.add_update_transform" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Controller.add_update_transform">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">add_grad_transform</span><span class="signature">(self, grad_transform)</span>:
+            <span class="name">add_update_transform</span><span class="signature">(self, update_transform)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">add_grad_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grad_transform</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">add_update_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_transform</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add a function to process&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grad_tranform_chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grad_transform</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">update_transform</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -395,9 +395,9 @@ up the chain.</p>
         <span class="sd">&quot;&quot;&quot;Connect two controllers in this network&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">from_con</span><span class="p">]</span><span class="o">.</span><span class="n">add_switch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">to_con</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">return_weights</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform an update step across the network and return the respective gradients&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">](</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">](</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">)</span>
 </pre></div>
 
         </details>

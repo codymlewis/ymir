@@ -67,6 +67,12 @@
                                 <a class="function" href="#Coordinate.__init__">Coordinate</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Coordinate.params">params</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Coordinate.network">network</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Coordinate.step">step</a>
                         </li>
                 </ul>
@@ -117,26 +123,19 @@ into three modules:</p>
     <span class="sd">&quot;&quot;&quot;Class for the high-level API for federated learning&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Construct the FL management object&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="o">.</span><span class="n">aggregators</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt_state</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server_update</span> <span class="o">=</span> <span class="n">garrison</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="o">.</span><span class="n">aggregators</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">params</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">network</span>
     
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform a single round of federated learning&quot;&quot;&quot;</span>
-        <span class="c1"># Client side updates</span>
-        <span class="n">all_grads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
-
-        <span class="c1"># Server side aggregation scaling</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
-        <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
-        <span class="n">all_grads</span> <span class="o">=</span> <span class="n">garrison</span><span class="o">.</span><span class="n">apply_scale</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">)</span>
-
-        <span class="c1"># Server side update</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span><span class="p">,</span> <span class="n">garrison</span><span class="o">.</span><span class="n">sum_grads</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">all_grads</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 </pre></div>
 
         </details>
@@ -157,26 +156,19 @@ into three modules:</p>
     <span class="sd">&quot;&quot;&quot;Class for the high-level API for federated learning&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Construct the FL management object&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="o">.</span><span class="n">aggregators</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt_state</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server_update</span> <span class="o">=</span> <span class="n">garrison</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="o">.</span><span class="n">aggregators</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">params</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">network</span>
     
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform a single round of federated learning&quot;&quot;&quot;</span>
-        <span class="c1"># Client side updates</span>
-        <span class="n">all_grads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
-
-        <span class="c1"># Server side aggregation scaling</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
-        <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
-        <span class="n">all_grads</span> <span class="o">=</span> <span class="n">garrison</span><span class="o">.</span><span class="n">apply_scale</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">)</span>
-
-        <span class="c1"># Server side update</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span><span class="p">,</span> <span class="n">garrison</span><span class="o">.</span><span class="n">sum_grads</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">all_grads</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 </pre></div>
 
         </details>
@@ -195,7 +187,7 @@ into three modules:</p>
     opt_state,
     params,
     network,
-    rng=Generator(PCG64) at 0x7F7052CBDAC0,
+    rng=Generator(PCG64) at 0x7F00457C93C0,
     **kwargs
 )</span>
     </div>
@@ -204,12 +196,7 @@ into three modules:</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Construct the FL management object&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="o">.</span><span class="n">aggregators</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt_state</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server_update</span> <span class="o">=</span> <span class="n">garrison</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="o">.</span><span class="n">aggregators</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -217,6 +204,24 @@ into three modules:</p>
             <div class="docstring"><p>Construct the FL management object</p>
 </div>
 
+
+                            </div>
+                            <div id="Coordinate.params" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Coordinate.params">#&nbsp;&nbsp</a>
+
+        <span class="name">params</span>
+    </div>
+
+    
+
+                            </div>
+                            <div id="Coordinate.network" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Coordinate.network">#&nbsp;&nbsp</a>
+
+        <span class="name">network</span>
+    </div>
+
+    
 
                             </div>
                             <div id="Coordinate.step" class="classattr">
@@ -231,17 +236,7 @@ into three modules:</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform a single round of federated learning&quot;&quot;&quot;</span>
-        <span class="c1"># Client side updates</span>
-        <span class="n">all_grads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
-
-        <span class="c1"># Server side aggregation scaling</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
-        <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
-        <span class="n">all_grads</span> <span class="o">=</span> <span class="n">garrison</span><span class="o">.</span><span class="n">apply_scale</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">)</span>
-
-        <span class="c1"># Server side update</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span><span class="p">,</span> <span class="n">garrison</span><span class="o">.</span><span class="n">sum_grads</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">all_grads</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 </pre></div>
 
         </details>
