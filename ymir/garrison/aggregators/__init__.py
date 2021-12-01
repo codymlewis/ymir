@@ -2,6 +2,7 @@
 Export the various aggregation algorithms
 """
 
+from . import contra
 from . import fed_avg
 from . import flguard
 from . import foolsgold
