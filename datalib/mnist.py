@@ -29,3 +29,4 @@ def download(path):
     logging.info(f"Done. Saving as a compressed file to {fn}")
     os.makedirs(dir, exist_ok=True)
     np.savez_compressed(fn, X=X, y=y, train=(np.arange(len(y)) < 60_000))
+    logging.info("Finished dataset download.")
