@@ -1,7 +1,10 @@
 import sys
+import os
 from functools import partial
 import pandas as pd
+
 from absl import app
+from absl import flags
 
 import numpy as np
 import jax
@@ -16,92 +19,106 @@ import ymir
 
 import metrics
 
+FLAGS = flags.FLAGS
+
+flags.DEFINE_string("alg", "fed_avg", "Algorithm to use")
+flags.DEFINE_string("attack", "onoff labelflip", "Attack to use")
+flags.DEFINE_string("dataset", "mnist", "Dataset to use")
+flags.DEFINE_float("aper", 0.1, "Percentage of adversaries in the network")
+
 
 def main(_):
     adv_percent = [0.1, 0.3, 0.5, 0.8]
-    final_results = pd.DataFrame(columns=["algorithm", "attack", "dataset"] + [f"{p} mean asr" for p in adv_percent] + [f"{p} std asr" for p in adv_percent])
+    if os.path.exists("results.pkl"):
+        final_results = pd.read_pickle("results.pkl")
+    else:
+        final_results = pd.DataFrame(columns=["algorithm", "attack", "dataset"] + [f"{p} mean asr" for p in adv_percent] + [f"{p} std asr" for p in adv_percent])
     VICTIM = 0
     T = 100
+    ALG = FLAGS.alg
+    ADV = FLAGS.attack
+    DATASET = FLAGS.dataset
+    aper = FLAGS.aper
     print("Starting up...")
-    for DATASET in ['mnist', 'kddcup99', 'cifar10']:
-        DS = ymir.mp.datasets.load(DATASET)
-        for ALG in ["foolsgold", "krum", "std_dagmm", "viceroy"]:
-            for ADV in ["onoff labelflip", "scaling backdoor", "onoff freerider", "bad mouther", "good mouther"]:
-                if DATASET == 'kddcup99':
-                    ATTACK_FROM, ATTACK_TO = 0, 11
-                else:
-                    ATTACK_FROM, ATTACK_TO = 0, 1
-                cur = {"algorithm": ALG, "attack": ADV, "dataset": DATASET}
-                for acal in adv_percent:
-                    rng = np.random.default_rng(0)
-                    print(f"Running {ALG} on {DATASET} with {acal:.0%} {ADV} adversaries")
-                    if DATASET == 'cifar10':
-                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.ConvLeNet(DS.classes)(x)))
-                    else:
-                        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(DS.classes)(x)))
+    DS = ymir.mp.datasets.load(DATASET)
+    if DATASET == 'kddcup99':
+        ATTACK_FROM, ATTACK_TO = 0, 11
+    else:
+        ATTACK_FROM, ATTACK_TO = 0, 1
+    cur = {"algorithm": ALG, "attack": ADV, "dataset": DATASET}
+    rng = np.random.default_rng(0)
+    print(f"Running {ALG} on {DATASET} with {aper:.0%} {ADV} adversaries")
+    if DATASET == 'cifar10':
+        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.ConvLeNet(DS.classes)(x)))
+    else:
+        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(DS.classes)(x)))
 
-                    train_eval = DS.get_iter("train", 10_000, rng=rng)
-                    test_eval = DS.get_iter("test", rng=rng)
-                    opt = optax.sgd(0.01)
-                    params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
-                    opt_state = opt.init(params)
-                    loss = ymir.mp.losses.cross_entropy_loss(net, DS.classes)
+    train_eval = DS.get_iter("train", 10_000, rng=rng)
+    test_eval = DS.get_iter("test", rng=rng)
+    opt = optax.sgd(0.01)
+    params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
+    opt_state = opt.init(params)
+    loss = ymir.mp.losses.cross_entropy_loss(net, DS.classes)
 
-                    A = int(T * acal)
-                    N = T - A
-                    batch_sizes = [8 for _ in range(N + A)]
-                    if DATASET != 'kddcup99':
-                        data = DS.fed_split(batch_sizes, partial(ymir.mp.distributions.lda, alpha=0.5 if ALG in ['contra', 'foolsgold', 'viceroy'] else 1000), rng)
-                    else:
-                        data = DS.fed_split(
-                            batch_sizes,
-                            partial(ymir.mp.distributions.assign_classes, classes=[[(i + 1 if i >= 11 else i) % DS.classes, 11] for i in range(T)]),
-                            rng
-                        )
+    A = int(T * aper)
+    N = T - A
+    batch_sizes = [8 for _ in range(N + A)]
+    if DATASET != 'kddcup99':
+        data = DS.fed_split(batch_sizes, partial(ymir.mp.distributions.lda, alpha=0.5 if ALG in ['contra', 'foolsgold', 'viceroy'] else 1000), rng)
+    else:
+        data = DS.fed_split(
+            batch_sizes,
+            partial(ymir.mp.distributions.assign_classes, classes=[[(i + 1 if i >= 11 else i) % DS.classes, 11] for i in range(T)]),
+            rng
+        )
 
-                    network, toggler = create_network(N, A, ADV, params, opt, opt_state, loss, data, batch_sizes, DS, DATASET, ALG, ATTACK_FROM, ATTACK_TO, VICTIM)
+    network, toggler = create_network(N, A, ADV, params, opt, opt_state, loss, data, batch_sizes, DS, DATASET, ALG, ATTACK_FROM, ATTACK_TO, VICTIM)
 
-                    evaluator = metrics.measurer(net)
+    evaluator = metrics.measurer(net)
 
-                    if "backdoor" in ADV:
-                        test_eval = DS.get_iter(
-                            "test",
-                            map=partial({
-                                "mnist": ymir.scout.adversaries.backdoor.mnist_backdoor_map,
-                                "cifar10": ymir.scout.adversaries.backdoor.cifar10_backdoor_map,
-                                "kddcup99": ymir.scout.adversaries.backdoor.kddcup99_backdoor_map
-                            }[DATASET], ATTACK_FROM, ATTACK_TO, no_label=True)
-                        )
+    if "backdoor" in ADV:
+        test_eval = DS.get_iter(
+            "test",
+            map=partial({
+                "mnist": ymir.scout.adversaries.backdoor.mnist_backdoor_map,
+                "cifar10": ymir.scout.adversaries.backdoor.cifar10_backdoor_map,
+                "kddcup99": ymir.scout.adversaries.backdoor.kddcup99_backdoor_map
+            }[DATASET], ATTACK_FROM, ATTACK_TO, no_label=True)
+        )
 
-                    if ALG == "krum":
-                        model = ymir.Coordinate(ALG, opt, opt_state, params, network, rng, clip=A)
-                    elif ALG == "contra":
-                        model = ymir.Coordinate(ALG, opt, opt_state, params, network, rng, k=N)
-                    else:
-                        model = ymir.Coordinate(ALG, opt, opt_state, params, network, rng)
+    if ALG == "krum":
+        model = ymir.Coordinate(ALG, opt, opt_state, params, network, rng, clip=A)
+    elif ALG == "contra":
+        model = ymir.Coordinate(ALG, opt, opt_state, params, network, rng, k=N)
+    else:
+        model = ymir.Coordinate(ALG, opt, opt_state, params, network, rng)
 
-                    results = metrics.create_recorder(['accuracy', 'asr'], train=True, test=True, add_evals=['attacking'])
-                    results["asr"] = []
+    results = metrics.create_recorder(['accuracy', 'asr'], train=True, test=True, add_evals=['attacking'])
+    results["asr"] = []
 
-                    # Train/eval loop.
-                    TOTAL_ROUNDS = 5000
-                    for round in (pbar := trange(TOTAL_ROUNDS)):
-                        alpha, all_grads = model.step()
-                        if round % 1 == 0:
-                            attacking = toggler.attacking if toggler else True
-                            record_metrics(results, evaluator, alpha, all_grads, model.params, train_eval, test_eval, ADV, ALG, A, attacking, ATTACK_FROM, ATTACK_TO, VICTIM)
-                            pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}", 'ASR': f"{results['asr'][-1]:.3f}", 'ATT': attacking})
-                    results = metrics.finalize(results)
-                    cur[f"{acal} mean asr"] = results['asr'].mean()
-                    cur[f"{acal} std asr"] = results['asr'].std()
-                    print()
-                    print("=" * 150)
-                    print(f"Server type {ALG}, Dataset {DATASET}, {A / (A + N):.2%} {ADV} adversaries, final accuracy: {results['test accuracy'][-1]:.3%}")
-                    print(metrics.tabulate(results, TOTAL_ROUNDS))
-                    print("=" * 150)
-                    print()
-                final_results = final_results.append(cur, ignore_index=True)
-    write_results(final_results, "results.tex")
+    # Train/eval loop.
+    TOTAL_ROUNDS = 5000
+    for round in (pbar := trange(TOTAL_ROUNDS)):
+        alpha, all_grads = model.step()
+        if round % 1 == 0:
+            attacking = toggler.attacking if toggler else True
+            record_metrics(results, evaluator, alpha, all_grads, model.params, train_eval, test_eval, ADV, ALG, A, attacking, ATTACK_FROM, ATTACK_TO, VICTIM)
+            pbar.set_postfix({'ACC': f"{results['test accuracy'][-1]:.3f}", 'ASR': f"{results['asr'][-1]:.3f}", 'ATT': attacking})
+    results = metrics.finalize(results)
+    cur[f"{aper} mean asr"] = results['asr'].mean()
+    cur[f"{aper} std asr"] = results['asr'].std()
+    print()
+    print("=" * 150)
+    print(f"Server type {ALG}, Dataset {DATASET}, {A / (A + N):.2%} {ADV} adversaries, final accuracy: {results['test accuracy'][-1]:.3%}")
+    print(metrics.tabulate(results, TOTAL_ROUNDS))
+    print("=" * 150)
+    print()
+    idx = (final_results['algorithm'] == ALG) & (final_results['attack'] == ADV) & (final_results['dataset'] == DATASET)
+    if idx.any():
+        final_results.loc[idx, cur.keys()] = cur.values()
+    else:
+        final_results = final_results.append(cur, ignore_index=True)
+    write_results(final_results, "results.pkl")
 
 
 @jax.jit
@@ -114,16 +131,15 @@ def unzero(x):
 
 
 def write_results(results, fn):
-    with open(fn, 'wb') as f:
-        f.write(results)
+    results.to_pickle(fn)
     print(f"Written results to {fn}")
 
 
 def create_network(num_honest, num_adv, attack, params, opt, opt_state, loss, data, batch_sizes, ds, dataset, alg, att_from, att_to, victim):
     if alg == "krum":
-        server_kwargs = {"clip": num_adv, "timer": True}
+        server_kwargs = {"clip": num_adv}
     elif alg == "contra":
-        server_kwargs = {"k": num_honest, "timer": True}
+        server_kwargs = {"k": num_honest}
     else:
         server_kwargs = {}
     network = ymir.mp.network.Network()
@@ -149,6 +165,8 @@ def create_network(num_honest, num_adv, attack, params, opt, opt_state, loss, da
     if "onoff" not in attack:
         toggler = None
     else:
+        if len(server_kwargs) > 0:
+            server_kwargs["timer"] = True
         toggler = ymir.scout.adversaries.onoff.GradientTransform(
             params, opt, opt_state, network, alg, controller.clients[-num_adv:],
             max_alpha=1/num_honest if alg in ['fed_avg', 'std_dagmm'] else 1,

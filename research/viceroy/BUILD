@@ -12,3 +12,9 @@ py_binary(
     srcs = ["grid_search.py", "metrics.py", "datasets.py"],
     main = "grid_search.py",
 )
+
+
+sh_binary(
+    name = "experiments",
+    srcs = ["experiments.sh"],
+)
