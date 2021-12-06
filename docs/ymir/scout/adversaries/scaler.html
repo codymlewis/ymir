@@ -48,6 +48,12 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
+                    <a class="function" href="#convert">convert</a>
+            </li>
+            <li>
+                    <a class="function" href="#update">update</a>
+            </li>
+            <li>
                     <a class="class" href="#GradientTransform">GradientTransform</a>
                             <ul class="memberlist">
                         <li>
@@ -82,6 +88,18 @@
 <span class="kn">import</span> <span class="nn">ymirlib</span>
 
 
+<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">num_endpoints</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A simple naive scaled model replacement attack.&quot;&quot;&quot;</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">quantum_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">update</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">update</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">num_endpoints</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">quantum_update</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">grads</span><span class="p">):</span>
+    <span class="n">grads</span> <span class="o">=</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_mul</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+    <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span>
+
+
 <span class="k">class</span> <span class="nc">GradientTransform</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Network controller that scales adversaries&#39; gradients by the inverse of aggregation algorithm</span>
@@ -105,6 +123,50 @@
         </details>
 
             </section>
+                <section id="convert">
+                            <div class="attr function"><a class="headerlink" href="#convert">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">convert</span><span class="signature">(client, num_endpoints)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">num_endpoints</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A simple naive scaled model replacement attack.&quot;&quot;&quot;</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">quantum_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">update</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">update</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">num_endpoints</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">quantum_update</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>A simple naive scaled model replacement attack.</p>
+</div>
+
+
+                </section>
+                <section id="update">
+                            <div class="attr function"><a class="headerlink" href="#update">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">update</span><span class="signature">(opt, scale, params, opt_state, grads)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">grads</span><span class="p">):</span>
+    <span class="n">grads</span> <span class="o">=</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_mul</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+    <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span>
+</pre></div>
+
+        </details>
+
+    
+
+                </section>
                 <section id="GradientTransform">
                                 <div class="attr class">
         <a class="headerlink" href="#GradientTransform">#&nbsp;&nbsp</a>
@@ -153,7 +215,7 @@
     network,
     alg,
     num_adversaries,
-    rng=Generator(PCG64) at 0x7FF5A2599660,
+    rng=Generator(PCG64) at 0x7F3E3228D660,
     **kwargs
 )</span>
     </div>
