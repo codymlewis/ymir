@@ -88,13 +88,13 @@
 <p>We use the term <code>Captain</code> to refer to the global server. It handles the collection of weights/gradients from
 each Collaborator and the computation of the global update.</p>
 
-<p>The following snippet demonstrates a generic example using the aggregators in module
-~~~python
-server = <a href="#Captain">ymir.garrison.Captain</a>(params, opt, opt_state, network)</p>
+<p>The following snippet demonstrates a generic example using the aggregators in module</p>
 
-<p>for round in range(N):
-    server.step()
-~~~</p>
+<div class="codehilite"><pre><span></span><code><span class="n">server</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">garrison</span><span class="o">.</span><span class="n">CAPTAIN</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="nb">round</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">server</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</code></pre></div>
 </div>
 
                         <details>
