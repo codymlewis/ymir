@@ -1,5 +1,5 @@
 """
-The CONTRA algorithm proposed in https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf
+The CONTRA algorithm proposed in `https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf <https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf>`_
 """
 
 import numpy as np

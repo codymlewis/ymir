@@ -1,5 +1,5 @@
 """
-Basic federated averaging proposed in https://arxiv.org/abs/1602.05629
+Basic federated averaging proposed in `https://arxiv.org/abs/1602.05629 <https://arxiv.org/abs/1602.05629>`_
 """
 
 import jax

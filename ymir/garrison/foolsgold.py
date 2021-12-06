@@ -1,5 +1,5 @@
 """
-The FoolsGold algorithm proposed in https://arxiv.org/abs/1808.04866
+The FoolsGold algorithm proposed in `https://arxiv.org/abs/1808.04866 <https://arxiv.org/abs/1808.04866>`_
 """
 
 import numpy as np

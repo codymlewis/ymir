@@ -1,5 +1,5 @@
 """
-The FLGuard algorithm proposed in https://arxiv.org/abs/2101.02281
+The FLGuard algorithm proposed in `https://arxiv.org/abs/2101.02281 <https://arxiv.org/abs/2101.02281>`_
 """
 
 import numpy as np

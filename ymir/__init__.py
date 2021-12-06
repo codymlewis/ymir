@@ -1,4 +1,6 @@
-
+"""
+.. include:: README.md
+"""
 
 import numpy as np
 
