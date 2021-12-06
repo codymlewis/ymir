@@ -31,7 +31,8 @@ jobs:
           pdoc --math -d restructuredtext -o docs ymir ymirlib
           git config --global user.name 'Cody Lewis'
           git config --global user.email 'codymlewis@users.noreply.github.com'
-          git commit -am "Update docs"
+          git add docs
+          git commit -m "Update docs"
           git push
   test:
     # The type of runner that the job will run on
