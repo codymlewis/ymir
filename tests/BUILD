@@ -12,19 +12,6 @@ py_test(
 )
 
 py_test(
-    name = "coordinate",
-    srcs = ['test_coordinate.py'],
-    deps = [
-        '//:ymir',
-        requirement('chex'),
-        requirement('absl-py'),
-        requirement('dm-haiku'),
-        requirement('optax'),
-    ],
-    main = "test_coordinate.py"
-)
-
-py_test(
     name = "collaborator",
     srcs = ['test_collaborator.py'],
     deps = [
