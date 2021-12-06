@@ -17,7 +17,7 @@ class GradientTransform:
         self.sharp = sharp
         self.beta = beta
         self.gamma = gamma
-        self.server = getattr(garrison.aggregators, self.alg).Server(params, opt, opt_state, network, rng, **kwargs)
+        self.server = getattr(garrison, self.alg).Captain(params, opt, opt_state, network, rng, **kwargs)
         self.adversaries = adversaries
         self.num_adv = len(adversaries)
         self.timer_mode = timer

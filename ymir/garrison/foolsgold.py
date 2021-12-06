@@ -1,19 +1,17 @@
-from dataclasses import dataclass
+"""
+The FoolsGold algorithm proposed in https://arxiv.org/abs/1808.04866
+"""
 
 import numpy as np
 import sklearn.metrics.pairwise as smp
 import jax
 import jax.numpy as jnp
 
-from . import server
+from . import captain
 
 
-"""
-The FoolsGold algorithm proposed in https://arxiv.org/abs/1808.04866
-"""
-
-class Server(server.AggServer):
-    def __init__(self, params, opt, opt_state, network, rng, kappa=1.0):
+class Captain(captain.ScaleCaptain):
+    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), kappa=1.0):
         super().__init__(params, opt, opt_state, network, rng)
         self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
         self.kappa = kappa

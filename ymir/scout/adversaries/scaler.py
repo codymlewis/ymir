@@ -24,7 +24,7 @@ class GradientTransform:
     def __init__(self, params, opt, opt_state, network, alg, num_adversaries, rng = np.random.default_rng(), **kwargs):
         self.num_adv = num_adversaries
         self.alg = alg
-        self.server = getattr(garrison.aggregators, self.alg).Server(params, opt, opt_state, network, rng, **kwargs)
+        self.server = getattr(garrison, self.alg).Captain(params, opt, opt_state, network, rng, **kwargs)
 
     def __call__(self, all_grads):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""

@@ -30,7 +30,7 @@ class Params:
 
 class TestAggregators(parameterized.TestCase):
     def setUp(self):
-        self.params = Params(w=jnp.ones(10), b=jnp.ones(2))
+        self.params = Params(w=jnp.ones(10, dtype=jnp.float32), b=jnp.ones(2, dtype=jnp.float32))
         self.network = Network([Client(batch_size=32, epochs=10) for _ in range(10)])
         self.opt = optax.sgd(0.1)
         self.opt_state = self.opt.init(self.params)
@@ -39,11 +39,11 @@ class TestAggregators(parameterized.TestCase):
     @parameterized.named_parameters(
         [
             {"testcase_name": f"_{server_name=}", "server_name": server_name}
-            for server_name in ["fed_avg", "foolsgold", "krum", "norm_clipping", "std_dagmm", "viceroy"]
+            for server_name in ["fedavg", "foolsgold", "krum", "norm_clipping", "std_dagmm", "viceroy"]
         ]
     )
-    def test_aggregator(self, server_name):
-        server = getattr(ymir.garrison.aggregators, server_name).Server(self.params, self.opt, self.opt_state, self.network, self.rng)
+    def test_scale_servers(self, server_name):
+        server = getattr(ymir.garrison, server_name).Captain(self.params, self.opt, self.opt_state, self.network, self.rng)
         rngs = jax.random.split(jax.random.PRNGKey(0))
         all_grads = [
             Params(
@@ -60,6 +60,28 @@ class TestAggregators(parameterized.TestCase):
         chex.assert_shape(alpha, (len(self.network.clients),))
         chex.assert_type(alpha, jnp.float32)
 
+    @parameterized.named_parameters(
+        [
+            {"testcase_name": f"_{server_name=}", "server_name": server_name}
+            for server_name in ["flguard"]
+        ]
+    )
+    def test_aggregate_servers(self, server_name):
+        server = getattr(ymir.garrison, server_name).Captain(self.params, self.opt, self.opt_state, self.network, self.rng)
+        rngs = jax.random.split(jax.random.PRNGKey(0))
+        all_weights = [
+            Params(
+                w=jax.random.uniform(rngs[0], (10,), dtype=jnp.float32),
+                b=jax.random.uniform(rngs[1], (2,), dtype=jnp.float32),
+            )
+            for _ in self.network.clients
+        ]
+        update = server.update(all_weights)
+        chex.assert_trees_all_equal_shapes(update, self.params)
+        chex.assert_tree_all_finite(update)
+        chex.assert_trees_all_equal_dtypes(update, self.params)
+
+        
 
 if __name__ == '__main__':
     absltest.main()

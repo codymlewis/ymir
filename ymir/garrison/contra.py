@@ -1,17 +1,17 @@
+"""
+The CONTRA algorithm proposed in https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf
+"""
+
 import numpy as np
 import sklearn.metrics.pairwise as smp
 import jax
 import jax.numpy as jnp
 
-from . import server
+from . import captain
 
 
-"""
-The CONTRA algorithm proposed in https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf
-"""
-
-class Server(server.AggServer):
-    def __init__(self, params, opt, opt_state, network, rng, C=0.1, k=10, delta=0.1, t=0.5):
+class Captain(captain.ScaleCaptain):
+    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), C=0.1, k=10, delta=0.1, t=0.5):
         super().__init__(params, opt, opt_state, network, rng)
         self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
         self.C = C

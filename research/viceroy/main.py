@@ -21,7 +21,7 @@ import metrics
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_string("alg", "fed_avg", "Algorithm to use")
+flags.DEFINE_string("alg", "fedavg", "Algorithm to use")
 flags.DEFINE_string("attack", "onoff labelflip", "Attack to use")
 flags.DEFINE_string("dataset", "mnist", "Dataset to use")
 flags.DEFINE_float("aper", 0.1, "Percentage of adversaries in the network")

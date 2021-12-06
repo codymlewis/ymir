@@ -1,19 +1,18 @@
-import jax
-import jax.numpy as jnp
-import numpy as np
-
-from . import server
-
-
 """
 Basic federated averaging proposed in https://arxiv.org/abs/1602.05629
 """
 
+import jax
+import jax.numpy as jnp
+import numpy as np
 
-class Server(server.AggServer):
-    def __init__(self, params, opt, opt_state, network, rng):
+from . import captain
+
+
+class Captain(captain.ScaleCaptain):
+    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng()):
         super().__init__(params, opt, opt_state, network, rng)
-        self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in network.clients])\
+        self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in network.clients])
     
     def update(self, all_grads):
         self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in self.network.clients])

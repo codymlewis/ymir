@@ -1,3 +1,10 @@
+"""
+There are two generic forms of servers defined here:
+- ScaleCaptain: a server that takes in a collection of gradients and algorithmically scales them
+- AggregateCaptain: a server that takes in a collection of weights and aggregates them into a single weight
+"""
+
+
 from abc import ABC, abstractmethod
 from typing import Iterable
 import numpy as np
@@ -10,11 +17,8 @@ import ymirlib
 
 from ymir.mp.network import Network
 
-"""
-Abstract definition of an aggregation server
-"""
 
-class AggServer(ABC):
+class ScaleCaptain(ABC):
     params: optax.Params
     network: Network
     opt_state: optax.OptState
@@ -39,14 +43,36 @@ class AggServer(ABC):
         # Client side updates
         all_grads = self.network(self.params, self.rng)
 
-        # Server side aggregation scaling
+        # Captain side aggregation scaling
         self.update(all_grads)
         alpha = self.scale(all_grads)
         all_grads = apply_scale(alpha, all_grads)
 
-        # Server side update
+        # Captain side update
         self.params, self.opt_state = self.update_params(self.params, self.opt_state, sum_grads(all_grads))
         return alpha, all_grads
+
+
+class AggregateCaptain(ABC):
+    params: optax.Params
+    network: Network
+    opt_state: optax.OptState
+    rng: np.random.Generator
+
+    def __init__(self, params, opt, opt_state, network, rng):
+        self.params = params
+        self.opt_state = opt_state
+        self.network = network
+        self.rng = rng
+        self.update_params = update(opt)
+
+    @abstractmethod
+    def update(self, all_weights: Iterable):
+        pass
+
+    @abstractmethod
+    def step(self):
+        pass
 
 
 def update(opt):

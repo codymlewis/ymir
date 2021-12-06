@@ -52,7 +52,7 @@ def main(_):
 
     server_opt = optax.sgd(0.1)
     server_opt_state = server_opt.init(params)
-    model = ymir.Coordinate("foolsgold", server_opt, server_opt_state, params, network, rng)
+    model = ymir.garrison.foolsgold.Captain(params, server_opt, server_opt_state, network, rng)
     meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval, 'backdoor': backdoor_eval})
 
     print("Done, beginning training.")

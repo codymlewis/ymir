@@ -1,4 +1,6 @@
-from dataclasses import dataclass
+"""
+The FLGuard algorithm proposed in https://arxiv.org/abs/2101.02281
+"""
 
 import numpy as np
 import sklearn.metrics.pairwise as smp
@@ -7,15 +9,11 @@ import jax.flatten_util
 import jax.numpy as jnp
 import hdbscan
 
-from . import server
+from . import captain
 
 
-"""
-The FLGuard algorithm proposed in https://arxiv.org/abs/2101.02281
-"""
-
-class Server(server.AggServer):
-    def __init__(self, params, opt, opt_state, network, rng, lamb=0.001):
+class Captain(captain.AggregateCaptain):
+    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), lamb=0.001):
         super().__init__(params, opt, opt_state, network, rng)
         self.G_unraveller = jax.flatten_util.ravel_pytree(params)[1]
         self.lamb = lamb  # 0.001 is good for image classification, 0.01 for IDS (according to the paper)
@@ -34,15 +32,10 @@ class Server(server.AggServer):
         sigma = self.lamb / S
         G = G + self.rng.normal(0, sigma, G.shape)
         return self.G_unraveller(G)
-
-    def scale(self, all_grads):
-        pass
-        
     
     def step(self):
         # Client side updates
         all_weights = self.network(self.params, self.rng, return_weights=True)
 
-        # Server side update
+        # Captain side update
         self.params = self.update(all_weights)
-        # return alpha, all_grads

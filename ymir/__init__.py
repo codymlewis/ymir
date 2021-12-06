@@ -1,6 +1,4 @@
-r"""
-.. include:: README.md
-"""
+
 
 import numpy as np
 
@@ -13,7 +11,7 @@ class Coordinate:
     """Class for the high-level API for federated learning"""
     def __init__(self, alg, opt, opt_state, params, network, rng=np.random.default_rng(), **kwargs):
         """Construct the FL management object"""
-        self.server = getattr(garrison.aggregators, alg).Server(params, opt, opt_state, network, rng, **kwargs)
+        self.server = getattr(garrison, alg).Captain(params, opt, opt_state, network, rng, **kwargs)
 
     @property
     def params(self):

@@ -1,22 +1,18 @@
-import sys
-from dataclasses import dataclass
+"""
+STD-DAGMM algorithm proposed in https://arxiv.org/abs/1911.12560 designed to mitigate free-rider attacks
+"""
 
 import jax
-from jax._src.numpy.lax_numpy import expand_dims
 import jax.flatten_util
 import jax.numpy as jnp
 import haiku as hk
 import optax
-import jaxlib
-import numpy as np
 
+import numpy as np
 from sklearn import mixture
 
-from . import server
+from . import captain
 
-"""
-STD-DAGMM algorithm proposed in https://arxiv.org/abs/1911.12560
-"""
 
 # Utility functions/classes
 
@@ -81,8 +77,8 @@ def predict(params, net, gmm, X):
 # Algorithm functions/classes
 
 
-class Server(server.AggServer):
-    def __init__(self, params, opt, opt_state, network, rng):
+class Captain(captain.ScaleCaptain):
+    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng()):
         super().__init__(params, opt, opt_state, network, rng)
         self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in network.clients])
         x = jnp.array([jax.flatten_util.ravel_pytree(params)[0]])

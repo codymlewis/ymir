@@ -1,17 +1,16 @@
-import jax
-import jax.numpy as jnp
-import numpy as np
-
-from . import server
-
-
 """
 Static norm clipping aggregator.
 """
 
+import jax
+import jax.numpy as jnp
+import numpy as np
 
-class Server(server.AggServer):
-    def __init__(self, params, opt, opt_state, network, rng, C=1.0, M=1.0):
+from . import captain
+
+
+class Captain(captain.ScaleCaptain):
+    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), C=1.0, M=1.0):
         super().__init__(params, opt, opt_state, network, rng)
         self.M = M
         self.C = C

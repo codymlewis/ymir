@@ -35,7 +35,7 @@ def main(_):
     for d in data:
         network.add_host("main", ymir.scout.Collaborator(opt, opt_state, loss, d, 10))
 
-    model = ymir.Coordinate("fed_avg", opt, opt_state, params, network)
+    model = ymir.garrison.fedavg.Captain(params, opt, opt_state, network)
     meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval})
 
     print("Done, beginning training.")

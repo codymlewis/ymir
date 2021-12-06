@@ -1,24 +1,21 @@
+"""
+Viceroy algorithm for mitigating the impact of the on-off toggling attack.
+"""
+
 import sys
 from functools import partial
 
 import numpy as np
 import sklearn.metrics.pairwise as smp
-import sklearn.neighbors as skn
 
 import jax
 import jax.numpy as jnp
-import optax
 
-from . import server
+from . import captain
 
 
-"""
-The viceroy algorithm
-"""
-from absl import logging
-
-class Server(server.AggServer):
-    def __init__(self, params, opt, opt_state, network, rng, tau_0=56, tau_1=5):
+class Captain(captain.ScaleCaptain):
+    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), tau_0=56, tau_1=5):
         super().__init__(params, opt, opt_state, network, rng)
         self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
         self.reps = np.array([1.0 for _ in range(len(network))])
@@ -36,6 +33,7 @@ class Server(server.AggServer):
 
     def scale(self, all_grads):
         return (self.reps * scale(self.histories)) + ((1 - self.reps) * scale(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads])))
+
 
 def scale(X):
     n_clients = X.shape[0]

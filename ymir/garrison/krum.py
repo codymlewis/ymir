@@ -1,13 +1,15 @@
-import numpy as np
-import jax
-
-from . import server
-
 """
 The multi-krum algorithm proposed in https://papers.nips.cc/paper/2017/hash/f4b9ec30ad9f68f89b29639786cb62ef-Abstract.html
 """
-class Server(server.AggServer):
-    def __init__(self, params, opt, opt_state, network, rng, clip=3):
+
+import numpy as np
+import jax
+
+from . import captain
+
+
+class Captain(captain.ScaleCaptain):
+    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), clip=3):
         super().__init__(params, opt, opt_state, network, rng)
         self.clip = clip
 

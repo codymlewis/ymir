@@ -37,7 +37,7 @@ def main(_):
     server_opt = optax.sgd(0.01)
     server_opt_state = server_opt.init(params)
 
-    model = ymir.Coordinate("fed_avg", server_opt, server_opt_state, params, network)
+    model = ymir.garrison.fedavg.Captain(params, server_opt, server_opt_state, network)
     meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval})
 
     print("Done, beginning training.")
