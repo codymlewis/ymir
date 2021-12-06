@@ -5,6 +5,18 @@ from ymir import garrison
 import ymirlib
 
 
+def convert(client, num_endpoints):
+    """A simple naive scaled model replacement attack."""
+    client.quantum_update = client.update
+    client.update = lambda p, o, X, y: update(client.opt, 1/num_endpoints, p, o, client.quantum_update(p, o, X, y))
+
+
+def update(opt, scale, params, opt_state, grads):
+    grads = ymirlib.tree_mul(grads, scale)
+    updates, opt_state = opt.update(grads, opt_state, params)
+    return grads, opt_state, updates
+
+
 class GradientTransform:
     """
     Network controller that scales adversaries' gradients by the inverse of aggregation algorithm
