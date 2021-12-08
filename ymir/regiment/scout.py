@@ -1,7 +1,7 @@
 from functools import partial
 import jax
 
-class Collaborator:
+class Scout:
     def __init__(self, opt, opt_state, loss, data, epochs):
         self.opt_state = opt_state
         self.data = data

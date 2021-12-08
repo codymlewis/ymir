@@ -32,7 +32,7 @@ class Captain(captain.AggregateCaptain):
         sigma = self.lamb / S
         G = G + self.rng.normal(0, sigma, G.shape)
         return self.G_unraveller(G)
-    
+
     def step(self):
         # Client side updates
         all_weights = self.network(self.params, self.rng, return_weights=True)

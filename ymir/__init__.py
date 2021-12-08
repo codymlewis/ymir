@@ -6,7 +6,7 @@ import numpy as np
 
 from . import garrison
 from . import mp
-from . import scout
+from . import regiment
 
 
 class Coordinate:

@@ -12,8 +12,8 @@ py_test(
 )
 
 py_test(
-    name = "collaborator",
-    srcs = ['test_collaborator.py'],
+    name = "scout",
+    srcs = ['test_scout.py'],
     deps = [
         '//:ymir',
         requirement('chex'),
@@ -21,7 +21,7 @@ py_test(
         requirement('dm-haiku'),
         requirement('optax'),
     ],
-    main = "test_collaborator.py"
+    main = "test_scout.py"
 )
 
 py_test(

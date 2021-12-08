@@ -53,14 +53,14 @@ def main(_):
             network = ymir.mp.network.Network()
             network.add_controller("main", server=True)
             for i in range(N):
-                network.add_host("main", ymir.scout.Collaborator(opt, opt_state, loss, data[i], 1))
+                network.add_host("main", ymir.regiment.Collaborator(opt, opt_state, loss, data[i], 1))
             for i in range(A):
-                c = ymir.scout.Collaborator(opt, opt_state, loss, data[i + N], 1)
-                ymir.scout.adversaries.labelflipper.convert(c, DS, ATTACK_FROM, ATTACK_TO)
-                ymir.scout.adversaries.onoff.convert(c)
+                c = ymir.regiment.Collaborator(opt, opt_state, loss, data[i + N], 1)
+                ymir.regiment.adversaries.labelflipper.convert(c, DS, ATTACK_FROM, ATTACK_TO)
+                ymir.regiment.adversaries.onoff.convert(c)
                 network.add_host("main", c)
             controller = network.get_controller("main")
-            toggler = ymir.scout.adversaries.onoff.GradientTransform(
+            toggler = ymir.regiment.adversaries.onoff.GradientTransform(
                 params, opt, opt_state, network, ALG, controller.clients[-A:],
                 max_alpha=1/N if ALG in ['fed_avg', 'std_dagmm'] else 1,
                 sharp=ALG in ['fed_avg', 'std_dagmm', 'krum']

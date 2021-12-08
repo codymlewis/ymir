@@ -4,7 +4,7 @@ import numpy as np
 
 from ymir import garrison
 from ymir import mp
-from ymir.scout import collaborator
+from ymir.regiment import scout
 
 class GradientTransform:
     """
@@ -51,7 +51,7 @@ class GradientTransform:
 
 def convert(client):
     client.shadow_update = client.update
-    client.update = partial(collaborator.update, client.opt, client.loss)
+    client.update = partial(scout.update, client.opt, client.loss)
     client.toggle = toggle.__get__(client)
 
 

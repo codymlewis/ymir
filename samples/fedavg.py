@@ -34,7 +34,7 @@ def main(_):
     network = ymir.mp.network.Network()
     network.add_controller("main", server=True)
     for d in data:
-        network.add_host("main", ymir.scout.Collaborator(client_opt, client_opt_state, loss, d, 1))
+        network.add_host("main", ymir.regiment.Scout(client_opt, client_opt_state, loss, d, 1))
 
     server_opt = optax.sgd(0.1)
     server_opt_state = server_opt.init(params)

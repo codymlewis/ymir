@@ -73,28 +73,28 @@ def main(_):
                         network = ymir.mp.network.Network()
                         network.add_controller("main", server=True)
                         for i in range(num_clients):
-                            network.add_host("main", ymir.scout.Collaborator(client_opt, client_opt_state, loss, data[i], local_epochs))
+                            network.add_host("main", ymir.regiment.Scout(client_opt, client_opt_state, loss, data[i], local_epochs))
 
                         for i in range(num_adversaries):
-                            c = ymir.scout.Collaborator(client_opt, client_opt_state, loss, data[i + num_clients], batch_sizes[i + num_clients])
+                            c = ymir.regiment.Scout(client_opt, client_opt_state, loss, data[i + num_clients], batch_sizes[i + num_clients])
                             if "labelflip" in attack:
-                                ymir.scout.adversaries.labelflipper.convert(c, dataset, attack_from, attack_to)
+                                ymir.regiment.adversaries.labelflipper.convert(c, dataset, attack_from, attack_to)
                             elif "backdoor" in attack:
-                                ymir.scout.adversaries.backdoor.convert(c, dataset, dataset_name, attack_from, attack_to)
+                                ymir.regiment.adversaries.backdoor.convert(c, dataset, dataset_name, attack_from, attack_to)
                             elif "freerider" in attack:
-                                ymir.scout.adversaries.freerider.convert(c, "delta", params)
+                                ymir.regiment.adversaries.freerider.convert(c, "delta", params)
                             if "onoff" in attack:
-                                ymir.scout.adversaries.onoff.convert(c)
+                                ymir.regiment.adversaries.onoff.convert(c)
                             network.add_host("main", c)
                         controller = network.get_controller("main")
                         if "scaling" in attack:
-                            controller.add_update_transform(ymir.scout.adversaries.scaler.GradientTransform(network, params, alg, num_adversaries))
+                            controller.add_update_transform(ymir.regiment.adversaries.scaler.GradientTransform(network, params, alg, num_adversaries))
                         if "mouther" in attack:
-                            controller.add_update_transform(ymir.scout.adversaries.mouther.GradientTransform(num_adversaries, victim, num_adversaries))
+                            controller.add_update_transform(ymir.regiment.adversaries.mouther.GradientTransform(num_adversaries, victim, num_adversaries))
                         if "onoff" not in attack:
                             toggler = None
                         else:
-                            toggler = ymir.scout.adversaries.onoff.GradientTransform(
+                            toggler = ymir.regiment.adversaries.onoff.GradientTransform(
                                 network, params, alg, controller.clients[-num_adversaries:],
                                 max_alpha=1/num_endpoints if alg in ['fed_avg', 'std_dagmm'] else 1,
                                 sharp=alg in ['fed_avg', 'std_dagmm', 'krum']

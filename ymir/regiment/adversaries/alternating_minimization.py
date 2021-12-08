@@ -3,7 +3,7 @@ from functools import partial
 import jax
 import optax
 
-import ymir.scout.collaborator
+import ymir.regiment.scout
 import ymirlib
 
 """
@@ -13,7 +13,7 @@ Alternating minimization model poisoning, proposed in https://arxiv.org/abs/1811
 
 def convert(client,  poison_epochs, stealth_epochs, stealth_data):
     client.poison_update = client.update
-    client.stealth_update = partial(ymir.scout.collaborator.update, client.opt, client.loss)
+    client.stealth_update = partial(ymir.regiment.scout.update, client.opt, client.loss)
     client.poison_epochs = poison_epochs
     client.stealth_epochs = stealth_epochs
     client.stealth_data = stealth_data

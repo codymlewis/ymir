@@ -7,7 +7,7 @@ import numpy as np
 
 import ymir
 
-class TestCollaboratorFunctions(absltest.TestCase):
+class TestScoutFunctions(absltest.TestCase):
     def setUp(self):
         rng = np.random.default_rng(0)
         dataset = ymir.mp.datasets.Dataset((X := rng.random((50, 1))), np.sin(X).reshape(-1), np.full(len(X), True))
@@ -16,7 +16,7 @@ class TestCollaboratorFunctions(absltest.TestCase):
         params = net.init(jax.random.PRNGKey(42), next(self.data)[0])
         opt = optax.sgd(0.1)
         self.opt_state = opt.init(params)
-        self.client = ymir.scout.Collaborator(None, self.opt_state, None, self.data, 1)
+        self.client = ymir.regiment.Scout(None, self.opt_state, None, self.data, 1)
 
     def test_member_variables(self):
         self.assertEqual(self.client.opt_state, self.opt_state)

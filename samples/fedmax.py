@@ -33,7 +33,7 @@ def main(_):
     network = ymir.mp.network.Network()
     network.add_controller("main", server=True)
     for d in data:
-        network.add_host("main", ymir.scout.Collaborator(opt, opt_state, loss, d, 10))
+        network.add_host("main", ymir.regiment.Scout(opt, opt_state, loss, d, 10))
 
     model = ymir.garrison.fedavg.Captain(params, opt, opt_state, network)
     meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval})

@@ -37,7 +37,7 @@ def main(_):
     network = ymir.mp.network.Network()
     network.add_controller("main", server=True)
     for i in range(num_clients):
-        network.add_host("main", ymir.scout.Collaborator(client_opt, client_opt_state, loss, data[i], 1))
+        network.add_host("main", ymir.regiment.Scout(client_opt, client_opt_state, loss, data[i], 1))
     
     if attack == "smp":
         # Setup for the stealthy model poisoning attack
@@ -45,16 +45,16 @@ def main(_):
         adv_opt = ymir.mp.optimizers.smp_opt(client_opt, 0.0001)
         adv_opt_state = adv_opt.init(params)
         for i in range(num_adversaries):
-            c = ymir.scout.Collaborator(adv_opt, adv_opt_state, adv_loss, data[i + num_clients], 1)
-            ymir.scout.adversaries.labelflipper.convert(c, dataset, 0, 1)
+            c = ymir.regiment.Scout(adv_opt, adv_opt_state, adv_loss, data[i + num_clients], 1)
+            ymir.regiment.adversaries.labelflipper.convert(c, dataset, 0, 1)
             network.add_host("main", c)
     else:
         # setup for the alternating minimization attack
         stealth_data = dataset.get_iter("test", 8, rng=rng)
         for i in range(num_adversaries):
-            c = ymir.scout.Collaborator(client_opt, client_opt_state, loss, data[i + num_clients], 10)
-            ymir.scout.adversaries.labelflipper.convert(c, dataset, 0, 1, 10)
-            ymir.scout.adversaries.alternating_minimization.convert(c, 1, 10, stealth_data)
+            c = ymir.regiment.Scout(client_opt, client_opt_state, loss, data[i + num_clients], 10)
+            ymir.regiment.adversaries.labelflipper.convert(c, dataset, 0, 1, 10)
+            ymir.regiment.adversaries.alternating_minimization.convert(c, 1, 10, stealth_data)
             network.add_host("main", c)
 
     server_opt = optax.sgd(0.1)

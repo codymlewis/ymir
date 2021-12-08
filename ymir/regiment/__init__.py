@@ -6,4 +6,4 @@ Endpoint side functionalities
 """
 
 
-from .collaborator import Collaborator
+from .scout import Scout

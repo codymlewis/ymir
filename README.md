@@ -25,7 +25,7 @@ bazel run research/viceroy/main
 ## Usage
 We provide examples of the library's usage in the `samples` folder. Though, generally
 a program involves initializing shared values and the network architecture, then initialization
-of our `Coordinate` object, and finally calling step from that object.
+of our `Captain` object, and finally calling step from that object.
 
 The following is a generic example snippet
 ```python
@@ -43,9 +43,9 @@ loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
 network = ymir.mp.network.Network(opt, loss)
 network.add_controller("main", is_server=True)
 for d in data:
-    network.add_host("main", ymir.scout.Collaborator(opt_state, d, CLIENT_EPOCHS))
+    network.add_host("main", ymir.regiment.Scout(opt_state, d, CLIENT_EPOCHS))
 
-model = ymir.Coordinate(AGG_ALG, opt, opt_state, params, network)
+model = ymir.garrison.AGG_ALG.Captain(params, opt, opt_state, network)
 
 # Train/eval loop.
 for round in range(TOTAL_EPOCHS):
