@@ -6,7 +6,6 @@ import numpy as np
 import sklearn.metrics.pairwise as smp
 import jax
 import jax.flatten_util
-import jax.numpy as jnp
 import hdbscan
 
 from . import captain
