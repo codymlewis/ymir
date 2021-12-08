@@ -91,7 +91,6 @@
 <span class="kn">import</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">as</span> <span class="nn">smp</span>
 <span class="kn">import</span> <span class="nn">jax</span>
 <span class="kn">import</span> <span class="nn">jax.flatten_util</span>
-<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="kn">as</span> <span class="nn">jnp</span>
 <span class="kn">import</span> <span class="nn">hdbscan</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">captain</span>
@@ -117,7 +116,7 @@
         <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lamb</span> <span class="o">/</span> <span class="n">S</span>
         <span class="n">G</span> <span class="o">=</span> <span class="n">G</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">G_unraveller</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
-    
+
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Client side updates</span>
         <span class="n">all_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -160,7 +159,7 @@
         <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lamb</span> <span class="o">/</span> <span class="n">S</span>
         <span class="n">G</span> <span class="o">=</span> <span class="n">G</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">G_unraveller</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
-    
+
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Client side updates</span>
         <span class="n">all_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -185,7 +184,7 @@ inheritance.</p>
     opt,
     opt_state,
     network,
-    rng=Generator(PCG64) at 0x7F52A7413D60,
+    rng=Generator(PCG64) at 0x7F1932AE6D60,
     lamb=0.001
 )</span>
     </div>
