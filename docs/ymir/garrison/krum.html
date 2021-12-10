@@ -78,13 +78,15 @@
                     <h1 class="modulename">
 <a href="./../../ymir.html">ymir</a><wbr>.<a href="./../garrison.html">garrison</a><wbr>.krum    </h1>
 
-                        <div class="docstring"><p>The multi-krum algorithm proposed in <a href="https://papers.nips.cc/paper/2017/hash/f4b9ec30ad9f68f89b29639786cb62ef-Abstract.html">https://papers.nips.cc/paper/2017/hash/f4b9ec30ad9f68f89b29639786cb62ef-Abstract.html </a></p>
+                        <div class="docstring"><p>The multi-Krum algorithm proposed in <a href="https://papers.nips.cc/paper/2017/hash/f4b9ec30ad9f68f89b29639786cb62ef-Abstract.html">https://papers.nips.cc/paper/2017/hash/f4b9ec30ad9f68f89b29639786cb62ef-Abstract.html </a>
+it is designed to be robust to Byzantine faults with i.i.d. environments.</p>
 </div>
 
                         <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">The multi-krum algorithm proposed in `https://papers.nips.cc/paper/2017/hash/f4b9ec30ad9f68f89b29639786cb62ef-Abstract.html &lt;https://papers.nips.cc/paper/2017/hash/f4b9ec30ad9f68f89b29639786cb62ef-Abstract.html&gt;`_</span>
+<span class="sd">The multi-Krum algorithm proposed in `https://papers.nips.cc/paper/2017/hash/f4b9ec30ad9f68f89b29639786cb62ef-Abstract.html &lt;https://papers.nips.cc/paper/2017/hash/f4b9ec30ad9f68f89b29639786cb62ef-Abstract.html&gt;`_</span>
+<span class="sd">it is designed to be robust to Byzantine faults with i.i.d. environments.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
@@ -95,6 +97,12 @@
 
 <span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">ScaleCaptain</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">clip</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the Krum captain.</span>
+
+<span class="sd">        Optional arguments:</span>
+<span class="sd">        - clip: the number of expected faults in each round.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clip</span> <span class="o">=</span> <span class="n">clip</span>
 
@@ -130,6 +138,12 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">ScaleCaptain</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">clip</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the Krum captain.</span>
+
+<span class="sd">        Optional arguments:</span>
+<span class="sd">        - clip: the number of expected faults in each round.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clip</span> <span class="o">=</span> <span class="n">clip</span>
 
@@ -151,8 +165,7 @@
 
         </details>
 
-            <div class="docstring"><p>Helper class that provides a standard way to create an ABC using
-inheritance.</p>
+            <div class="docstring"><p>A captain that algorithmically scales gradients by some factor, $p_i$</p>
 </div>
 
 
@@ -165,7 +178,7 @@ inheritance.</p>
     opt,
     opt_state,
     network,
-    rng=Generator(PCG64) at 0x7F19329172E0,
+    rng=Generator(PCG64) at 0x7F51C9FC4820,
     clip=3
 )</span>
     </div>
@@ -173,13 +186,27 @@ inheritance.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">clip</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the Krum captain.</span>
+
+<span class="sd">        Optional arguments:</span>
+<span class="sd">        - clip: the number of expected faults in each round.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clip</span> <span class="o">=</span> <span class="n">clip</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Construct the Krum captain.</p>
+
+<p>Optional arguments:</p>
+
+<ul>
+<li>clip: the number of expected faults in each round.</li>
+</ul>
+</div>
+
 
                             </div>
                             <div id="Captain.update" class="classattr">
@@ -198,7 +225,9 @@ inheritance.</p>
 
         </details>
 
-    
+            <div class="docstring"><p>Update stored values of this object.</p>
+</div>
+
 
                             </div>
                             <div id="Captain.scale" class="classattr">
@@ -226,7 +255,9 @@ inheritance.</p>
 
         </details>
 
-    
+            <div class="docstring"><p>Calculate the amount by which to scale the gradients by ($p_i$), according the specified algorithm.</p>
+</div>
+
 
                             </div>
                             <div class="inherited">

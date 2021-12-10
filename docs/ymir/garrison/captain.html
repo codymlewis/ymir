@@ -130,6 +130,7 @@
 
 
 <span class="k">class</span> <span class="nc">ScaleCaptain</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A captain that algorithmically scales gradients by some factor, $p_i$&quot;&quot;&quot;</span>
     <span class="n">params</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">Params</span>
     <span class="n">network</span><span class="p">:</span> <span class="n">Network</span>
     <span class="n">opt_state</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">OptState</span>
@@ -144,13 +145,19 @@
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update stored values of this object.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jaxlib</span><span class="o">.</span><span class="n">xla_extension</span><span class="o">.</span><span class="n">DeviceArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the amount by which to scale the gradients by ($p_i$), according the specified algorithm.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        First get the gradients from the network, use them to update this captain, scale the gradients, then apply the</span>
+<span class="sd">        a step of the optimizer to the stored global parameters using the sum of those scaled gradients.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Client side updates</span>
         <span class="n">all_grads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
 
@@ -165,6 +172,7 @@
 
 
 <span class="k">class</span> <span class="nc">AggregateCaptain</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A captian that aggregates weights into a single global weight, $w_t$&quot;&quot;&quot;</span>
     <span class="n">params</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">Params</span>
     <span class="n">network</span><span class="p">:</span> <span class="n">Network</span>
     <span class="n">opt_state</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">OptState</span>
@@ -179,10 +187,12 @@
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_weights</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update the global weight according to the specified algorithm.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform a step involving getting weights from the network and aggregating them into the global weight.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
 
@@ -224,6 +234,7 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ScaleCaptain</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A captain that algorithmically scales gradients by some factor, $p_i$&quot;&quot;&quot;</span>
     <span class="n">params</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">Params</span>
     <span class="n">network</span><span class="p">:</span> <span class="n">Network</span>
     <span class="n">opt_state</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">OptState</span>
@@ -238,13 +249,19 @@
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update stored values of this object.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jaxlib</span><span class="o">.</span><span class="n">xla_extension</span><span class="o">.</span><span class="n">DeviceArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the amount by which to scale the gradients by ($p_i$), according the specified algorithm.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        First get the gradients from the network, use them to update this captain, scale the gradients, then apply the</span>
+<span class="sd">        a step of the optimizer to the stored global parameters using the sum of those scaled gradients.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Client side updates</span>
         <span class="n">all_grads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
 
@@ -260,8 +277,7 @@
 
         </details>
 
-            <div class="docstring"><p>Helper class that provides a standard way to create an ABC using
-inheritance.</p>
+            <div class="docstring"><p>A captain that algorithmically scales gradients by some factor, $p_i$</p>
 </div>
 
 
@@ -278,12 +294,15 @@ inheritance.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update stored values of this object.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Update stored values of this object.</p>
+</div>
+
 
                             </div>
                             <div id="ScaleCaptain.scale" class="classattr">
@@ -299,12 +318,15 @@ inheritance.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jaxlib</span><span class="o">.</span><span class="n">xla_extension</span><span class="o">.</span><span class="n">DeviceArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the amount by which to scale the gradients by ($p_i$), according the specified algorithm.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Calculate the amount by which to scale the gradients by ($p_i$), according the specified algorithm.</p>
+</div>
+
 
                             </div>
                             <div id="ScaleCaptain.step" class="classattr">
@@ -318,6 +340,10 @@ inheritance.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        First get the gradients from the network, use them to update this captain, scale the gradients, then apply the</span>
+<span class="sd">        a step of the optimizer to the stored global parameters using the sum of those scaled gradients.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Client side updates</span>
         <span class="n">all_grads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
 
@@ -333,7 +359,10 @@ inheritance.</p>
 
         </details>
 
-    
+            <div class="docstring"><p>First get the gradients from the network, use them to update this captain, scale the gradients, then apply the
+a step of the optimizer to the stored global parameters using the sum of those scaled gradients.</p>
+</div>
+
 
                             </div>
                 </section>
@@ -349,6 +378,7 @@ inheritance.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">AggregateCaptain</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A captian that aggregates weights into a single global weight, $w_t$&quot;&quot;&quot;</span>
     <span class="n">params</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">Params</span>
     <span class="n">network</span><span class="p">:</span> <span class="n">Network</span>
     <span class="n">opt_state</span><span class="p">:</span> <span class="n">optax</span><span class="o">.</span><span class="n">OptState</span>
@@ -363,17 +393,18 @@ inheritance.</p>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_weights</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update the global weight according to the specified algorithm.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform a step involving getting weights from the network and aggregating them into the global weight.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Helper class that provides a standard way to create an ABC using
-inheritance.</p>
+            <div class="docstring"><p>A captian that aggregates weights into a single global weight, $w_t$</p>
 </div>
 
 
@@ -390,12 +421,15 @@ inheritance.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_weights</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update the global weight according to the specified algorithm.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Update the global weight according to the specified algorithm.</p>
+</div>
+
 
                             </div>
                             <div id="AggregateCaptain.step" class="classattr">
@@ -411,12 +445,15 @@ inheritance.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform a step involving getting weights from the network and aggregating them into the global weight.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Perform a step involving getting weights from the network and aggregating them into the global weight.</p>
+</div>
+
 
                             </div>
                 </section>

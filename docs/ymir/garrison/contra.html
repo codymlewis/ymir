@@ -81,13 +81,15 @@
                     <h1 class="modulename">
 <a href="./../../ymir.html">ymir</a><wbr>.<a href="./../garrison.html">garrison</a><wbr>.contra    </h1>
 
-                        <div class="docstring"><p>The CONTRA algorithm proposed in <a href="https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf">https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf </a></p>
+                        <div class="docstring"><p>The CONTRA algorithm proposed in <a href="https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf">https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf </a>
+it is designed to provide robustness to poisoning adversaries within many statistically heterogenous environments.</p>
 </div>
 
                         <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">The CONTRA algorithm proposed in `https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf &lt;https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf&gt;`_</span>
+<span class="sd">it is designed to provide robustness to poisoning adversaries within many statistically heterogenous environments.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
@@ -100,6 +102,16 @@
 
 <span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">ScaleCaptain</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">C</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the CONTRA captain.</span>
+
+<span class="sd">        Optional arguments:</span>
+
+<span class="sd">        - C: Percentage of collaborators to be selected for each update.</span>
+<span class="sd">        - k: Number of expected adversarial collaborators.</span>
+<span class="sd">        - delta: Amount the increase/decrease the reputation (selection likelyhood) by.</span>
+<span class="sd">        - t: Threshold for choosing when to increase the reputation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">histories</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">network</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
@@ -111,6 +123,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">J</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">network</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update the stored collaborator histories, that is, perform $H_{i, t + 1} \gets H_{i, t} + \Delta_{i, t + 1} : \\forall i \in \mathcal{U}$&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">histories</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">histories</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
@@ -139,6 +152,7 @@
 
 <span class="nd">@jax.jit</span>
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">histories</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Perform histories + all_grads, elementwise.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span> <span class="o">+</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">g</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">histories</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">)])</span>
 </pre></div>
 
@@ -158,6 +172,16 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">ScaleCaptain</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">C</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the CONTRA captain.</span>
+
+<span class="sd">        Optional arguments:</span>
+
+<span class="sd">        - C: Percentage of collaborators to be selected for each update.</span>
+<span class="sd">        - k: Number of expected adversarial collaborators.</span>
+<span class="sd">        - delta: Amount the increase/decrease the reputation (selection likelyhood) by.</span>
+<span class="sd">        - t: Threshold for choosing when to increase the reputation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">histories</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">network</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
@@ -169,6 +193,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">J</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">network</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update the stored collaborator histories, that is, perform $H_{i, t + 1} \gets H_{i, t} + \Delta_{i, t + 1} : \\forall i \in \mathcal{U}$&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">histories</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">histories</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
@@ -197,8 +222,7 @@
 
         </details>
 
-            <div class="docstring"><p>Helper class that provides a standard way to create an ABC using
-inheritance.</p>
+            <div class="docstring"><p>A captain that algorithmically scales gradients by some factor, $p_i$</p>
 </div>
 
 
@@ -211,7 +235,7 @@ inheritance.</p>
     opt,
     opt_state,
     network,
-    rng=Generator(PCG64) at 0x7F1932AB82E0,
+    rng=Generator(PCG64) at 0x7F51CB3D29E0,
     C=0.1,
     k=10,
     delta=0.1,
@@ -222,6 +246,16 @@ inheritance.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">C</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the CONTRA captain.</span>
+
+<span class="sd">        Optional arguments:</span>
+
+<span class="sd">        - C: Percentage of collaborators to be selected for each update.</span>
+<span class="sd">        - k: Number of expected adversarial collaborators.</span>
+<span class="sd">        - delta: Amount the increase/decrease the reputation (selection likelyhood) by.</span>
+<span class="sd">        - t: Threshold for choosing when to increase the reputation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">histories</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">network</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
@@ -235,7 +269,18 @@ inheritance.</p>
 
         </details>
 
-    
+            <div class="docstring"><p>Construct the CONTRA captain.</p>
+
+<p>Optional arguments:</p>
+
+<ul>
+<li>C: Percentage of collaborators to be selected for each update.</li>
+<li>k: Number of expected adversarial collaborators.</li>
+<li>delta: Amount the increase/decrease the reputation (selection likelyhood) by.</li>
+<li>t: Threshold for choosing when to increase the reputation.</li>
+</ul>
+</div>
+
 
                             </div>
                             <div id="Captain.update" class="classattr">
@@ -249,12 +294,15 @@ inheritance.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update the stored collaborator histories, that is, perform $H_{i, t + 1} \gets H_{i, t} + \Delta_{i, t + 1} : \\forall i \in \mathcal{U}$&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">histories</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">histories</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Update the stored collaborator histories, that is, perform $H_{i, t + 1} \gets H_{i, t} + \Delta_{i, t + 1} : \forall i \in \mathcal{U}$</p>
+</div>
+
 
                             </div>
                             <div id="Captain.scale" class="classattr">
@@ -293,7 +341,9 @@ inheritance.</p>
 
         </details>
 
-    
+            <div class="docstring"><p>Calculate the amount by which to scale the gradients by ($p_i$), according the specified algorithm.</p>
+</div>
+
 
                             </div>
                             <div class="inherited">
@@ -319,12 +369,15 @@ inheritance.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="nd">@jax.jit</span>
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">histories</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Perform histories + all_grads, elementwise.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span> <span class="o">+</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">g</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">histories</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">)])</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Perform histories + all_grads, elementwise.</p>
+</div>
+
 
                 </section>
     </main>
