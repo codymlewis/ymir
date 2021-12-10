@@ -1,5 +1,5 @@
 """
-Static norm clipping aggregator.
+Static norm clipping aggregator, scales down any updates that sit out side of the $l_2$ sphere of radius $M$.
 """
 
 import jax
@@ -10,11 +10,15 @@ from . import captain
 
 
 class Captain(captain.ScaleCaptain):
-    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), C=1.0, M=1.0):
+    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), M=1.0):
+        """
+        Construct the norm clipping aggregator.
+
+        Optional arguments:
+        - M: the radius of the $l_2$ sphere to scale according to.
+        """
         super().__init__(params, opt, opt_state, network, rng)
         self.M = M
-        self.C = C
-        self.K = len(network)
     
     def update(self, all_grads):
         pass

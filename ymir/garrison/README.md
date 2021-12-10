@@ -2,8 +2,8 @@
 Functionality specific to the global server of the FL system
 
 ## Design
-We use the term `Captain` to refer to the global server. It handles the collection of weights/gradients from
-each Collaborator and the computation of the global update.
+We use the object `Captain` to refer to the global server. It handles the collection of weights/gradients from
+each collaborator (Scout) and the computation of the global update.
 
 The following snippet demonstrates a generic example using the aggregators in module
 ```python

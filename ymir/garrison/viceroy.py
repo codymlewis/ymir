@@ -16,6 +16,13 @@ from . import captain
 
 class Captain(captain.ScaleCaptain):
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), tau_0=56, tau_1=5):
+        r"""
+        Construct the Viceroy captain.
+
+        Optional arguments:
+        - tau_0: amount of rounds for the reputation to decay to 0 ($\tau_0$).
+        - tau_1: amount of rounds for the reputation to build to 1 ($\tau_1$).
+        """
         super().__init__(params, opt, opt_state, network, rng)
         self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
         self.reps = np.array([1.0 for _ in range(len(network))])
@@ -36,6 +43,7 @@ class Captain(captain.ScaleCaptain):
 
 
 def scale(X):
+    """A modified FoolsGold algorithm for scaling the gradients/histories."""
     n_clients = X.shape[0]
     cs = smp.cosine_similarity(X) - np.eye(n_clients)
     maxcs = np.max(cs, axis=1)
@@ -61,4 +69,5 @@ def scale(X):
 
 @partial(jax.jit, static_argnums=(0,))
 def update(omega, histories, all_grads):
+    r"""A decayed histories update, $H_{i, t + 1} \gets \omega H_{i, t} + \Delta_{i, t + 1} : \forall i \in \mathcal{U}$."""
     return jnp.array([omega * h + jax.flatten_util.ravel_pytree(g)[0] for h, g in zip(histories, all_grads)])

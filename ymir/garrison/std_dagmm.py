@@ -16,8 +16,8 @@ from . import captain
 
 # Utility functions/classes
 
-class DA(hk.Module):
-    """Deep autoencoder"""
+class _DA(hk.Module):
+    """A simple deep autoencoder model."""
     def __init__(self, in_len, name=None):
         super().__init__(name=name)
         self.encoder = hk.Sequential([
@@ -38,8 +38,8 @@ class DA(hk.Module):
         return enc, self.decoder(enc)
 
 
-def loss(net):
-    """Deep autoencoder MSE loss"""
+def _loss(net):
+    """MSE loss for the deep autoencoder."""
     @jax.jit
     def _apply(params, x):
         _, z = net.apply(params, x)
@@ -47,8 +47,8 @@ def loss(net):
     return _apply
 
 
-def da_update(opt, loss):
-    """Update function for the autoencoder"""
+def _da_update(opt, loss):
+    """Update function for the autoencoder."""
     @jax.jit
     def _apply(params, opt_state, batch):
         grads = jax.grad(loss)(params, batch)
@@ -59,15 +59,17 @@ def da_update(opt, loss):
 
 
 @jax.jit
-def relative_euclidean_distance(a, b):
+def _relative_euclidean_distance(a, b):
+    """Find the relative euclidean distance between two vectors."""
     return jnp.linalg.norm(a - b, ord=2) / jnp.clip(jnp.linalg.norm(a, ord=2), a_min=1e-10)
 
 
-def predict(params, net, gmm, X):
+def _predict(params, net, gmm, X):
+    """Make the STD-DAGMM prediction."""
     enc, dec = net.apply(params, X)
     z = jnp.array([[
         jnp.squeeze(e),
-        relative_euclidean_distance(x, d),
+        _relative_euclidean_distance(x, d),
         optax.cosine_similarity(x, d),
         jnp.std(x)
     ] for x, e, d in zip(X, enc, dec)])
@@ -82,12 +84,12 @@ class Captain(captain.ScaleCaptain):
         super().__init__(params, opt, opt_state, network, rng)
         self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in network.clients])
         x = jnp.array([jax.flatten_util.ravel_pytree(params)[0]])
-        self.da = hk.without_apply_rng(hk.transform(lambda x: DA(x[0].shape[0])(x)))
+        self.da = hk.without_apply_rng(hk.transform(lambda x: _DA(x[0].shape[0])(x)))
         rng = jax.random.PRNGKey(42)
         self.da_params = self.da.init(rng, x)
         opt = optax.adamw(0.001, weight_decay=0.0001)
         self.da_opt_state = opt.init(self.da_params)
-        self.da_update = da_update(opt, loss(self.da))
+        self.da_update = _da_update(opt, _loss(self.da))
 
         self.gmm = mixture.GaussianMixture(4, random_state=0, warm_start=True)
 
@@ -98,7 +100,7 @@ class Captain(captain.ScaleCaptain):
         enc, dec = self.da.apply(self.da_params, grads)
         z = jnp.array([[
             jnp.squeeze(e),
-            relative_euclidean_distance(x, d),
+            _relative_euclidean_distance(x, d),
             optax.cosine_similarity(x, d),
             jnp.std(x)
         ] for x, e, d in zip(grads, enc, dec)])
@@ -106,7 +108,7 @@ class Captain(captain.ScaleCaptain):
 
     def scale(self, all_grads):
         grads = jnp.array([jax.flatten_util.ravel_pytree(g)[0].tolist() for g in all_grads])
-        energies = predict(self.da_params, self.da, self.gmm, grads)
+        energies = _predict(self.da_params, self.da, self.gmm, grads)
         std = jnp.std(energies)
         avg = jnp.mean(energies)
         mask = jnp.where((energies >= avg - std) * (energies <= avg + std), 1, 0)

@@ -1,5 +1,6 @@
 """
 The CONTRA algorithm proposed in `https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf <https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESORICS.pdf>`_
+it is designed to provide robustness to poisoning adversaries within many statistically heterogenous environments.
 """
 
 import numpy as np
@@ -12,6 +13,16 @@ from . import captain
 
 class Captain(captain.ScaleCaptain):
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), C=0.1, k=10, delta=0.1, t=0.5):
+        """
+        Construct the CONTRA captain.
+
+        Optional arguments:
+
+        - C: Percentage of collaborators to be selected for each update.
+        - k: Number of expected adversarial collaborators.
+        - delta: Amount the increase/decrease the reputation (selection likelyhood) by.
+        - t: Threshold for choosing when to increase the reputation.
+        """
         super().__init__(params, opt, opt_state, network, rng)
         self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
         self.C = C
@@ -23,6 +34,7 @@ class Captain(captain.ScaleCaptain):
         self.J = round(self.C * len(network))
 
     def update(self, all_grads):
+        """Update the stored collaborator histories, that is, perform $H_{i, t + 1} \gets H_{i, t} + \Delta_{i, t + 1} : \\forall i \in \mathcal{U}$"""
         self.histories = update(self.histories, all_grads)
 
     def scale(self, all_grads):
@@ -51,4 +63,5 @@ class Captain(captain.ScaleCaptain):
 
 @jax.jit
 def update(histories, all_grads):
+    """Perform histories + all_grads, elementwise."""
     return jnp.array([h + jax.flatten_util.ravel_pytree(g)[0] for h, g in zip(histories, all_grads)])

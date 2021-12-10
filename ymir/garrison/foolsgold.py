@@ -1,5 +1,6 @@
 """
 The FoolsGold algorithm proposed in `https://arxiv.org/abs/1808.04866 <https://arxiv.org/abs/1808.04866>`_
+it is designed to provide robustness to (Sybil) adversarial attacks within non-i.i.d. environments.
 """
 
 import numpy as np
@@ -12,6 +13,12 @@ from . import captain
 
 class Captain(captain.ScaleCaptain):
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), kappa=1.0):
+        """
+        Construct the FoolsGold captain.
+
+        Optional arguments:
+        - kappa: value stating the distribution of classes across endpoints.
+        """
         super().__init__(params, opt, opt_state, network, rng)
         self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
         self.kappa = kappa
@@ -20,7 +27,11 @@ class Captain(captain.ScaleCaptain):
         self.histories = update(self.histories, all_grads)
 
     def scale(self, all_grads):
-        """Adapted from https://github.com/DistributedML/FoolsGold"""
+        """
+        Scale the gradients according to the FoolsGold algorithm.
+
+        Code adapted from `https://github.com/DistributedML/FoolsGold <https://github.com/DistributedML/FoolsGold>`_.
+        """
         n_clients = self.histories.shape[0]
         cs = smp.cosine_similarity(self.histories) - np.eye(n_clients)
         maxcs = np.max(cs, axis=1)
@@ -46,4 +57,5 @@ class Captain(captain.ScaleCaptain):
 
 @jax.jit
 def update(histories, all_grads):
+    """Perform histories + all_grads elementwise."""
     return jnp.array([h + jax.flatten_util.ravel_pytree(g)[0] for h, g in zip(histories, all_grads)])

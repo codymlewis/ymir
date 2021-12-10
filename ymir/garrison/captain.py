@@ -19,6 +19,7 @@ from ymir.mp.network import Network
 
 
 class ScaleCaptain(ABC):
+    """A captain that algorithmically scales gradients by some factor, $p_i$"""
     params: optax.Params
     network: Network
     opt_state: optax.OptState
@@ -33,13 +34,19 @@ class ScaleCaptain(ABC):
 
     @abstractmethod
     def update(self, all_grads: Iterable):
+        """Update stored values of this object."""
         pass
 
     @abstractmethod
     def scale(self, all_grads: Iterable) -> jaxlib.xla_extension.DeviceArray:
+        """Calculate the amount by which to scale the gradients by ($p_i$), according the specified algorithm."""
         pass
 
     def step(self):
+        """
+        First get the gradients from the network, use them to update this captain, scale the gradients, then apply the
+        a step of the optimizer to the stored global parameters using the sum of those scaled gradients.
+        """
         # Client side updates
         all_grads = self.network(self.params, self.rng)
 
@@ -54,6 +61,7 @@ class ScaleCaptain(ABC):
 
 
 class AggregateCaptain(ABC):
+    """A captian that aggregates weights into a single global weight, $w_t$"""
     params: optax.Params
     network: Network
     opt_state: optax.OptState
@@ -68,10 +76,12 @@ class AggregateCaptain(ABC):
 
     @abstractmethod
     def update(self, all_weights: Iterable):
+        """Update the global weight according to the specified algorithm."""
         pass
 
     @abstractmethod
     def step(self):
+        """Perform a step involving getting weights from the network and aggregating them into the global weight."""
         pass
 
 

@@ -1,5 +1,7 @@
 """
 The FLGuard algorithm proposed in `https://arxiv.org/abs/2101.02281 <https://arxiv.org/abs/2101.02281>`_
+it is designed to provide robustness against adversaries, inclusive of multiple attacks and statistical
+heterogeneity environments.
 """
 
 import numpy as np
@@ -13,6 +15,12 @@ from . import captain
 
 class Captain(captain.AggregateCaptain):
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), lamb=0.001):
+        """
+        Construct the FLGuard captain.
+
+        Optional arguments:
+        - lamb: the lambda parameter for the FLGuard algorithm, scales the noise added to the global weight.
+        """
         super().__init__(params, opt, opt_state, network, rng)
         self.G_unraveller = jax.flatten_util.ravel_pytree(params)[1]
         self.lamb = lamb  # 0.001 is good for image classification, 0.01 for IDS (according to the paper)
