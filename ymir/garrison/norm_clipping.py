@@ -1,5 +1,6 @@
 """
-Static norm clipping aggregator, scales down any updates that sit out side of the $l_2$ sphere of radius $M$.
+Static norm clipping aggregator proposed in `https://arxiv.org/abs/1911.07963 <https://arxiv.org/pdf/1911.07963.pdf>`_,
+scales down any updates that sit out side of the $l_2$ sphere of radius $M$.
 """
 
 import jax
