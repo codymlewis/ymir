@@ -78,13 +78,15 @@
                     <h1 class="modulename">
 <a href="./../../ymir.html">ymir</a><wbr>.<a href="./../garrison.html">garrison</a><wbr>.norm_clipping    </h1>
 
-                        <div class="docstring"><p>Static norm clipping aggregator, scales down any updates that sit out side of the $l_2$ sphere of radius $M$.</p>
+                        <div class="docstring"><p>Static norm clipping aggregator proposed in <a href="https://arxiv.org/pdf/1911.07963.pdf">https://arxiv.org/abs/1911.07963 </a>,
+scales down any updates that sit out side of the $l_2$ sphere of radius $M$.</p>
 </div>
 
                         <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Static norm clipping aggregator, scales down any updates that sit out side of the $l_2$ sphere of radius $M$.</span>
+<span class="sd">Static norm clipping aggregator proposed in `https://arxiv.org/abs/1911.07963 &lt;https://arxiv.org/pdf/1911.07963.pdf&gt;`_,</span>
+<span class="sd">scales down any updates that sit out side of the $l_2$ sphere of radius $M$.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">jax</span>
@@ -161,7 +163,7 @@
     opt,
     opt_state,
     network,
-    rng=Generator(PCG64) at 0x7F51C9FC4BA0,
+    rng=Generator(PCG64) at 0x7FF1B86FBBA0,
     M=1.0
 )</span>
     </div>
