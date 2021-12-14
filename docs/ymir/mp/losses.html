@@ -81,22 +81,34 @@
                     <h1 class="modulename">
 <a href="./../../ymir.html">ymir</a><wbr>.<a href="./../mp.html">mp</a><wbr>.losses    </h1>
 
-                
+                        <div class="docstring"><p>JAX-based loss functions for ML models. Each function is curried to store the neural network apply
+function and required parameters. The internal functions each take the current neural network parameters,
+the input data, and the target labels, and return the specified loss value.</p>
+</div>
+
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">jax</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">JAX-based loss functions for ML models. Each function is curried to store the neural network apply</span>
+<span class="sd">function and required parameters. The internal functions each take the current neural network parameters,</span>
+<span class="sd">the input data, and the target labels, and return the specified loss value.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">jax</span>
 <span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="kn">as</span> <span class="nn">jnp</span>
 <span class="kn">import</span> <span class="nn">optax</span>
 
 <span class="kn">import</span> <span class="nn">ymirlib</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Loss functions for ML models</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
 
 <span class="k">def</span> <span class="nf">cross_entropy_loss</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">classes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Cross entropy/log loss, best suited for softmax models&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cross entropy/log loss, best suited for softmax models</span>
+<span class="sd">    </span>
+<span class="sd">    Additional arguments:</span>
+<span class="sd">    - classes: the number of classes in the dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">logits</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
@@ -106,7 +118,7 @@
 
 
 <span class="k">def</span> <span class="nf">ae_l2_loss</span><span class="p">(</span><span class="n">net</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Autoencoder L2 loss&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Autoencoder L2 loss, internal function only takes the neural network parameters and input data&quot;&quot;&quot;</span>
     <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">z</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
@@ -115,7 +127,13 @@
 
 
 <span class="k">def</span> <span class="nf">fedmax_loss</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">net_act</span><span class="p">,</span> <span class="n">classes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loss function used for the FedMAX algorithm proposed in https://arxiv.org/abs/2004.03657&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loss function used for the FedMAX algorithm proposed in `https://arxiv.org/abs/2004.03657 &lt;https://arxiv.org/abs/2004.03657&gt;`_</span>
+<span class="sd">    </span>
+<span class="sd">    Additional arguments:</span>
+<span class="sd">    - net_act: the activation function to use for the neural network, this is the output up to the second-last layer</span>
+<span class="sd">    - classes: the number of classes in the dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">logits</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
@@ -128,7 +146,16 @@
 
 
 <span class="k">def</span> <span class="nf">smp_loss</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">val_X</span><span class="p">,</span> <span class="n">val_y</span><span class="p">,</span> <span class="n">classes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loss function for stealthy model poisoning https://arxiv.org/abs/1811.12470, assumes a classification task&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loss function for stealthy model poisoning `https://arxiv.org/abs/1811.12470 &lt;https://arxiv.org/abs/1811.12470&gt;`_,</span>
+<span class="sd">    assumes a classification task</span>
+<span class="sd">    </span>
+<span class="sd">    Additional arguments:</span>
+<span class="sd">    - scale: the scale of the poisoned loss function over the stealthy loss function</span>
+<span class="sd">    - val_X: the validation data, used for stealth</span>
+<span class="sd">    - val_y: the validation labels, used for stealth</span>
+<span class="sd">    - classes: the number of classes in the dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">val_logits</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">val_X</span><span class="p">)</span>
@@ -138,7 +165,15 @@
 
 
 <span class="k">def</span> <span class="nf">constrain_distance_loss</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loss function from the constrain and scale attack `https://arxiv.org/abs/1807.00459 &lt;https://arxiv.org/abs/1807.00459&gt;`_</span>
+<span class="sd">    specifically for evading distance metric-based defense systems</span>
+
+<span class="sd">    Additional arguments:</span>
+<span class="sd">    - alpha: weighting of attack loss vs. constraint loss</span>
+<span class="sd">    - opt: the optimizer to use</span>
+<span class="sd">    - opt_state: the optimizer state</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">global_params</span> <span class="o">=</span> <span class="n">params</span>
@@ -150,7 +185,15 @@
 
 
 <span class="k">def</span> <span class="nf">constrain_cosine_loss</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loss function from the constrain and scale attack `https://arxiv.org/abs/1807.00459 &lt;https://arxiv.org/abs/1807.00459&gt;`_</span>
+<span class="sd">    specifically for evading cosine similarity-based defense systems</span>
+
+<span class="sd">    Additional arguments:</span>
+<span class="sd">    - alpha: weighting of attack loss vs. constraint loss</span>
+<span class="sd">    - opt: the optimizer to use</span>
+<span class="sd">    - opt_state: the optimizer state</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">global_params</span> <span class="o">=</span> <span class="n">params</span>
@@ -175,7 +218,12 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">cross_entropy_loss</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">classes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Cross entropy/log loss, best suited for softmax models&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cross entropy/log loss, best suited for softmax models</span>
+<span class="sd">    </span>
+<span class="sd">    Additional arguments:</span>
+<span class="sd">    - classes: the number of classes in the dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">logits</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
@@ -187,6 +235,12 @@
         </details>
 
             <div class="docstring"><p>Cross entropy/log loss, best suited for softmax models</p>
+
+<p>Additional arguments:</p>
+
+<ul>
+<li>classes: the number of classes in the dataset</li>
+</ul>
 </div>
 
 
@@ -202,7 +256,7 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ae_l2_loss</span><span class="p">(</span><span class="n">net</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Autoencoder L2 loss&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Autoencoder L2 loss, internal function only takes the neural network parameters and input data&quot;&quot;&quot;</span>
     <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">z</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
@@ -212,7 +266,7 @@
 
         </details>
 
-            <div class="docstring"><p>Autoencoder L2 loss</p>
+            <div class="docstring"><p>Autoencoder L2 loss, internal function only takes the neural network parameters and input data</p>
 </div>
 
 
@@ -228,7 +282,13 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">fedmax_loss</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">net_act</span><span class="p">,</span> <span class="n">classes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loss function used for the FedMAX algorithm proposed in https://arxiv.org/abs/2004.03657&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loss function used for the FedMAX algorithm proposed in `https://arxiv.org/abs/2004.03657 &lt;https://arxiv.org/abs/2004.03657&gt;`_</span>
+<span class="sd">    </span>
+<span class="sd">    Additional arguments:</span>
+<span class="sd">    - net_act: the activation function to use for the neural network, this is the output up to the second-last layer</span>
+<span class="sd">    - classes: the number of classes in the dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">logits</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
@@ -242,7 +302,14 @@
 
         </details>
 
-            <div class="docstring"><p>Loss function used for the FedMAX algorithm proposed in https://arxiv.org/abs/2004.03657</p>
+            <div class="docstring"><p>Loss function used for the FedMAX algorithm proposed in <a href="https://arxiv.org/abs/2004.03657">https://arxiv.org/abs/2004.03657 </a></p>
+
+<p>Additional arguments:</p>
+
+<ul>
+<li>net_act: the activation function to use for the neural network, this is the output up to the second-last layer</li>
+<li>classes: the number of classes in the dataset</li>
+</ul>
 </div>
 
 
@@ -258,7 +325,16 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">smp_loss</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">val_X</span><span class="p">,</span> <span class="n">val_y</span><span class="p">,</span> <span class="n">classes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loss function for stealthy model poisoning https://arxiv.org/abs/1811.12470, assumes a classification task&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loss function for stealthy model poisoning `https://arxiv.org/abs/1811.12470 &lt;https://arxiv.org/abs/1811.12470&gt;`_,</span>
+<span class="sd">    assumes a classification task</span>
+<span class="sd">    </span>
+<span class="sd">    Additional arguments:</span>
+<span class="sd">    - scale: the scale of the poisoned loss function over the stealthy loss function</span>
+<span class="sd">    - val_X: the validation data, used for stealth</span>
+<span class="sd">    - val_y: the validation labels, used for stealth</span>
+<span class="sd">    - classes: the number of classes in the dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">val_logits</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">val_X</span><span class="p">)</span>
@@ -269,7 +345,17 @@
 
         </details>
 
-            <div class="docstring"><p>Loss function for stealthy model poisoning https://arxiv.org/abs/1811.12470, assumes a classification task</p>
+            <div class="docstring"><p>Loss function for stealthy model poisoning <a href="https://arxiv.org/abs/1811.12470">https://arxiv.org/abs/1811.12470 </a>,
+assumes a classification task</p>
+
+<p>Additional arguments:</p>
+
+<ul>
+<li>scale: the scale of the poisoned loss function over the stealthy loss function</li>
+<li>val_X: the validation data, used for stealth</li>
+<li>val_y: the validation labels, used for stealth</li>
+<li>classes: the number of classes in the dataset</li>
+</ul>
 </div>
 
 
@@ -285,7 +371,15 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">constrain_distance_loss</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loss function from the constrain and scale attack `https://arxiv.org/abs/1807.00459 &lt;https://arxiv.org/abs/1807.00459&gt;`_</span>
+<span class="sd">    specifically for evading distance metric-based defense systems</span>
+
+<span class="sd">    Additional arguments:</span>
+<span class="sd">    - alpha: weighting of attack loss vs. constraint loss</span>
+<span class="sd">    - opt: the optimizer to use</span>
+<span class="sd">    - opt_state: the optimizer state</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">global_params</span> <span class="o">=</span> <span class="n">params</span>
@@ -298,7 +392,16 @@
 
         </details>
 
-            <div class="docstring"><p>Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459</p>
+            <div class="docstring"><p>Loss function from the constrain and scale attack <a href="https://arxiv.org/abs/1807.00459">https://arxiv.org/abs/1807.00459 </a>
+specifically for evading distance metric-based defense systems</p>
+
+<p>Additional arguments:</p>
+
+<ul>
+<li>alpha: weighting of attack loss vs. constraint loss</li>
+<li>opt: the optimizer to use</li>
+<li>opt_state: the optimizer state</li>
+</ul>
 </div>
 
 
@@ -314,7 +417,15 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">constrain_cosine_loss</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loss function from the constrain and scale attack `https://arxiv.org/abs/1807.00459 &lt;https://arxiv.org/abs/1807.00459&gt;`_</span>
+<span class="sd">    specifically for evading cosine similarity-based defense systems</span>
+
+<span class="sd">    Additional arguments:</span>
+<span class="sd">    - alpha: weighting of attack loss vs. constraint loss</span>
+<span class="sd">    - opt: the optimizer to use</span>
+<span class="sd">    - opt_state: the optimizer state</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@jax.jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">global_params</span> <span class="o">=</span> <span class="n">params</span>
@@ -327,7 +438,16 @@
 
         </details>
 
-            <div class="docstring"><p>Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459</p>
+            <div class="docstring"><p>Loss function from the constrain and scale attack <a href="https://arxiv.org/abs/1807.00459">https://arxiv.org/abs/1807.00459 </a>
+specifically for evading cosine similarity-based defense systems</p>
+
+<p>Additional arguments:</p>
+
+<ul>
+<li>alpha: weighting of attack loss vs. constraint loss</li>
+<li>opt: the optimizer to use</li>
+<li>opt_state: the optimizer state</li>
+</ul>
 </div>
 
 

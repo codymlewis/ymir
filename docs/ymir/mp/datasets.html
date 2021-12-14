@@ -96,20 +96,23 @@
                     <h1 class="modulename">
 <a href="./../../ymir.html">ymir</a><wbr>.<a href="./../mp.html">mp</a><wbr>.datasets    </h1>
 
-                
+                        <div class="docstring"><p>Load a dataset, handle the subset distribution, and provide an iterator.</p>
+</div>
+
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Load a dataset, handle the subset distribution, and provide an iterator.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">datalib</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Load and preprocess datasets</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
 
 <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load a dataset according to the datalib module.&quot;&quot;&quot;</span>
     <span class="n">fn</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;{dir}/{dataset}.npz&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
         <span class="n">datalib</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
@@ -119,8 +122,18 @@
 
 
 <span class="k">class</span> <span class="nc">DataIter</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Iterator that gives random batchs in pairs of (sample, label)&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Iterator that gives random batchs in pairs of $(X_i, y_i) : i \subseteq {1, \ldots, N}$&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct a data iterator.</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">        - X: the samples</span>
+<span class="sd">        - y: the labels</span>
+<span class="sd">        - batch_size: the batch size</span>
+<span class="sd">        - classes: the number of classes</span>
+<span class="sd">        - rng: the random number generator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">batch_size</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -129,15 +142,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return this as an iterator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a random batch.&quot;&quot;&quot;</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
 
 
 <span class="k">class</span> <span class="nc">Dataset</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Object that contains the full dataset, primarily to prevent the need for reloading for each endpoint.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the dataset.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - X: the samples</span>
+<span class="sd">        - y: the labels</span>
+<span class="sd">        - train: the training indices</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_idx</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -150,7 +174,17 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">train_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">train_idx</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">get_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">DataIter</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Generate an iterator out of the dataset&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate an iterator out of the dataset.</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">        - split: the split to use, either &quot;train&quot; or &quot;test&quot;</span>
+<span class="sd">        - batch_size: the batch size</span>
+<span class="sd">        - idx: the indices to use</span>
+<span class="sd">        - filter: a function that takes the labels and returns whether to keep the sample</span>
+<span class="sd">        - map: a function that takes the samples and labels and returns a subset of the samples and labels</span>
+<span class="sd">        - rng: the random number generator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">()</span> <span class="k">if</span> <span class="n">split</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">()</span>
         <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -163,7 +197,14 @@
         <span class="k">return</span> <span class="n">DataIter</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
     
     <span class="k">def</span> <span class="nf">fed_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_sizes</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
-        <span class="sd">&quot;&quot;&quot;Divide the dataset for federated learning&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Divide the dataset for federated learning.</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">        - batch_sizes: the batch sizes for each endpoint</span>
+<span class="sd">        - mapping: a function that takes the dataset information and returns the indices for each endpoint</span>
+<span class="sd">        - rng: the random number generator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">mapping</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">distribution</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_sizes</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">batch_sizes</span><span class="p">,</span> <span class="n">distribution</span><span class="p">)]</span>
@@ -184,6 +225,7 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load a dataset according to the datalib module.&quot;&quot;&quot;</span>
     <span class="n">fn</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;{dir}/{dataset}.npz&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
         <span class="n">datalib</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
@@ -194,7 +236,9 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Load a dataset according to the datalib module.</p>
+</div>
+
 
                 </section>
                 <section id="DataIter">
@@ -209,8 +253,18 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">DataIter</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Iterator that gives random batchs in pairs of (sample, label)&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Iterator that gives random batchs in pairs of $(X_i, y_i) : i \subseteq {1, \ldots, N}$&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct a data iterator.</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">        - X: the samples</span>
+<span class="sd">        - y: the labels</span>
+<span class="sd">        - batch_size: the batch size</span>
+<span class="sd">        - classes: the number of classes</span>
+<span class="sd">        - rng: the random number generator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">batch_size</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -219,16 +273,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return this as an iterator.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a random batch.&quot;&quot;&quot;</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Iterator that gives random batchs in pairs of (sample, label)</p>
+            <div class="docstring"><p>Iterator that gives random batchs in pairs of $(X_i, y_i) : i \subseteq {1, \ldots, N}$</p>
 </div>
 
 
@@ -242,6 +298,16 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct a data iterator.</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">        - X: the samples</span>
+<span class="sd">        - y: the labels</span>
+<span class="sd">        - batch_size: the batch size</span>
+<span class="sd">        - classes: the number of classes</span>
+<span class="sd">        - rng: the random number generator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">batch_size</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -252,7 +318,19 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Construct a data iterator.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>X: the samples</li>
+<li>y: the labels</li>
+<li>batch_size: the batch size</li>
+<li>classes: the number of classes</li>
+<li>rng: the random number generator</li>
+</ul>
+</div>
+
 
                             </div>
                 </section>
@@ -268,7 +346,16 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Dataset</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Object that contains the full dataset, primarily to prevent the need for reloading for each endpoint.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the dataset.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - X: the samples</span>
+<span class="sd">        - y: the labels</span>
+<span class="sd">        - train: the training indices</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_idx</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -281,7 +368,17 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">train_idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">train_idx</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">get_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">DataIter</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Generate an iterator out of the dataset&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate an iterator out of the dataset.</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">        - split: the split to use, either &quot;train&quot; or &quot;test&quot;</span>
+<span class="sd">        - batch_size: the batch size</span>
+<span class="sd">        - idx: the indices to use</span>
+<span class="sd">        - filter: a function that takes the labels and returns whether to keep the sample</span>
+<span class="sd">        - map: a function that takes the samples and labels and returns a subset of the samples and labels</span>
+<span class="sd">        - rng: the random number generator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">()</span> <span class="k">if</span> <span class="n">split</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">()</span>
         <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -294,7 +391,14 @@
         <span class="k">return</span> <span class="n">DataIter</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
     
     <span class="k">def</span> <span class="nf">fed_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_sizes</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
-        <span class="sd">&quot;&quot;&quot;Divide the dataset for federated learning&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Divide the dataset for federated learning.</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">        - batch_sizes: the batch sizes for each endpoint</span>
+<span class="sd">        - mapping: a function that takes the dataset information and returns the indices for each endpoint</span>
+<span class="sd">        - rng: the random number generator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">mapping</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">distribution</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_sizes</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">batch_sizes</span><span class="p">,</span> <span class="n">distribution</span><span class="p">)]</span>
@@ -303,7 +407,9 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Object that contains the full dataset, primarily to prevent the need for reloading for each endpoint.</p>
+</div>
+
 
                             <div id="Dataset.__init__" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#Dataset.__init__">#&nbsp;&nbsp</a>
@@ -315,13 +421,31 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the dataset.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - X: the samples</span>
+<span class="sd">        - y: the labels</span>
+<span class="sd">        - train: the training indices</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_idx</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Construct the dataset.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>X: the samples</li>
+<li>y: the labels</li>
+<li>train: the training indices</li>
+</ul>
+</div>
+
 
                             </div>
                             <div id="Dataset.train" class="classattr">
@@ -380,14 +504,24 @@
     idx=None,
     filter=None,
     map=None,
-    rng=Generator(PCG64) at 0x7FF1BE213F20
+    rng=Generator(PCG64) at 0x7F1F05E21F20
 ) -&gt; <a href="#DataIter">ymir.mp.datasets.DataIter</a></span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">map</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">DataIter</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Generate an iterator out of the dataset&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate an iterator out of the dataset.</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">        - split: the split to use, either &quot;train&quot; or &quot;test&quot;</span>
+<span class="sd">        - batch_size: the batch size</span>
+<span class="sd">        - idx: the indices to use</span>
+<span class="sd">        - filter: a function that takes the labels and returns whether to keep the sample</span>
+<span class="sd">        - map: a function that takes the samples and labels and returns a subset of the samples and labels</span>
+<span class="sd">        - rng: the random number generator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">()</span> <span class="k">if</span> <span class="n">split</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">()</span>
         <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -402,7 +536,18 @@
 
         </details>
 
-            <div class="docstring"><p>Generate an iterator out of the dataset</p>
+            <div class="docstring"><p>Generate an iterator out of the dataset.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>split: the split to use, either "train" or "test"</li>
+<li>batch_size: the batch size</li>
+<li>idx: the indices to use</li>
+<li>filter: a function that takes the labels and returns whether to keep the sample</li>
+<li>map: a function that takes the samples and labels and returns a subset of the samples and labels</li>
+<li>rng: the random number generator</li>
+</ul>
 </div>
 
 
@@ -416,14 +561,21 @@
     self,
     batch_sizes,
     mapping=None,
-    rng=Generator(PCG64) at 0x7FF1BDB19200
+    rng=Generator(PCG64) at 0x7F1F05728200
 )</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">fed_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_sizes</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
-        <span class="sd">&quot;&quot;&quot;Divide the dataset for federated learning&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Divide the dataset for federated learning.</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">        - batch_sizes: the batch sizes for each endpoint</span>
+<span class="sd">        - mapping: a function that takes the dataset information and returns the indices for each endpoint</span>
+<span class="sd">        - rng: the random number generator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">mapping</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">distribution</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_sizes</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">batch_sizes</span><span class="p">,</span> <span class="n">distribution</span><span class="p">)]</span>
@@ -432,7 +584,15 @@
 
         </details>
 
-            <div class="docstring"><p>Divide the dataset for federated learning</p>
+            <div class="docstring"><p>Divide the dataset for federated learning.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>batch_sizes: the batch sizes for each endpoint</li>
+<li>mapping: a function that takes the dataset information and returns the indices for each endpoint</li>
+<li>rng: the random number generator</li>
+</ul>
 </div>
 
 

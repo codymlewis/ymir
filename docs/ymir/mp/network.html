@@ -102,26 +102,35 @@
                     <h1 class="modulename">
 <a href="./../../ymir.html">ymir</a><wbr>.<a href="./../mp.html">mp</a><wbr>.network    </h1>
 
-                
+                        <div class="docstring"><p>Defines the network architecture for the FL system.</p>
+</div>
+
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span>  <span class="nn">np</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines the network architecture for the FL system.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span>  <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">optax</span>
 
 <span class="kn">import</span> <span class="nn">ymirlib</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Set-up a network architecture for the FL process</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
 
 <span class="k">class</span> <span class="nc">Controller</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Holds a collection of clients and connects to other Controllers</span>
+<span class="sd">    Holds a collection of clients and connects to other Controllers.  </span>
 <span class="sd">    Handles the update step of each of the clients and passes the respective gradients</span>
 <span class="sd">    up the chain.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the Controller.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - C: percent of clients to randomly select for training at each round</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clients</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">switches</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
@@ -137,15 +146,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">def</span> <span class="nf">add_switch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">switch</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Connect another controller to this controller&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Connect another controller (referred to as switch) to this controller&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">switch</span><span class="p">)</span>
     
     <span class="k">def</span> <span class="nf">add_update_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_transform</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add a function to process&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Add a function that transforms the updates before passing them up the chain&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">update_transform</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">return_weights</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Update each connected client and return the generated gradients. Recursively call in connected controllers&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update each connected client and return the generated update. Recursively call in connected controllers</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the global model from the most recent round</span>
+<span class="sd">        - rng: the random number generator to use</span>
+<span class="sd">        - return_weights: if True, return the weights of the clients else return the gradients from the local training</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">all_updates</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">:</span>
             <span class="n">all_updates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">switch</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">))</span>
@@ -164,6 +180,11 @@
 <span class="k">class</span> <span class="nc">Network</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Higher level class for tracking each controller and client&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct the Network.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - C: percent of clients to randomly select for training at each round</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clients</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">server_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -180,6 +201,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">server_name</span> <span class="o">=</span> <span class="n">name</span>
     
     <span class="k">def</span> <span class="nf">get_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the controller with the specified name&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">add_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller_name</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
@@ -192,7 +214,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">from_con</span><span class="p">]</span><span class="o">.</span><span class="n">add_switch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">to_con</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">return_weights</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Perform an update step across the network and return the respective gradients&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform an update step across the network and return the respective updates</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the global model from the most recent round</span>
+<span class="sd">        - rng: the random number generator to use</span>
+<span class="sd">        - return_weights: if True, return the weights of the clients else return the gradients from the local training</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">](</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">)</span>
 </pre></div>
 
@@ -212,11 +241,17 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Controller</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Holds a collection of clients and connects to other Controllers</span>
+<span class="sd">    Holds a collection of clients and connects to other Controllers.  </span>
 <span class="sd">    Handles the update step of each of the clients and passes the respective gradients</span>
 <span class="sd">    up the chain.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the Controller.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - C: percent of clients to randomly select for training at each round</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clients</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">switches</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
@@ -232,15 +267,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">def</span> <span class="nf">add_switch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">switch</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Connect another controller to this controller&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Connect another controller (referred to as switch) to this controller&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">switch</span><span class="p">)</span>
     
     <span class="k">def</span> <span class="nf">add_update_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_transform</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add a function to process&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Add a function that transforms the updates before passing them up the chain&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">update_transform</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">return_weights</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Update each connected client and return the generated gradients. Recursively call in connected controllers&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update each connected client and return the generated update. Recursively call in connected controllers</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the global model from the most recent round</span>
+<span class="sd">        - rng: the random number generator to use</span>
+<span class="sd">        - return_weights: if True, return the weights of the clients else return the gradients from the local training</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">all_updates</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">:</span>
             <span class="n">all_updates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">switch</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">))</span>
@@ -258,7 +300,7 @@
 
         </details>
 
-            <div class="docstring"><p>Holds a collection of clients and connects to other Controllers
+            <div class="docstring"><p>Holds a collection of clients and connects to other Controllers. <br />
 Handles the update step of each of the clients and passes the respective gradients
 up the chain.</p>
 </div>
@@ -274,6 +316,12 @@ up the chain.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the Controller.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - C: percent of clients to randomly select for training at each round</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clients</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">switches</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
@@ -283,7 +331,15 @@ up the chain.</p>
 
         </details>
 
-    
+            <div class="docstring"><p>Construct the Controller.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>C: percent of clients to randomly select for training at each round</li>
+</ul>
+</div>
+
 
                             </div>
                             <div id="Controller.add_client" class="classattr">
@@ -320,13 +376,13 @@ up the chain.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">add_switch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">switch</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Connect another controller to this controller&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Connect another controller (referred to as switch) to this controller&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">switch</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Connect another controller to this controller</p>
+            <div class="docstring"><p>Connect another controller (referred to as switch) to this controller</p>
 </div>
 
 
@@ -342,13 +398,13 @@ up the chain.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">add_update_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_transform</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add a function to process&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Add a function that transforms the updates before passing them up the chain&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">update_transform</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Add a function to process</p>
+            <div class="docstring"><p>Add a function that transforms the updates before passing them up the chain</p>
 </div>
 
 
@@ -368,6 +424,11 @@ up the chain.</p>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Network</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Higher level class for tracking each controller and client&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct the Network.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - C: percent of clients to randomly select for training at each round</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clients</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">server_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -384,6 +445,7 @@ up the chain.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">server_name</span> <span class="o">=</span> <span class="n">name</span>
     
     <span class="k">def</span> <span class="nf">get_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the controller with the specified name&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">add_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">controller_name</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
@@ -396,7 +458,14 @@ up the chain.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">from_con</span><span class="p">]</span><span class="o">.</span><span class="n">add_switch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">to_con</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">return_weights</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Perform an update step across the network and return the respective gradients&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform an update step across the network and return the respective updates</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the global model from the most recent round</span>
+<span class="sd">        - rng: the random number generator to use</span>
+<span class="sd">        - return_weights: if True, return the weights of the clients else return the gradients from the local training</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">](</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">)</span>
 </pre></div>
 
@@ -416,6 +485,11 @@ up the chain.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct the Network.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - C: percent of clients to randomly select for training at each round</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clients</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">server_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -424,7 +498,15 @@ up the chain.</p>
 
         </details>
 
-    
+            <div class="docstring"><p>Construct the Network.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>C: percent of clients to randomly select for training at each round</li>
+</ul>
+</div>
+
 
                             </div>
                             <div id="Network.add_controller" class="classattr">
@@ -462,12 +544,15 @@ up the chain.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_controller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the controller with the specified name&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Get the controller with the specified name</p>
+</div>
+
 
                             </div>
                             <div id="Network.add_host" class="classattr">

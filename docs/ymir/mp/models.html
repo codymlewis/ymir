@@ -111,15 +111,18 @@
                     <h1 class="modulename">
 <a href="./../../ymir.html">ymir</a><wbr>.<a href="./../mp.html">mp</a><wbr>.models    </h1>
 
-                
+                        <div class="docstring"><p>Collection of haiku implemented neural network models.</p>
+</div>
+
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">jax</span>
-<span class="kn">import</span> <span class="nn">haiku</span> <span class="kn">as</span> <span class="nn">hk</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Collection of haiku implemented neural network models.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Neural networks to be used with FL</span>
-<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">jax</span>
+<span class="kn">import</span> <span class="nn">haiku</span> <span class="kn">as</span> <span class="nn">hk</span>
 
 
 <span class="k">class</span> <span class="nc">Logistic</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
@@ -139,7 +142,7 @@
 
 
 <span class="k">class</span> <span class="nc">LeNet_300_100</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;LeNet 300-100 network&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;LeNet 300-100 network from `https://doi.org/10.1109/5.726791 &lt;https://doi.org/10.1109/5.726791&gt;`_&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
@@ -157,7 +160,7 @@
 
 
 <span class="k">class</span> <span class="nc">LeNet</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;LeNet network&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;LeNet network from `https://doi.org/10.1109/5.726791 &lt;https://doi.org/10.1109/5.726791&gt;`_&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
@@ -317,7 +320,7 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">LeNet_300_100</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;LeNet 300-100 network&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;LeNet 300-100 network from `https://doi.org/10.1109/5.726791 &lt;https://doi.org/10.1109/5.726791&gt;`_&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
@@ -336,7 +339,7 @@
 
         </details>
 
-            <div class="docstring"><p>LeNet 300-100 network</p>
+            <div class="docstring"><p>LeNet 300-100 network from <a href="https://doi.org/10.1109/5.726791">https://doi.org/10.1109/5.726791 </a></p>
 </div>
 
 
@@ -424,7 +427,7 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">LeNet</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;LeNet network&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;LeNet network from `https://doi.org/10.1109/5.726791 &lt;https://doi.org/10.1109/5.726791&gt;`_&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
@@ -446,7 +449,7 @@
 
         </details>
 
-            <div class="docstring"><p>LeNet network</p>
+            <div class="docstring"><p>LeNet network from <a href="https://doi.org/10.1109/5.726791">https://doi.org/10.1109/5.726791 </a></p>
 </div>
 
 

@@ -81,17 +81,40 @@
                     <h1 class="modulename">
 <a href="./../../ymir.html">ymir</a><wbr>.<a href="./../mp.html">mp</a><wbr>.distributions    </h1>
 
-                
+                        <div class="docstring"><p>Federated learning data distribution mapping functions.</p>
+
+<p>All functions take the following arguments:</p>
+
+<ul>
+<li>X: the samples</li>
+<li>y: the labels</li>
+<li>nendpoints: the number of endpoints</li>
+<li>nclasses: the number of classes</li>
+<li>rng: the random number generator</li>
+</ul>
+
+<p>And they all return a list of lists of indices, where the outer list is indexed by endpoint.</p>
+</div>
+
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">itertools</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Federated learning data distribution mapping functions.</span>
+
+<span class="sd">All functions take the following arguments:</span>
+<span class="sd">- X: the samples</span>
+<span class="sd">- y: the labels</span>
+<span class="sd">- nendpoints: the number of endpoints</span>
+<span class="sd">- nclasses: the number of classes</span>
+<span class="sd">- rng: the random number generator</span>
+
+<span class="sd">And they all return a list of lists of indices, where the outer list is indexed by endpoint.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">itertools</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">absl</span> <span class="kn">import</span> <span class="n">logging</span>
-
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Federated learning data distribution mapping functions</span>
-<span class="sd">&quot;&quot;&quot;</span>
 
 
 <span class="k">def</span> <span class="nf">homogeneous</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
@@ -105,9 +128,13 @@
 
 
 <span class="k">def</span> <span class="nf">lda</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Latent dirichlet allocation defined in https://arxiv.org/abs/1909.06335</span>
-<span class="sd">    default value from https://arxiv.org/abs/2002.06440</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Latent Dirichlet allocation defined in `https://arxiv.org/abs/1909.06335 &lt;https://arxiv.org/abs/1909.06335&gt;`_</span>
+<span class="sd">    default value from `https://arxiv.org/abs/2002.06440 &lt;https://arxiv.org/abs/2002.06440&gt;`_</span>
+
+<span class="sd">    Optional arguments:</span>
+<span class="sd">    - alpha: the $\alpha$ parameter of the Dirichlet function,</span>
+<span class="sd">    the distribution is more i.i.d. as $\alpha \to \infty$ and less i.i.d. as $\alpha \to 0$</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">distribution</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
     <span class="n">proportions</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">dirichlet</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">nclasses</span><span class="p">)</span>
@@ -121,14 +148,20 @@
 
 
 <span class="k">def</span> <span class="nf">iid_partition</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Assign each endpoint iid the data from each class as defined in https://arxiv.org/abs/1602.05629&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Assign each endpoint iid the data from each class as defined in `https://arxiv.org/abs/1602.05629 &lt;https://arxiv.org/abs/1602.05629&gt;`_&quot;&quot;&quot;</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
     <span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="n">nendpoints</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">)])</span>
 
 
 <span class="k">def</span> <span class="nf">shard</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">shards_per_endpoint</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The shard data distribution scheme as defined in https://arxiv.org/abs/1602.05629&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The shard data distribution scheme as defined in `https://arxiv.org/abs/1602.05629 &lt;https://arxiv.org/abs/1602.05629&gt;`_</span>
+<span class="sd">    shards are even partitions of the data after sorting by class.</span>
+
+<span class="sd">    Optional arguments:</span>
+<span class="sd">    - shards_per_endpoint: the number of shards to assign to each endpoint.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>  <span class="c1"># sort by label</span>
     <span class="n">shards</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span><span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)])</span>
     <span class="n">assignment</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shards</span><span class="p">)),</span> <span class="p">(</span><span class="n">nendpoints</span><span class="p">,</span> <span class="n">shards_per_endpoint</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
@@ -136,7 +169,12 @@
 
 
 <span class="k">def</span> <span class="nf">assign_classes</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Assign each endpoint only the data from the list specified class&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assign each endpoint only the data from the list specified class</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    - classes: a list of classes to assign to each endpoint.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">classes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Classes not specified in distribution&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
@@ -200,9 +238,13 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">lda</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Latent dirichlet allocation defined in https://arxiv.org/abs/1909.06335</span>
-<span class="sd">    default value from https://arxiv.org/abs/2002.06440</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Latent Dirichlet allocation defined in `https://arxiv.org/abs/1909.06335 &lt;https://arxiv.org/abs/1909.06335&gt;`_</span>
+<span class="sd">    default value from `https://arxiv.org/abs/2002.06440 &lt;https://arxiv.org/abs/2002.06440&gt;`_</span>
+
+<span class="sd">    Optional arguments:</span>
+<span class="sd">    - alpha: the $\alpha$ parameter of the Dirichlet function,</span>
+<span class="sd">    the distribution is more i.i.d. as $\alpha \to \infty$ and less i.i.d. as $\alpha \to 0$</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">distribution</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
     <span class="n">proportions</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">dirichlet</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">nclasses</span><span class="p">)</span>
@@ -217,8 +259,15 @@
 
         </details>
 
-            <div class="docstring"><p>Latent dirichlet allocation defined in https://arxiv.org/abs/1909.06335
-default value from https://arxiv.org/abs/2002.06440</p>
+            <div class="docstring"><p>Latent Dirichlet allocation defined in <a href="https://arxiv.org/abs/1909.06335">https://arxiv.org/abs/1909.06335 </a>
+default value from <a href="https://arxiv.org/abs/2002.06440">https://arxiv.org/abs/2002.06440 </a></p>
+
+<p>Optional arguments:</p>
+
+<ul>
+<li>alpha: the $\alpha$ parameter of the Dirichlet function,
+the distribution is more i.i.d. as $\alpha \to \infty$ and less i.i.d. as $\alpha \to 0$</li>
+</ul>
 </div>
 
 
@@ -234,7 +283,7 @@ default value from https://arxiv.org/abs/2002.06440</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">iid_partition</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Assign each endpoint iid the data from each class as defined in https://arxiv.org/abs/1602.05629&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Assign each endpoint iid the data from each class as defined in `https://arxiv.org/abs/1602.05629 &lt;https://arxiv.org/abs/1602.05629&gt;`_&quot;&quot;&quot;</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
     <span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="n">nendpoints</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">)])</span>
@@ -242,7 +291,7 @@ default value from https://arxiv.org/abs/2002.06440</p>
 
         </details>
 
-            <div class="docstring"><p>Assign each endpoint iid the data from each class as defined in https://arxiv.org/abs/1602.05629</p>
+            <div class="docstring"><p>Assign each endpoint iid the data from each class as defined in <a href="https://arxiv.org/abs/1602.05629">https://arxiv.org/abs/1602.05629 </a></p>
 </div>
 
 
@@ -258,7 +307,13 @@ default value from https://arxiv.org/abs/2002.06440</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">shard</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">shards_per_endpoint</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The shard data distribution scheme as defined in https://arxiv.org/abs/1602.05629&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The shard data distribution scheme as defined in `https://arxiv.org/abs/1602.05629 &lt;https://arxiv.org/abs/1602.05629&gt;`_</span>
+<span class="sd">    shards are even partitions of the data after sorting by class.</span>
+
+<span class="sd">    Optional arguments:</span>
+<span class="sd">    - shards_per_endpoint: the number of shards to assign to each endpoint.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>  <span class="c1"># sort by label</span>
     <span class="n">shards</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span><span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)])</span>
     <span class="n">assignment</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shards</span><span class="p">)),</span> <span class="p">(</span><span class="n">nendpoints</span><span class="p">,</span> <span class="n">shards_per_endpoint</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
@@ -267,7 +322,14 @@ default value from https://arxiv.org/abs/2002.06440</p>
 
         </details>
 
-            <div class="docstring"><p>The shard data distribution scheme as defined in https://arxiv.org/abs/1602.05629</p>
+            <div class="docstring"><p>The shard data distribution scheme as defined in <a href="https://arxiv.org/abs/1602.05629">https://arxiv.org/abs/1602.05629 </a>
+shards are even partitions of the data after sorting by class.</p>
+
+<p>Optional arguments:</p>
+
+<ul>
+<li>shards_per_endpoint: the number of shards to assign to each endpoint.</li>
+</ul>
 </div>
 
 
@@ -283,7 +345,12 @@ default value from https://arxiv.org/abs/2002.06440</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">assign_classes</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Assign each endpoint only the data from the list specified class&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assign each endpoint only the data from the list specified class</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    - classes: a list of classes to assign to each endpoint.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">classes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Classes not specified in distribution&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
@@ -292,6 +359,12 @@ default value from https://arxiv.org/abs/2002.06440</p>
         </details>
 
             <div class="docstring"><p>Assign each endpoint only the data from the list specified class</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>classes: a list of classes to assign to each endpoint.</li>
+</ul>
 </div>
 
 
