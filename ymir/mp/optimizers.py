@@ -1,3 +1,8 @@
+"""
+Unique optimizers proposed in the FL literature
+"""
+
+
 from typing import NamedTuple
 
 import jax
@@ -6,14 +11,9 @@ import optax
 import chex
 
 
-"""
-Unique optimizers proposed in the FL literature
-"""
-
-
 def pgd(learning_rate, mu, local_epochs=1):
     """
-    Perturbed gradient descent proposed as the mechanism for FedProx in https://arxiv.org/abs/1812.06127
+    Perturbed gradient descent proposed as the mechanism for FedProx in `https://arxiv.org/abs/1812.06127 <https://arxiv.org/abs/1812.06127>`_
     """
     return optax.chain(
         _add_prox(mu, local_epochs),
@@ -22,8 +22,11 @@ def pgd(learning_rate, mu, local_epochs=1):
 
 
 class PgdState(NamedTuple):
+    """Perturbed gradient descent optimizer state"""
     params: optax.Params
+    """Model parameters from most recent round."""
     counter: chex.Array
+    """Counter for the number of epochs, determines when to update params."""
 
 
 def _add_prox(mu: float, local_epochs: int) -> optax.GradientTransformation:

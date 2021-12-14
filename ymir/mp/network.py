@@ -1,20 +1,27 @@
+"""
+Defines the network architecture for the FL system.
+"""
+
+
 import numpy as  np
 import optax
 
 import ymirlib
 
-"""
-Set-up a network architecture for the FL process
-"""
-
 
 class Controller:
     """
-    Holds a collection of clients and connects to other Controllers
+    Holds a collection of clients and connects to other Controllers.  
     Handles the update step of each of the clients and passes the respective gradients
     up the chain.
     """
     def __init__(self, C):
+        """
+        Construct the Controller.
+
+        Arguments:
+        - C: percent of clients to randomly select for training at each round
+        """
         self.clients = []
         self.switches = []
         self.C = C
@@ -30,15 +37,22 @@ class Controller:
         self.K += 1
 
     def add_switch(self, switch):
-        """Connect another controller to this controller"""
+        """Connect another controller (referred to as switch) to this controller"""
         self.switches.append(switch)
     
     def add_update_transform(self, update_transform):
-        """Add a function to process"""
+        """Add a function that transforms the updates before passing them up the chain"""
         self.update_transform_chain.append(update_transform)
 
     def __call__(self, params, rng=np.random.default_rng(), return_weights=False):
-        """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
+        """
+        Update each connected client and return the generated update. Recursively call in connected controllers
+        
+        Arguments:
+        - params: the parameters of the global model from the most recent round
+        - rng: the random number generator to use
+        - return_weights: if True, return the weights of the clients else return the gradients from the local training
+        """
         all_updates = []
         for switch in self.switches:
             all_updates.extend(switch(params, rng, return_weights))
@@ -57,6 +71,11 @@ class Controller:
 class Network:
     """Higher level class for tracking each controller and client"""
     def __init__(self, C=1.0):
+        """Construct the Network.
+
+        Arguments:
+        - C: percent of clients to randomly select for training at each round
+        """
         self.clients = []
         self.controllers = {}
         self.server_name = ""
@@ -73,6 +92,7 @@ class Network:
             self.server_name = name
     
     def get_controller(self, name):
+        """Get the controller with the specified name"""
         return self.controllers[name]
 
     def add_host(self, controller_name, client):
@@ -85,5 +105,12 @@ class Network:
         self.controllers[from_con].add_switch(self.controllers[to_con])
 
     def __call__(self, params, rng=np.random.default_rng(), return_weights=False):
-        """Perform an update step across the network and return the respective gradients"""
+        """
+        Perform an update step across the network and return the respective updates
+
+        Arguments:
+        - params: the parameters of the global model from the most recent round
+        - rng: the random number generator to use
+        - return_weights: if True, return the weights of the clients else return the gradients from the local training
+        """
         return self.controllers[self.server_name](params, rng, return_weights)

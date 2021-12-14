@@ -1,5 +1,5 @@
 """
-Functionality shared between the endpoint and server
+.. include:: README.md
 """
 
 from . import distributions

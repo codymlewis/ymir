@@ -1,17 +1,21 @@
+"""
+The FedZip compression scheme from `https://arxiv.org/abs/2102.01593 <https://arxiv.org/abs/2102.01593>`_
+"""
+
 import jax
 import jax.numpy as jnp
 import numpy as np
 from sklearn import cluster
 
 
-# FedZip: https://arxiv.org/abs/2102.01593
 # Endpoint-side FedZip functionality
 
-def encode(all_grads, compress=False):
+def encode(all_grads, compress=True):
+    """Compress all of the updates, performs a lossy-compression then if compress is True, a lossless compression encoding."""
     return [_encode(g, compress=compress) for g in all_grads]
 
 
-def _encode(grads, compress=False):
+def _encode(grads, compress=True):
     usable_grads = jax.tree_leaves(jax.tree_map(lambda x: x.flatten(), grads))
     sparse_grads = [_top_z(0.3, np.array(g)) for g in usable_grads]
     quantized_grads = [_k_means(g) for g in sparse_grads]
@@ -74,13 +78,21 @@ def _traverse_tree(root, line=0b0):
 
 # server-side FedZip functionality
 
-
 class Decode:
+    """Update transformation that decodes the input updates."""
     def __init__(self, params, compress=False):
+        """
+        Construct the encoder.
+
+        Arguments:
+        - params: the parameters of the model, used for structure information
+        - compress: whether to perform lossless decompression step
+        """
         self.params = params
         self.compress = compress
 
     def __call__(self, all_grads):
+        """Get all updates and decode each one."""
         if self.compress:
             return [_huffman_decode(self.params, g, e) for (g, e) in all_grads]
         return all_grads

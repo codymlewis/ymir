@@ -1,16 +1,24 @@
+"""
+JAX-based loss functions for ML models. Each function is curried to store the neural network apply
+function and required parameters. The internal functions each take the current neural network parameters,
+the input data, and the target labels, and return the specified loss value.
+"""
+
+
 import jax
 import jax.numpy as jnp
 import optax
 
 import ymirlib
 
-"""
-Loss functions for ML models
-"""
-
 
 def cross_entropy_loss(net, classes):
-    """Cross entropy/log loss, best suited for softmax models"""
+    """
+    Cross entropy/log loss, best suited for softmax models
+    
+    Additional arguments:
+    - classes: the number of classes in the dataset
+    """
     @jax.jit
     def _apply(params, X, y):
         logits = net.apply(params, X)
@@ -20,7 +28,7 @@ def cross_entropy_loss(net, classes):
 
 
 def ae_l2_loss(net):
-    """Autoencoder L2 loss"""
+    """Autoencoder L2 loss, internal function only takes the neural network parameters and input data"""
     @jax.jit
     def _apply(params, x):
         z = net.apply(params, x)
@@ -29,7 +37,13 @@ def ae_l2_loss(net):
 
 
 def fedmax_loss(net, net_act, classes):
-    """Loss function used for the FedMAX algorithm proposed in https://arxiv.org/abs/2004.03657"""
+    """
+    Loss function used for the FedMAX algorithm proposed in `https://arxiv.org/abs/2004.03657 <https://arxiv.org/abs/2004.03657>`_
+    
+    Additional arguments:
+    - net_act: the activation function to use for the neural network, this is the output up to the second-last layer
+    - classes: the number of classes in the dataset
+    """
     @jax.jit
     def _apply(params, X, y):
         logits = net.apply(params, X)
@@ -42,7 +56,16 @@ def fedmax_loss(net, net_act, classes):
 
 
 def smp_loss(net, scale, loss, val_X, val_y, classes):
-    """Loss function for stealthy model poisoning https://arxiv.org/abs/1811.12470, assumes a classification task"""
+    """
+    Loss function for stealthy model poisoning `https://arxiv.org/abs/1811.12470 <https://arxiv.org/abs/1811.12470>`_,
+    assumes a classification task
+    
+    Additional arguments:
+    - scale: the scale of the poisoned loss function over the stealthy loss function
+    - val_X: the validation data, used for stealth
+    - val_y: the validation labels, used for stealth
+    - classes: the number of classes in the dataset
+    """
     @jax.jit
     def _apply(params, X, y):
         val_logits = net.apply(params, val_X)
@@ -52,7 +75,15 @@ def smp_loss(net, scale, loss, val_X, val_y, classes):
 
 
 def constrain_distance_loss(alpha, loss, opt, opt_state):
-    """Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459"""
+    """
+    Loss function from the constrain and scale attack `https://arxiv.org/abs/1807.00459 <https://arxiv.org/abs/1807.00459>`_
+    specifically for evading distance metric-based defense systems
+
+    Additional arguments:
+    - alpha: weighting of attack loss vs. constraint loss
+    - opt: the optimizer to use
+    - opt_state: the optimizer state
+    """
     @jax.jit
     def _apply(params, X, y):
         global_params = params
@@ -64,7 +95,15 @@ def constrain_distance_loss(alpha, loss, opt, opt_state):
 
 
 def constrain_cosine_loss(alpha, loss, opt, opt_state):
-    """Loss function from the constrain and scale attack https://arxiv.org/abs/1807.00459"""
+    """
+    Loss function from the constrain and scale attack `https://arxiv.org/abs/1807.00459 <https://arxiv.org/abs/1807.00459>`_
+    specifically for evading cosine similarity-based defense systems
+
+    Additional arguments:
+    - alpha: weighting of attack loss vs. constraint loss
+    - opt: the optimizer to use
+    - opt_state: the optimizer state
+    """
     @jax.jit
     def _apply(params, X, y):
         global_params = params

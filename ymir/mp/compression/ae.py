@@ -1,3 +1,8 @@
+"""
+Autoencoder compression scheme from `https://arxiv.org/abs/2108.05670 <https://arxiv.org/abs/2108.05670>`_
+"""
+
+
 import jax
 import jax.numpy as jnp
 import optax
@@ -6,7 +11,7 @@ import haiku as hk
 from .. import losses
 
 
-# Autoencoder compression: https://arxiv.org/abs/2108.05670
+# Autoencoder compression
 
 def _update(opt, loss):
     @jax.jit
@@ -18,8 +23,16 @@ def _update(opt, loss):
     return _apply
 
 
-class Coder:  # batch size?
+class Coder:
+    """Store the per-endpoint autoencoders and associated variables."""
     def __init__(self, gm_params, num_clients):
+        """
+        Construct the Coder.
+
+        Arguments:
+        - gm_params: the parameters of the global model
+        - num_clients: the number of clients connected to the associated controller
+        """
         gm_params = jax.flatten_util.ravel_pytree(gm_params)[0]
         param_size = len(gm_params)
         ae = lambda: AE(param_size)
@@ -36,22 +49,30 @@ class Coder:  # batch size?
         self.num_clients = num_clients
 
     def encode(self, grad, i):
+        """Encode the updates of the client i."""
         return self.fe.apply(self.params[i], jax.flatten_util.ravel_pytree(grad)[0])
 
     def decode(self, all_grads):
+        """Decode the updates of the clients."""
         return [self.fd.apply(self.params[i], grad) for i, grad in enumerate(all_grads)]
 
     def add_data(self, grad, i):
+        """Add the updates of the client i to the ith dataset."""
         self.datas[i].append(grad)
     
     def update(self, i):
+        """Update the ith client's autoencoder."""
         grads = jnp.array(self.datas[i])
         self.params[i], self.opt_states[i] = self.updater(self.params[i], self.opt_states[i], grads)
         self.datas[i] = []
 
 
 class AE(hk.Module):
+    """Autoencoder for compression/decompression"""
     def __init__(self, in_len, name=None):
+        """
+        Construct the autoencoder, in_len ensures the the output is the same size as the input.
+        """
         super().__init__(name=name)
         self.encoder = hk.Sequential([
             hk.Linear(60), jax.nn.relu,
@@ -67,18 +88,28 @@ class AE(hk.Module):
         ])
     
     def __call__(self, x):
+        """Perform the encode and decode steps"""
         x = self.encoder(x)
         return self.decoder(x)
     
     def encode(self, x):
+        """Perform just the encode step"""
         return self.encoder(x)
 
     def decode(self, x):
+        """Perform just the decode step"""
         return self.decoder(x)
 
 
 class Encode:
+    """Encoding update transform."""
     def __init__(self, coder):
+        """
+        Construct the encoder.
+        
+        Arguments:
+        - coder: the autoencoders used for compression
+        """
         self.coder = coder
 
     def __call__(self, all_grads):
@@ -92,7 +123,15 @@ class Encode:
 
 
 class Decode:
+    """Decoding update transform."""
     def __init__(self, params, coder):
+        """
+        Construct the decoder.
+        
+        Arguments:
+        - params: the parameters of the global model, used for structure information
+        - coder: the autoencoders used for decompression
+        """
         self.unraveller = jax.flatten_util.ravel_pytree(params)[1]
         self.coder = coder
 

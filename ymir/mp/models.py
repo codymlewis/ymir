@@ -1,9 +1,10 @@
+"""
+Collection of haiku implemented neural network models.
+"""
+
+
 import jax
 import haiku as hk
-
-"""
-Neural networks to be used with FL
-"""
 
 
 class Logistic(hk.Module):
@@ -23,7 +24,7 @@ class Logistic(hk.Module):
 
 
 class LeNet_300_100(hk.Module):
-    """LeNet 300-100 network"""
+    """LeNet 300-100 network from `https://doi.org/10.1109/5.726791 <https://doi.org/10.1109/5.726791>`_"""
     def __init__(self, classes, name=None):
         super().__init__(name=name)
         self.layers = [
@@ -41,7 +42,7 @@ class LeNet_300_100(hk.Module):
 
 
 class LeNet(hk.Module):
-    """LeNet network"""
+    """LeNet network from `https://doi.org/10.1109/5.726791 <https://doi.org/10.1109/5.726791>`_"""
     def __init__(self, classes, name=None):
         super().__init__(name=name)
         self.layers = [
