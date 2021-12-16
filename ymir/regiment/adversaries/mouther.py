@@ -1,3 +1,8 @@
+"""
+The bad and good mouthing attacks for federated learning.
+"""
+
+
 from ymir import mp
 
 import ymirlib
@@ -5,15 +10,23 @@ import ymirlib
 
 class GradientTransform:
     """
-    Network controller that scales adversaries' gradients by the inverse of aggregation algorithm
+    Gradient transformation that copies the gradient of the victim client to the adversaries.
     """
     def __init__(self, num_adversaries, victim, attack_type):
+        """
+        Construct the gradient transformation.
+
+        Arguments:
+        - num_adversaries: the number of adversaries
+        - victim: the index of the victim client
+        - attack_type: the attack type to use, options are "bad" and "good" for the bad and good mouthing attacks respectively
+        """
         self.num_adv = num_adversaries
         self.victim = victim
         self.attack_type = attack_type
         
     def __call__(self, all_grads):
-        """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
+        """Copy victim gradient to all adversaries, negate the adversary gradients if bad mouthing."""
         grad = all_grads[self.victim]
         if "bad" in self.attack_type:
             grad = ymirlib.tree_mul(grad, -1)

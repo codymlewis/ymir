@@ -1,10 +1,10 @@
-from dataclasses import dataclass
-from typing import Mapping
+"""
+Federated learning-based adversaries.  
+The `convert` function is used to convert a `Scout` into the specified adversary.  
+The `GradientTranform` classes perform the adversarial activity at the network level,
+and are to be added to the network controller.
+"""
 
-import numpy as np
-import optax
-
-from functools import partial
 
 from . import alternating_minimization
 from . import backdoor

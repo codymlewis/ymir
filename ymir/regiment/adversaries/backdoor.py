@@ -1,9 +1,23 @@
+"""
+Federated learning backdoor attack proposed in `https://arxiv.org/abs/1807.00459 <https://arxiv.org/abs/1807.00459>`_
+"""
+
 from functools import partial
 
 import jax
 
 
 def convert(client, dataset, dataset_name, attack_from, attack_to):
+    """
+    Convert an endpoint into a backdoor adversary.
+
+    Arguments:
+    - client: the endpoint to convert
+    - dataset: the dataset to use
+    - dataset_name: the name of the dataset
+    - attack_from: the label to attack
+    - attack_to: the label to replace the attack_from label with
+    """
     bd_map = partial(globals()[f"{dataset_name}_backdoor_map"], attack_from, attack_to)
     data = dataset.get_iter(
         "train",
@@ -39,6 +53,7 @@ def kddcup99_backdoor_map(attack_from, attack_to, X, y, no_label=False):
 
 @partial(jax.jit, static_argnums=(0, 1, 2))
 def update(opt, loss, data, params, opt_state, X, y):
+    """Backdoor update function for endpoints."""
     grads = jax.grad(loss)(params, *next(data))
     updates, opt_state = opt.update(grads, opt_state, params)
     return grads, opt_state, updates

@@ -1,3 +1,7 @@
+"""
+MNIST digit recognition dataset `http://yann.lecun.com/exdb/mnist/ <http://yann.lecun.com/exdb/mnist/>`_.
+"""
+
 import os
 
 import sklearn.datasets as skds
@@ -7,11 +11,13 @@ from absl import logging
 
 
 def load():
+    """Load the MNIST dataset."""
     X, y = skds.fetch_openml('mnist_784', return_X_y=True)
     return X.to_numpy(), y.to_numpy()
 
 
 def preprocess(X, y):
+    """Preprocess the MNIST dataset."""
     X = skp.MinMaxScaler().fit_transform(X)
     X = X.reshape(-1, 28, 28, 1).astype(np.float32)
     y = skp.LabelEncoder().fit_transform(y).astype(np.int8)
@@ -19,6 +25,7 @@ def preprocess(X, y):
 
 
 def download(path):
+    """Download, preprocess, and save the dataset."""
     fn = os.path.expanduser(path)
     dir = os.path.dirname(fn)
 

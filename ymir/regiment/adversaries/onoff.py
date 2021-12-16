@@ -1,3 +1,7 @@
+"""
+Federate learning on-off toggle attack, this is not an attack by itself but it toggles an already existing attack.
+"""
+
 from functools import partial
 
 import numpy as np
@@ -6,11 +10,29 @@ from ymir import garrison
 from ymir import mp
 from ymir.regiment import scout
 
+
 class GradientTransform:
     """
-    Network controller that toggles an attack on or off respective to the result of the aggregation algorithm
+    Gradient transform for determining when to toggle the attack.
     """
     def __init__(self, params, opt, opt_state, network, alg, adversaries, max_alpha, sharp, beta=1.0, gamma=0.85, timer=False, rng=np.random.default_rng(), **kwargs):
+        """
+        Construct the gradient transform.
+
+        Arguments:
+        - params: the parameters of the starting model
+        - opt: the optimizer to use
+        - opt_state: the optimizer state
+        - network: the network of the FL environment
+        - alg: the FL aggregation algorithm to use
+        - adversaries: the list of adversaries
+        - max_alpha: the maximum value of the scale function from aggregation
+        - sharp: whether to use the sharp version of the toggle
+        - beta: the beta parameter for the toggle
+        - gamma: the gamma parameter for the toggle
+        - timer: whether to use a timer to determine when to toggle
+        - rng: the random number generator to use
+        """
         self.alg = alg
         self.attacking = False
         self.max_alpha = max_alpha
@@ -25,6 +47,7 @@ class GradientTransform:
             self.timer = 0
         
     def should_toggle(self, alpha):
+        """Return whether the attack should be toggled based on the current scale value."""
         if self.timer_mode:
             self.timer += 1
             if self.timer % 30 == 0:
@@ -50,10 +73,12 @@ class GradientTransform:
 
 
 def convert(client):
+    """Convert an endpoint into an on-off toggle adversary."""
     client.shadow_update = client.update
     client.update = partial(scout.update, client.opt, client.loss)
     client.toggle = toggle.__get__(client)
 
 
 def toggle(self):
+    """Toggle the attack."""
     self.update, shadow_update = self.shadow_update, self.update

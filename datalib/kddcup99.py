@@ -1,3 +1,8 @@
+"""
+KDD Cup '99 intrusion detection dataset `http://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html <http://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html>`_.
+"""
+
+
 import os
 
 import sklearn.datasets as skds
@@ -7,10 +12,12 @@ from absl import logging
 
 
 def load():
+    """Load the KDD Cup '99 dataset."""
     return skds.fetch_kddcup99(return_X_y=True)
 
 
 def preprocess(X, y):
+    """Preprocess the KDD Cup '99 dataset."""
     idx = (y != b'spy.') & (y != b'warezclient.')
     X, y = X[idx], y[idx]
     y = skp.LabelEncoder().fit_transform(y).astype(np.int8)
@@ -22,6 +29,7 @@ def preprocess(X, y):
 
 
 def download(path):
+    """Download, preprocess, and save the dataset."""
     fn = os.path.expanduser(path)
     dir = os.path.dirname(fn)
 

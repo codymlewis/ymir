@@ -28,7 +28,7 @@ jobs:
           pip install jax jaxlib pdoc
           pip install -r requirements.txt
           rm -r docs
-          pdoc --math -d restructuredtext -o docs ymir ymirlib
+          pdoc --math -d restructuredtext -o docs ymir ymirlib datalib
           git config --global user.name 'Cody Lewis'
           git config --global user.email 'codymlewis@users.noreply.github.com'
           git add docs

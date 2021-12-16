@@ -1,3 +1,8 @@
+"""
+Scale the updates submitted from selected endpoints.
+"""
+
+
 import numpy as np
 
 from ymir import garrison
@@ -12,6 +17,7 @@ def convert(client, num_endpoints):
 
 
 def update(opt, scale, params, opt_state, grads):
+    """Scale the gradient and resulting update."""
     grads = ymirlib.tree_mul(grads, scale)
     updates, opt_state = opt.update(grads, opt_state, params)
     return grads, opt_state, updates
@@ -19,15 +25,27 @@ def update(opt, scale, params, opt_state, grads):
 
 class GradientTransform:
     """
-    Network controller that scales adversaries' gradients by the inverse of aggregation algorithm
+    Gradient transform that scales updates based on the inverse of the result from the aggregation scale value.
     """
-    def __init__(self, params, opt, opt_state, network, alg, num_adversaries, rng = np.random.default_rng(), **kwargs):
+    def __init__(self, params, opt, opt_state, network, alg, num_adversaries, rng=np.random.default_rng(), **kwargs):
+        """
+        Construct the gradient transform.
+
+        Arguments:
+        - params: the parameters of the starting model
+        - opt: the optimizer to use
+        - opt_state: the optimizer state
+        - network: the network of the FL environment
+        - alg: the FL aggregation algorithm to use
+        - num_adversaries: the number of adversaries
+        - rng: the random number generator to use
+        """
         self.num_adv = num_adversaries
         self.alg = alg
         self.server = getattr(garrison, self.alg).Captain(params, opt, opt_state, network, rng, **kwargs)
 
     def __call__(self, all_grads):
-        """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
+        """Get the scale value and scale the gradients."""
         self.server.update(all_grads)
         alpha = np.array(self.server.scale(all_grads))
         idx = np.arange(len(alpha) - self.num_adv, len(alpha))[alpha[-self.num_adv:] > 0.0001]
