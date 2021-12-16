@@ -53,9 +53,9 @@ def main(_):
             network = ymir.mp.network.Network()
             network.add_controller("main", server=True)
             for i in range(N):
-                network.add_host("main", ymir.regiment.Collaborator(opt, opt_state, loss, data[i], 1))
+                network.add_host("main", ymir.regiment.Scout(opt, opt_state, loss, data[i], 1))
             for i in range(A):
-                c = ymir.regiment.Collaborator(opt, opt_state, loss, data[i + N], 1)
+                c = ymir.regiment.Scout(opt, opt_state, loss, data[i + N], 1)
                 ymir.regiment.adversaries.labelflipper.convert(c, DS, ATTACK_FROM, ATTACK_TO)
                 ymir.regiment.adversaries.onoff.convert(c)
                 network.add_host("main", c)
@@ -68,7 +68,7 @@ def main(_):
             controller.add_update_transform(toggler)
 
             evaluator = metrics.measurer(net)
-            model = ymir.Coordinate(ALG, opt, opt_state, params, network)
+            model = getattr(ymir.garrison, ALG).Captain(params, opt, opt_state, network)
             results = metrics.create_recorder(['accuracy', 'asr'], train=True, test=True, add_evals=['attacking'])
 
             # Train/eval loop.

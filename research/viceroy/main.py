@@ -87,11 +87,11 @@ def main(_):
         )
 
     if ALG == "krum":
-        model = ymir.Coordinate(ALG, opt, opt_state, params, network, rng, clip=A)
+        model = getattr(ymir.garrison, ALG).Captain(params, opt, opt_state, network, rng, clip=A)
     elif ALG == "contra":
-        model = ymir.Coordinate(ALG, opt, opt_state, params, network, rng, k=N)
+        model = getattr(ymir.garrison, ALG).Captain(params, opt, opt_state, network, rng, k=N)
     else:
-        model = ymir.Coordinate(ALG, opt, opt_state, params, network, rng)
+        model = getattr(ymir.garrison, ALG).Captain(params, opt, opt_state, network, rng)
 
     results = metrics.create_recorder(['accuracy', 'asr'], train=True, test=True, add_evals=['attacking'])
     results["asr"] = []
@@ -145,9 +145,9 @@ def create_network(num_honest, num_adv, attack, params, opt, opt_state, loss, da
     network = ymir.mp.network.Network()
     network.add_controller("main", server=True)
     for i in range(num_honest):
-        network.add_host("main", ymir.regiment.Collaborator(opt, opt_state, loss, data[i], 1))
+        network.add_host("main", ymir.regiment.Scout(opt, opt_state, loss, data[i], 1))
     for i in range(num_adv):
-        c = ymir.regiment.Collaborator(opt, opt_state, loss, data[i + num_honest], batch_sizes[i + num_honest])
+        c = ymir.regiment.Scout(opt, opt_state, loss, data[i + num_honest], batch_sizes[i + num_honest])
         if "labelflip" in attack:
             ymir.regiment.adversaries.labelflipper.convert(c, ds, att_from, att_to)
         elif "backdoor" in attack:

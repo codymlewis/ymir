@@ -108,7 +108,7 @@ def main(_):
                             controller.add_update_transform(ymir.mp.compression.fedzip.encode)
                             controller.add_update_transform(ymir.mp.compression.fedzip.Decode(params))
 
-                        model = ymir.Coordinate(alg, opt, opt_state, params, network)
+                        model = getattr(ymir.garrison, alg).Captain(params, opt, opt_state, network)
                         meter = utils.Neurometer(
                             net,
                             {'train': train_eval, 'test': test_eval},
