@@ -78,15 +78,31 @@
                     <h1 class="modulename">
 <a href="./../../../ymir.html">ymir</a><wbr>.<a href="./../../regiment.html">regiment</a><wbr>.<a href="./../adversaries.html">adversaries</a><wbr>.backdoor    </h1>
 
-                
+                        <div class="docstring"><p>Federated learning backdoor attack proposed in <a href="https://arxiv.org/abs/1807.00459">https://arxiv.org/abs/1807.00459 </a></p>
+</div>
+
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Federated learning backdoor attack proposed in `https://arxiv.org/abs/1807.00459 &lt;https://arxiv.org/abs/1807.00459&gt;`_</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
 <span class="kn">import</span> <span class="nn">jax</span>
 
 
 <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert an endpoint into a backdoor adversary.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    - client: the endpoint to convert</span>
+<span class="sd">    - dataset: the dataset to use</span>
+<span class="sd">    - dataset_name: the name of the dataset</span>
+<span class="sd">    - attack_from: the label to attack</span>
+<span class="sd">    - attack_to: the label to replace the attack_from label with</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">bd_map</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="n">f</span><span class="s2">&quot;{dataset_name}_backdoor_map&quot;</span><span class="p">],</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span>
         <span class="s2">&quot;train&quot;</span><span class="p">,</span>
@@ -122,6 +138,7 @@
 
 <span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Backdoor update function for endpoints.&quot;&quot;&quot;</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
     <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span>
@@ -141,6 +158,16 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert an endpoint into a backdoor adversary.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    - client: the endpoint to convert</span>
+<span class="sd">    - dataset: the dataset to use</span>
+<span class="sd">    - dataset_name: the name of the dataset</span>
+<span class="sd">    - attack_from: the label to attack</span>
+<span class="sd">    - attack_to: the label to replace the attack_from label with</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">bd_map</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="n">f</span><span class="s2">&quot;{dataset_name}_backdoor_map&quot;</span><span class="p">],</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span>
         <span class="s2">&quot;train&quot;</span><span class="p">,</span>
@@ -153,7 +180,19 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Convert an endpoint into a backdoor adversary.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>client: the endpoint to convert</li>
+<li>dataset: the dataset to use</li>
+<li>dataset_name: the name of the dataset</li>
+<li>attack_from: the label to attack</li>
+<li>attack_to: the label to replace the attack_from label with</li>
+</ul>
+</div>
+
 
                 </section>
                 <section id="mnist_backdoor_map">
@@ -238,6 +277,7 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Backdoor update function for endpoints.&quot;&quot;&quot;</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
     <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span>
@@ -245,7 +285,9 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Backdoor update function for endpoints.</p>
+</div>
+
 
                 </section>
     </main>

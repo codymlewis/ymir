@@ -78,10 +78,17 @@
                     <h1 class="modulename">
 <a href="./../../../ymir.html">ymir</a><wbr>.<a href="./../../regiment.html">regiment</a><wbr>.<a href="./../adversaries.html">adversaries</a><wbr>.scaler    </h1>
 
-                
+                        <div class="docstring"><p>Scale the updates submitted from selected endpoints.</p>
+</div>
+
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Scale the updates submitted from selected endpoints.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">ymir</span> <span class="kn">import</span> <span class="n">garrison</span>
 
@@ -95,6 +102,7 @@
 
 
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">grads</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scale the gradient and resulting update.&quot;&quot;&quot;</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_mul</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
     <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span>
@@ -102,15 +110,27 @@
 
 <span class="k">class</span> <span class="nc">GradientTransform</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Network controller that scales adversaries&#39; gradients by the inverse of aggregation algorithm</span>
+<span class="sd">    Gradient transform that scales updates based on the inverse of the result from the aggregation scale value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the gradient transform.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the starting model</span>
+<span class="sd">        - opt: the optimizer to use</span>
+<span class="sd">        - opt_state: the optimizer state</span>
+<span class="sd">        - network: the network of the FL environment</span>
+<span class="sd">        - alg: the FL aggregation algorithm to use</span>
+<span class="sd">        - num_adversaries: the number of adversaries</span>
+<span class="sd">        - rng: the random number generator to use</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span> <span class="o">=</span> <span class="n">num_adversaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Update each connected client and return the generated gradients. Recursively call in connected controllers&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Get the scale value and scale the gradients.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
         <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">))[</span><span class="n">alpha</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span><span class="p">:]</span> <span class="o">&gt;</span> <span class="mf">0.0001</span><span class="p">]</span>
@@ -157,6 +177,7 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">grads</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scale the gradient and resulting update.&quot;&quot;&quot;</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_mul</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
     <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span>
@@ -164,7 +185,9 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Scale the gradient and resulting update.</p>
+</div>
+
 
                 </section>
                 <section id="GradientTransform">
@@ -180,15 +203,27 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">GradientTransform</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Network controller that scales adversaries&#39; gradients by the inverse of aggregation algorithm</span>
+<span class="sd">    Gradient transform that scales updates based on the inverse of the result from the aggregation scale value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the gradient transform.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the starting model</span>
+<span class="sd">        - opt: the optimizer to use</span>
+<span class="sd">        - opt_state: the optimizer state</span>
+<span class="sd">        - network: the network of the FL environment</span>
+<span class="sd">        - alg: the FL aggregation algorithm to use</span>
+<span class="sd">        - num_adversaries: the number of adversaries</span>
+<span class="sd">        - rng: the random number generator to use</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span> <span class="o">=</span> <span class="n">num_adversaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Update each connected client and return the generated gradients. Recursively call in connected controllers&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Get the scale value and scale the gradients.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
         <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">))[</span><span class="n">alpha</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span><span class="p">:]</span> <span class="o">&gt;</span> <span class="mf">0.0001</span><span class="p">]</span>
@@ -200,7 +235,7 @@
 
         </details>
 
-            <div class="docstring"><p>Network controller that scales adversaries' gradients by the inverse of aggregation algorithm</p>
+            <div class="docstring"><p>Gradient transform that scales updates based on the inverse of the result from the aggregation scale value.</p>
 </div>
 
 
@@ -215,14 +250,26 @@
     network,
     alg,
     num_adversaries,
-    rng=Generator(PCG64) at 0x7F1F001AB820,
+    rng=Generator(PCG64) at 0x7F65E56D7BA0,
     **kwargs
 )</span>
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the gradient transform.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the starting model</span>
+<span class="sd">        - opt: the optimizer to use</span>
+<span class="sd">        - opt_state: the optimizer state</span>
+<span class="sd">        - network: the network of the FL environment</span>
+<span class="sd">        - alg: the FL aggregation algorithm to use</span>
+<span class="sd">        - num_adversaries: the number of adversaries</span>
+<span class="sd">        - rng: the random number generator to use</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span> <span class="o">=</span> <span class="n">num_adversaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -230,7 +277,21 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Construct the gradient transform.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>params: the parameters of the starting model</li>
+<li>opt: the optimizer to use</li>
+<li>opt_state: the optimizer state</li>
+<li>network: the network of the FL environment</li>
+<li>alg: the FL aggregation algorithm to use</li>
+<li>num_adversaries: the number of adversaries</li>
+<li>rng: the random number generator to use</li>
+</ul>
+</div>
+
 
                             </div>
                 </section>

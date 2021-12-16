@@ -47,7 +47,10 @@
 
                     <h2>Contents</h2>
                     <ul>
-  <li><a href="#ymir-library">Ymir Library</a></li>
+  <li><a href="#ymir-library">Ymir Library</a>
+  <ul>
+    <li><a href="#supporting-libraries">Supporting Libraries</a></li>
+  </ul></li>
 </ul>
 
 
@@ -57,28 +60,6 @@
                             <li><a href="ymir/mp.html">ymir.mp</a></li>
                             <li><a href="ymir/regiment.html">ymir.regiment</a></li>
                     </ul>
-
-                    <h2>API Documentation</h2>
-                        <ul class="memberlist">
-            <li>
-                    <a class="class" href="#Coordinate">Coordinate</a>
-                            <ul class="memberlist">
-                        <li>
-                                <a class="function" href="#Coordinate.__init__">Coordinate</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Coordinate.params">params</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#Coordinate.network">network</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#Coordinate.step">step</a>
-                        </li>
-                </ul>
-
-            </li>
-    </ul>
 
 
 
@@ -99,9 +80,18 @@ ymir    </h1>
 <p>This library is divided into the three following modules:</p>
 
 <ul>
-<li>garrison contains the server aspects of federated learning</li>
-<li>mp contains the shared aspects of federated learning</li>
-<li>regiment contains the endpoint aspects of federated learning</li>
+<li><a href="/ymir/garrison">garrison</a> contains the server aspects of federated learning</li>
+<li><a href="/ymir/mp">mp</a> contains the shared aspects of federated learning</li>
+<li><a href="/ymir/regiment">regiment</a> contains the endpoint aspects of federated learning</li>
+</ul>
+
+<h2 id="supporting-libraries">Supporting Libraries</h2>
+
+<p>We also include the following independent libraries:</p>
+
+<ul>
+<li><a href="/ymirlib">ymirlib</a> contains generic utility functions used throughout ymir</li>
+<li><a href="/datalib">datalib</a> contains functions for the downloading, preprocessing, and caching of datasets</li>
 </ul>
 </div>
 
@@ -116,136 +106,11 @@ ymir    </h1>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">garrison</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">mp</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">regiment</span>
-
-
-<span class="k">class</span> <span class="nc">Coordinate</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Class for the high-level API for federated learning&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct the FL management object&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">params</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">network</span>
-    
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Perform a single round of federated learning&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 </pre></div>
 
         </details>
 
             </section>
-                <section id="Coordinate">
-                                <div class="attr class">
-        <a class="headerlink" href="#Coordinate">#&nbsp;&nbsp</a>
-
-        
-        <span class="def">class</span>
-        <span class="name">Coordinate</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Coordinate</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Class for the high-level API for federated learning&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct the FL management object&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">params</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">network</span>
-    
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Perform a single round of federated learning&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Class for the high-level API for federated learning</p>
-</div>
-
-
-                            <div id="Coordinate.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#Coordinate.__init__">#&nbsp;&nbsp</a>
-
-        
-            <span class="name">Coordinate</span><span class="signature">(
-    alg,
-    opt,
-    opt_state,
-    params,
-    network,
-    rng=Generator(PCG64) at 0x7F1F001C52E0,
-    **kwargs
-)</span>
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct the FL management object&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Construct the FL management object</p>
-</div>
-
-
-                            </div>
-                            <div id="Coordinate.params" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#Coordinate.params">#&nbsp;&nbsp</a>
-
-        <span class="name">params</span>
-    </div>
-
-    
-
-                            </div>
-                            <div id="Coordinate.network" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#Coordinate.network">#&nbsp;&nbsp</a>
-
-        <span class="name">network</span>
-    </div>
-
-    
-
-                            </div>
-                            <div id="Coordinate.step" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#Coordinate.step">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">step</span><span class="signature">(self)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Perform a single round of federated learning&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Perform a single round of federated learning</p>
-</div>
-
-
-                            </div>
-                </section>
     </main>
 <script>
     function escapeHTML(html) {

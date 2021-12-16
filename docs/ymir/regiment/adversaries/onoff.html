@@ -81,10 +81,16 @@
                     <h1 class="modulename">
 <a href="./../../../ymir.html">ymir</a><wbr>.<a href="./../../regiment.html">regiment</a><wbr>.<a href="./../adversaries.html">adversaries</a><wbr>.onoff    </h1>
 
-                
+                        <div class="docstring"><p>Federate learning on-off toggle attack, this is not an attack by itself but it toggles an already existing attack.</p>
+</div>
+
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Federate learning on-off toggle attack, this is not an attack by itself but it toggles an already existing attack.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
@@ -92,11 +98,29 @@
 <span class="kn">from</span> <span class="nn">ymir</span> <span class="kn">import</span> <span class="n">mp</span>
 <span class="kn">from</span> <span class="nn">ymir.regiment</span> <span class="kn">import</span> <span class="n">scout</span>
 
+
 <span class="k">class</span> <span class="nc">GradientTransform</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Network controller that toggles an attack on or off respective to the result of the aggregation algorithm</span>
+<span class="sd">    Gradient transform for determining when to toggle the attack.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">adversaries</span><span class="p">,</span> <span class="n">max_alpha</span><span class="p">,</span> <span class="n">sharp</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="n">timer</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the gradient transform.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the starting model</span>
+<span class="sd">        - opt: the optimizer to use</span>
+<span class="sd">        - opt_state: the optimizer state</span>
+<span class="sd">        - network: the network of the FL environment</span>
+<span class="sd">        - alg: the FL aggregation algorithm to use</span>
+<span class="sd">        - adversaries: the list of adversaries</span>
+<span class="sd">        - max_alpha: the maximum value of the scale function from aggregation</span>
+<span class="sd">        - sharp: whether to use the sharp version of the toggle</span>
+<span class="sd">        - beta: the beta parameter for the toggle</span>
+<span class="sd">        - gamma: the gamma parameter for the toggle</span>
+<span class="sd">        - timer: whether to use a timer to determine when to toggle</span>
+<span class="sd">        - rng: the random number generator to use</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attacking</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_alpha</span> <span class="o">=</span> <span class="n">max_alpha</span>
@@ -111,6 +135,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="mi">0</span>
         
     <span class="k">def</span> <span class="nf">should_toggle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return whether the attack should be toggled based on the current scale value.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer_mode</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">%</span> <span class="mi">30</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -136,12 +161,14 @@
 
 
 <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert an endpoint into an on-off toggle adversary.&quot;&quot;&quot;</span>
     <span class="n">client</span><span class="o">.</span><span class="n">shadow_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">update</span>
     <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">scout</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">toggle</span> <span class="o">=</span> <span class="n">toggle</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">toggle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Toggle the attack.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">shadow_update</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_update</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span>
 </pre></div>
 
@@ -161,9 +188,26 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">GradientTransform</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Network controller that toggles an attack on or off respective to the result of the aggregation algorithm</span>
+<span class="sd">    Gradient transform for determining when to toggle the attack.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">adversaries</span><span class="p">,</span> <span class="n">max_alpha</span><span class="p">,</span> <span class="n">sharp</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="n">timer</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the gradient transform.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the starting model</span>
+<span class="sd">        - opt: the optimizer to use</span>
+<span class="sd">        - opt_state: the optimizer state</span>
+<span class="sd">        - network: the network of the FL environment</span>
+<span class="sd">        - alg: the FL aggregation algorithm to use</span>
+<span class="sd">        - adversaries: the list of adversaries</span>
+<span class="sd">        - max_alpha: the maximum value of the scale function from aggregation</span>
+<span class="sd">        - sharp: whether to use the sharp version of the toggle</span>
+<span class="sd">        - beta: the beta parameter for the toggle</span>
+<span class="sd">        - gamma: the gamma parameter for the toggle</span>
+<span class="sd">        - timer: whether to use a timer to determine when to toggle</span>
+<span class="sd">        - rng: the random number generator to use</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attacking</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_alpha</span> <span class="o">=</span> <span class="n">max_alpha</span>
@@ -178,6 +222,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="mi">0</span>
         
     <span class="k">def</span> <span class="nf">should_toggle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return whether the attack should be toggled based on the current scale value.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer_mode</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">%</span> <span class="mi">30</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -204,7 +249,7 @@
 
         </details>
 
-            <div class="docstring"><p>Network controller that toggles an attack on or off respective to the result of the aggregation algorithm</p>
+            <div class="docstring"><p>Gradient transform for determining when to toggle the attack.</p>
 </div>
 
 
@@ -224,7 +269,7 @@
     beta=1.0,
     gamma=0.85,
     timer=False,
-    rng=Generator(PCG64) at 0x7F1F001ABD60,
+    rng=Generator(PCG64) at 0x7F65E56D7E40,
     **kwargs
 )</span>
     </div>
@@ -232,6 +277,23 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">adversaries</span><span class="p">,</span> <span class="n">max_alpha</span><span class="p">,</span> <span class="n">sharp</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="n">timer</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the gradient transform.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the starting model</span>
+<span class="sd">        - opt: the optimizer to use</span>
+<span class="sd">        - opt_state: the optimizer state</span>
+<span class="sd">        - network: the network of the FL environment</span>
+<span class="sd">        - alg: the FL aggregation algorithm to use</span>
+<span class="sd">        - adversaries: the list of adversaries</span>
+<span class="sd">        - max_alpha: the maximum value of the scale function from aggregation</span>
+<span class="sd">        - sharp: whether to use the sharp version of the toggle</span>
+<span class="sd">        - beta: the beta parameter for the toggle</span>
+<span class="sd">        - gamma: the gamma parameter for the toggle</span>
+<span class="sd">        - timer: whether to use a timer to determine when to toggle</span>
+<span class="sd">        - rng: the random number generator to use</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attacking</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_alpha</span> <span class="o">=</span> <span class="n">max_alpha</span>
@@ -248,7 +310,26 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Construct the gradient transform.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>params: the parameters of the starting model</li>
+<li>opt: the optimizer to use</li>
+<li>opt_state: the optimizer state</li>
+<li>network: the network of the FL environment</li>
+<li>alg: the FL aggregation algorithm to use</li>
+<li>adversaries: the list of adversaries</li>
+<li>max_alpha: the maximum value of the scale function from aggregation</li>
+<li>sharp: whether to use the sharp version of the toggle</li>
+<li>beta: the beta parameter for the toggle</li>
+<li>gamma: the gamma parameter for the toggle</li>
+<li>timer: whether to use a timer to determine when to toggle</li>
+<li>rng: the random number generator to use</li>
+</ul>
+</div>
+
 
                             </div>
                             <div id="GradientTransform.should_toggle" class="classattr">
@@ -262,6 +343,7 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">should_toggle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return whether the attack should be toggled based on the current scale value.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer_mode</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">%</span> <span class="mi">30</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -278,7 +360,9 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Return whether the attack should be toggled based on the current scale value.</p>
+</div>
+
 
                             </div>
                 </section>
@@ -293,6 +377,7 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert an endpoint into an on-off toggle adversary.&quot;&quot;&quot;</span>
     <span class="n">client</span><span class="o">.</span><span class="n">shadow_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">update</span>
     <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">scout</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">toggle</span> <span class="o">=</span> <span class="n">toggle</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
@@ -300,7 +385,9 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Convert an endpoint into an on-off toggle adversary.</p>
+</div>
+
 
                 </section>
                 <section id="toggle">
@@ -314,12 +401,15 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">toggle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Toggle the attack.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">shadow_update</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_update</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Toggle the attack.</p>
+</div>
+
 
                 </section>
     </main>

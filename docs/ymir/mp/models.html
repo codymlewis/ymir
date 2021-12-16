@@ -48,52 +48,19 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
-                    <a class="class" href="#Logistic">Logistic</a>
-                            <ul class="memberlist">
-                        <li>
-                                <a class="function" href="#Logistic.__init__">Logistic</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#Logistic.act">act</a>
-                        </li>
-                </ul>
-
+                    <a class="function" href="#Logistic">Logistic</a>
             </li>
             <li>
-                    <a class="class" href="#LeNet_300_100">LeNet_300_100</a>
-                            <ul class="memberlist">
-                        <li>
-                                <a class="function" href="#LeNet_300_100.__init__">LeNet_300_100</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#LeNet_300_100.act">act</a>
-                        </li>
-                </ul>
-
+                    <a class="function" href="#LeNet_300_100">LeNet_300_100</a>
             </li>
             <li>
-                    <a class="class" href="#LeNet">LeNet</a>
-                            <ul class="memberlist">
-                        <li>
-                                <a class="function" href="#LeNet.__init__">LeNet</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#LeNet.act">act</a>
-                        </li>
-                </ul>
-
+                    <a class="function" href="#LeNet">LeNet</a>
             </li>
             <li>
-                    <a class="class" href="#ConvLeNet">ConvLeNet</a>
-                            <ul class="memberlist">
-                        <li>
-                                <a class="function" href="#ConvLeNet.__init__">ConvLeNet</a>
-                        </li>
-                        <li>
-                                <a class="function" href="#ConvLeNet.act">act</a>
-                        </li>
-                </ul>
-
+                    <a class="function" href="#ConvLeNet">ConvLeNet</a>
+            </li>
+            <li>
+                    <a class="function" href="#CNN">CNN</a>
             </li>
     </ul>
 
@@ -111,13 +78,21 @@
                     <h1 class="modulename">
 <a href="./../../ymir.html">ymir</a><wbr>.<a href="./../mp.html">mp</a><wbr>.models    </h1>
 
-                        <div class="docstring"><p>Collection of haiku implemented neural network models.</p>
+                        <div class="docstring"><p>Collection of haiku implemented neural network models. <br />
+Each of the classification models are functions take as
+arguments the number of classes, the input tensor, and a flags stating whether to return the activation
+<a href="https://arxiv.org/abs/2004.03657">https://arxiv.org/abs/2004.03657 </a> or
+classification.</p>
 </div>
 
                         <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Collection of haiku implemented neural network models.</span>
+<span class="sd">Collection of haiku implemented neural network models.  </span>
+<span class="sd">Each of the classification models are functions take as</span>
+<span class="sd">arguments the number of classes, the input tensor, and a flags stating whether to return the activation</span>
+<span class="sd">`https://arxiv.org/abs/2004.03657 &lt;https://arxiv.org/abs/2004.03657&gt;`_ or</span>
+<span class="sd">classification.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 
@@ -125,216 +100,95 @@
 <span class="kn">import</span> <span class="nn">haiku</span> <span class="kn">as</span> <span class="nn">hk</span>
 
 
-<span class="k">class</span> <span class="nc">Logistic</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Multi-class one-vs-all logistic regression model&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span>
-        <span class="p">]</span>
-    
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])(</span><span class="n">x</span><span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">LeNet_300_100</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">Logistic</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">act</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;LeNet 300-100 network from `https://doi.org/10.1109/5.726791 &lt;https://doi.org/10.1109/5.726791&gt;`_&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">300</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
-        <span class="p">]</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">),</span>
+    <span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">LeNet</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">LeNet_300_100</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">act</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;LeNet 300-100 network from `https://doi.org/10.1109/5.726791 &lt;https://doi.org/10.1109/5.726791&gt;`_&quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">300</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+    <span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">LeNet</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">act</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;LeNet network from `https://doi.org/10.1109/5.726791 &lt;https://doi.org/10.1109/5.726791&gt;`_&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;SAME&quot;</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;SAME&quot;</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
-        <span class="p">]</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;SAME&quot;</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;SAME&quot;</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span>
+    <span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">ConvLeNet</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">ConvLeNet</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">act</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;LeNet 300-100 network with a convolutional layer and max pooling layer prepended&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;VALID&quot;</span><span class="p">),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">300</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
-        <span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;VALID&quot;</span><span class="p">),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">300</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+    <span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">CNN</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">act</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;LeNet 300-100 network with a convolutional layer and max pooling layer prepended&quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;VALID&quot;</span><span class="p">),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;VALID&quot;</span><span class="p">),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+    <span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
             </section>
                 <section id="Logistic">
-                                <div class="attr class">
-        <a class="headerlink" href="#Logistic">#&nbsp;&nbsp</a>
-
-        
-        <span class="def">class</span>
-        <span class="name">Logistic</span><wbr>(<span class="base">haiku._src.module.Module</span>):
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Logistic</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Multi-class one-vs-all logistic regression model&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span>
-        <span class="p">]</span>
-    
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])(</span><span class="n">x</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Multi-class one-vs-all logistic regression model</p>
-</div>
-
-
-                            <div id="Logistic.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#Logistic.__init__">#&nbsp;&nbsp</a>
-
-        
-            <span class="name">Logistic</span><span class="signature">(*args, **kwargs)</span>
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>  <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-self-argument</span>
-    <span class="c1"># Call new such that we have an un-initialized module instance that we can</span>
-    <span class="c1"># still reference even if there is an exception during __init__. This is</span>
-    <span class="c1"># needed such that we can make sure the name_scope constructed in __init__</span>
-    <span class="c1"># is closed even if there is an exception.</span>
-
-    <span class="c1"># NOTE: We disable pytype since (somewhat surprisingly) this method is bound</span>
-    <span class="c1"># with the new class and not the metaclass.</span>
-    <span class="n">module</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># pytype: disable=wrong-arg-types</span>
-
-    <span class="c1"># Now attempt to initialize the object.</span>
-    <span class="n">init</span> <span class="o">=</span> <span class="n">wrap_method</span><span class="p">(</span><span class="s2">&quot;__init__&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span>
-    <span class="n">init</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="n">module</span><span class="o">.</span><span class="n">_auto_repr</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">auto_repr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
-
-    <span class="n">ran_super_ctor</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">&quot;module_name&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">ran_super_ctor</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="s2">&quot;Constructing an hk.Module without calling the super constructor &quot;</span>
-          <span class="s2">&quot;is not supported. Add the following as the first line in your &quot;</span>
-          <span class="s2">&quot;__init__ method:</span><span class="se">\n\n</span><span class="s2">super(</span><span class="si">%s</span><span class="s2">, self).__init__()&quot;</span> <span class="o">%</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">module</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Call self as a function.</p>
-</div>
-
-
-                            </div>
-                            <div id="Logistic.act" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#Logistic.act">#&nbsp;&nbsp</a>
+                            <div class="attr function"><a class="headerlink" href="#Logistic">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">act</span><span class="signature">(self, x)</span>:
+            <span class="name">Logistic</span><span class="signature">(classes, x, act=False)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])(</span><span class="n">x</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-    
-
-                            </div>
-                            <div class="inherited">
-                                <h5>Inherited Members</h5>
-                                <dl>
-                                    <div><dt>haiku._src.module.Module</dt>
-                                <dd id="Logistic.params_dict" class="function">params_dict</dd>
-                <dd id="Logistic.state_dict" class="function">state_dict</dd>
-
-            </div>
-                                </dl>
-                            </div>
-                </section>
-                <section id="LeNet_300_100">
-                                <div class="attr class">
-        <a class="headerlink" href="#LeNet_300_100">#&nbsp;&nbsp</a>
-
-        
-        <span class="def">class</span>
-        <span class="name">LeNet_300_100</span><wbr>(<span class="base">haiku._src.module.Module</span>):
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">LeNet_300_100</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">Logistic</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">act</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;LeNet 300-100 network from `https://doi.org/10.1109/5.726791 &lt;https://doi.org/10.1109/5.726791&gt;`_&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">300</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
-        <span class="p">]</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">),</span>
+    <span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -343,108 +197,59 @@
 </div>
 
 
-                            <div id="LeNet_300_100.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#LeNet_300_100.__init__">#&nbsp;&nbsp</a>
-
-        
-            <span class="name">LeNet_300_100</span><span class="signature">(*args, **kwargs)</span>
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>  <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-self-argument</span>
-    <span class="c1"># Call new such that we have an un-initialized module instance that we can</span>
-    <span class="c1"># still reference even if there is an exception during __init__. This is</span>
-    <span class="c1"># needed such that we can make sure the name_scope constructed in __init__</span>
-    <span class="c1"># is closed even if there is an exception.</span>
-
-    <span class="c1"># NOTE: We disable pytype since (somewhat surprisingly) this method is bound</span>
-    <span class="c1"># with the new class and not the metaclass.</span>
-    <span class="n">module</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># pytype: disable=wrong-arg-types</span>
-
-    <span class="c1"># Now attempt to initialize the object.</span>
-    <span class="n">init</span> <span class="o">=</span> <span class="n">wrap_method</span><span class="p">(</span><span class="s2">&quot;__init__&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span>
-    <span class="n">init</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="n">module</span><span class="o">.</span><span class="n">_auto_repr</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">auto_repr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
-
-    <span class="n">ran_super_ctor</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">&quot;module_name&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">ran_super_ctor</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="s2">&quot;Constructing an hk.Module without calling the super constructor &quot;</span>
-          <span class="s2">&quot;is not supported. Add the following as the first line in your &quot;</span>
-          <span class="s2">&quot;__init__ method:</span><span class="se">\n\n</span><span class="s2">super(</span><span class="si">%s</span><span class="s2">, self).__init__()&quot;</span> <span class="o">%</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">module</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Call self as a function.</p>
-</div>
-
-
-                            </div>
-                            <div id="LeNet_300_100.act" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#LeNet_300_100.act">#&nbsp;&nbsp</a>
+                </section>
+                <section id="LeNet_300_100">
+                            <div class="attr function"><a class="headerlink" href="#LeNet_300_100">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">act</span><span class="signature">(self, x)</span>:
+            <span class="name">LeNet_300_100</span><span class="signature">(classes, x, act=False)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">LeNet_300_100</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">act</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;LeNet 300-100 network from `https://doi.org/10.1109/5.726791 &lt;https://doi.org/10.1109/5.726791&gt;`_&quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">300</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+    <span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>LeNet 300-100 network from <a href="https://doi.org/10.1109/5.726791">https://doi.org/10.1109/5.726791 </a></p>
+</div>
 
-                            </div>
-                            <div class="inherited">
-                                <h5>Inherited Members</h5>
-                                <dl>
-                                    <div><dt>haiku._src.module.Module</dt>
-                                <dd id="LeNet_300_100.params_dict" class="function">params_dict</dd>
-                <dd id="LeNet_300_100.state_dict" class="function">state_dict</dd>
 
-            </div>
-                                </dl>
-                            </div>
                 </section>
                 <section id="LeNet">
-                                <div class="attr class">
-        <a class="headerlink" href="#LeNet">#&nbsp;&nbsp</a>
+                            <div class="attr function"><a class="headerlink" href="#LeNet">#&nbsp;&nbsp</a>
 
         
-        <span class="def">class</span>
-        <span class="name">LeNet</span><wbr>(<span class="base">haiku._src.module.Module</span>):
+            <span class="def">def</span>
+            <span class="name">LeNet</span><span class="signature">(classes, x, act=False)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">LeNet</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">LeNet</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">act</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;LeNet network from `https://doi.org/10.1109/5.726791 &lt;https://doi.org/10.1109/5.726791&gt;`_&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;SAME&quot;</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;SAME&quot;</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
-        <span class="p">]</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;SAME&quot;</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;SAME&quot;</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span>
+    <span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -453,107 +258,29 @@
 </div>
 
 
-                            <div id="LeNet.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#LeNet.__init__">#&nbsp;&nbsp</a>
-
-        
-            <span class="name">LeNet</span><span class="signature">(*args, **kwargs)</span>
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>  <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-self-argument</span>
-    <span class="c1"># Call new such that we have an un-initialized module instance that we can</span>
-    <span class="c1"># still reference even if there is an exception during __init__. This is</span>
-    <span class="c1"># needed such that we can make sure the name_scope constructed in __init__</span>
-    <span class="c1"># is closed even if there is an exception.</span>
-
-    <span class="c1"># NOTE: We disable pytype since (somewhat surprisingly) this method is bound</span>
-    <span class="c1"># with the new class and not the metaclass.</span>
-    <span class="n">module</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># pytype: disable=wrong-arg-types</span>
-
-    <span class="c1"># Now attempt to initialize the object.</span>
-    <span class="n">init</span> <span class="o">=</span> <span class="n">wrap_method</span><span class="p">(</span><span class="s2">&quot;__init__&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span>
-    <span class="n">init</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="n">module</span><span class="o">.</span><span class="n">_auto_repr</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">auto_repr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
-
-    <span class="n">ran_super_ctor</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">&quot;module_name&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">ran_super_ctor</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="s2">&quot;Constructing an hk.Module without calling the super constructor &quot;</span>
-          <span class="s2">&quot;is not supported. Add the following as the first line in your &quot;</span>
-          <span class="s2">&quot;__init__ method:</span><span class="se">\n\n</span><span class="s2">super(</span><span class="si">%s</span><span class="s2">, self).__init__()&quot;</span> <span class="o">%</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">module</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Call self as a function.</p>
-</div>
-
-
-                            </div>
-                            <div id="LeNet.act" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#LeNet.act">#&nbsp;&nbsp</a>
+                </section>
+                <section id="ConvLeNet">
+                            <div class="attr function"><a class="headerlink" href="#ConvLeNet">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">act</span><span class="signature">(self, x)</span>:
+            <span class="name">ConvLeNet</span><span class="signature">(classes, x, act=False)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])(</span><span class="n">x</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-    
-
-                            </div>
-                            <div class="inherited">
-                                <h5>Inherited Members</h5>
-                                <dl>
-                                    <div><dt>haiku._src.module.Module</dt>
-                                <dd id="LeNet.params_dict" class="function">params_dict</dd>
-                <dd id="LeNet.state_dict" class="function">state_dict</dd>
-
-            </div>
-                                </dl>
-                            </div>
-                </section>
-                <section id="ConvLeNet">
-                                <div class="attr class">
-        <a class="headerlink" href="#ConvLeNet">#&nbsp;&nbsp</a>
-
-        
-        <span class="def">class</span>
-        <span class="name">ConvLeNet</span><wbr>(<span class="base">haiku._src.module.Module</span>):
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ConvLeNet</span><span class="p">(</span><span class="n">hk</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ConvLeNet</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">act</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;LeNet 300-100 network with a convolutional layer and max pooling layer prepended&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;VALID&quot;</span><span class="p">),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">300</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
-            <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
-        <span class="p">]</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;VALID&quot;</span><span class="p">),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">300</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+    <span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -562,77 +289,38 @@
 </div>
 
 
-                            <div id="ConvLeNet.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#ConvLeNet.__init__">#&nbsp;&nbsp</a>
-
-        
-            <span class="name">ConvLeNet</span><span class="signature">(*args, **kwargs)</span>
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>  <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-self-argument</span>
-    <span class="c1"># Call new such that we have an un-initialized module instance that we can</span>
-    <span class="c1"># still reference even if there is an exception during __init__. This is</span>
-    <span class="c1"># needed such that we can make sure the name_scope constructed in __init__</span>
-    <span class="c1"># is closed even if there is an exception.</span>
-
-    <span class="c1"># NOTE: We disable pytype since (somewhat surprisingly) this method is bound</span>
-    <span class="c1"># with the new class and not the metaclass.</span>
-    <span class="n">module</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># pytype: disable=wrong-arg-types</span>
-
-    <span class="c1"># Now attempt to initialize the object.</span>
-    <span class="n">init</span> <span class="o">=</span> <span class="n">wrap_method</span><span class="p">(</span><span class="s2">&quot;__init__&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span>
-    <span class="n">init</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="n">module</span><span class="o">.</span><span class="n">_auto_repr</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">auto_repr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
-
-    <span class="n">ran_super_ctor</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">&quot;module_name&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">ran_super_ctor</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="s2">&quot;Constructing an hk.Module without calling the super constructor &quot;</span>
-          <span class="s2">&quot;is not supported. Add the following as the first line in your &quot;</span>
-          <span class="s2">&quot;__init__ method:</span><span class="se">\n\n</span><span class="s2">super(</span><span class="si">%s</span><span class="s2">, self).__init__()&quot;</span> <span class="o">%</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">module</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Call self as a function.</p>
-</div>
-
-
-                            </div>
-                            <div id="ConvLeNet.act" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#ConvLeNet.act">#&nbsp;&nbsp</a>
+                </section>
+                <section id="CNN">
+                            <div class="attr function"><a class="headerlink" href="#CNN">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">act</span><span class="signature">(self, x)</span>:
+            <span class="name">CNN</span><span class="signature">(classes, x, act=False)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">act</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">CNN</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">act</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;LeNet 300-100 network with a convolutional layer and max pooling layer prepended&quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">hk</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;VALID&quot;</span><span class="p">),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">kernel_shape</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">MaxPool</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;VALID&quot;</span><span class="p">),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+        <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+    <span class="p">])(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">act</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">hk</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">classes</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>LeNet 300-100 network with a convolutional layer and max pooling layer prepended</p>
+</div>
 
-                            </div>
-                            <div class="inherited">
-                                <h5>Inherited Members</h5>
-                                <dl>
-                                    <div><dt>haiku._src.module.Module</dt>
-                                <dd id="ConvLeNet.params_dict" class="function">params_dict</dd>
-                <dd id="ConvLeNet.state_dict" class="function">state_dict</dd>
 
-            </div>
-                                </dl>
-                            </div>
                 </section>
     </main>
 <script>

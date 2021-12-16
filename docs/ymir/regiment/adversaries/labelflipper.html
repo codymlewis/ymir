@@ -56,9 +56,6 @@
             <li>
                     <a class="function" href="#update">update</a>
             </li>
-            <li>
-                    <a class="function" href="#scaled_update">scaled_update</a>
-            </li>
     </ul>
 
 
@@ -75,30 +72,43 @@
                     <h1 class="modulename">
 <a href="./../../../ymir.html">ymir</a><wbr>.<a href="./../../regiment.html">regiment</a><wbr>.<a href="./../adversaries.html">adversaries</a><wbr>.labelflipper    </h1>
 
-                
+                        <div class="docstring"><p>Targeted model poisoning (label flipping) attack, proposed in <a href="https://arxiv.org/abs/1811.12470">https://arxiv.org/abs/1811.12470 </a></p>
+</div>
+
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Targeted model poisoning (label flipping) attack, proposed in `https://arxiv.org/abs/1811.12470 &lt;https://arxiv.org/abs/1811.12470&gt;`_</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
 <span class="kn">import</span> <span class="nn">jax</span>
 
 <span class="kn">import</span> <span class="nn">ymirlib</span>
 
 
-<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert an endpoint into a label flipping adversary.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    - client: the endpoint to convert</span>
+<span class="sd">    - dataset: the dataset to use</span>
+<span class="sd">    - attack_from: the label to attack</span>
+<span class="sd">    - attack_to: the label to replace the attack_from label with</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span>
         <span class="s2">&quot;train&quot;</span><span class="p">,</span>
         <span class="n">client</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
         <span class="nb">filter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span><span class="p">,</span>
         <span class="nb">map</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">labelflip_map</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="k">if</span> <span class="n">scale</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">scaled_update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">labelflip_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Map function for converting a dataset to a label flipping dataset.&quot;&quot;&quot;</span>
     <span class="n">idfrom</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
     <span class="n">y</span><span class="p">[</span><span class="n">idfrom</span><span class="p">]</span> <span class="o">=</span> <span class="n">attack_to</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -106,14 +116,8 @@
 
 <span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,))</span>
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Label flipping update function for endpoints.&quot;&quot;&quot;</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-    <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span>
-
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,))</span>
-<span class="k">def</span> <span class="nf">scaled_update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-    <span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_mul</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
     <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span>
 </pre></div>
@@ -126,27 +130,44 @@
 
         
             <span class="def">def</span>
-            <span class="name">convert</span><span class="signature">(client, dataset, attack_from, attack_to, scale=1.0)</span>:
+            <span class="name">convert</span><span class="signature">(client, dataset, attack_from, attack_to)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert an endpoint into a label flipping adversary.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    - client: the endpoint to convert</span>
+<span class="sd">    - dataset: the dataset to use</span>
+<span class="sd">    - attack_from: the label to attack</span>
+<span class="sd">    - attack_to: the label to replace the attack_from label with</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span>
         <span class="s2">&quot;train&quot;</span><span class="p">,</span>
         <span class="n">client</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
         <span class="nb">filter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span><span class="p">,</span>
         <span class="nb">map</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">labelflip_map</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="k">if</span> <span class="n">scale</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">scaled_update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Convert an endpoint into a label flipping adversary.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>client: the endpoint to convert</li>
+<li>dataset: the dataset to use</li>
+<li>attack_from: the label to attack</li>
+<li>attack_to: the label to replace the attack_from label with</li>
+</ul>
+</div>
+
 
                 </section>
                 <section id="labelflip_map">
@@ -160,6 +181,7 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">labelflip_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Map function for converting a dataset to a label flipping dataset.&quot;&quot;&quot;</span>
     <span class="n">idfrom</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
     <span class="n">y</span><span class="p">[</span><span class="n">idfrom</span><span class="p">]</span> <span class="o">=</span> <span class="n">attack_to</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -167,7 +189,9 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Map function for converting a dataset to a label flipping dataset.</p>
+</div>
+
 
                 </section>
                 <section id="update">
@@ -183,6 +207,7 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,))</span>
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Label flipping update function for endpoints.&quot;&quot;&quot;</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
     <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span>
@@ -190,31 +215,9 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Label flipping update function for endpoints.</p>
+</div>
 
-                </section>
-                <section id="scaled_update">
-                            <div class="attr function"><a class="headerlink" href="#scaled_update">#&nbsp;&nbsp</a>
-
-                <div class="decorator">@partial(jax.jit, static_argnums=(0, 1, 2, 3))</div>
-
-            <span class="def">def</span>
-            <span class="name">scaled_update</span><span class="signature">(opt, loss, data, scale, params, opt_state, X, y)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,))</span>
-<span class="k">def</span> <span class="nf">scaled_update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-    <span class="n">ymirlib</span><span class="o">.</span><span class="n">tree_mul</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
-    <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span>
-</pre></div>
-
-        </details>
-
-    
 
                 </section>
     </main>

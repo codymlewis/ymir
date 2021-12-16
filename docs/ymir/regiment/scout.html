@@ -75,14 +75,31 @@
                     <h1 class="modulename">
 <a href="./../../ymir.html">ymir</a><wbr>.<a href="./../regiment.html">regiment</a><wbr>.scout    </h1>
 
-                
+                        <div class="docstring"><p>Standard endpoint collaborators for federated learning.</p>
+</div>
+
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Standard endpoint collaborators for federated learning.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">import</span> <span class="nn">jax</span>
 
 <span class="k">class</span> <span class="nc">Scout</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;An endpoint for federated learning, holds its own data and personal learning variables.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">epochs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for a Scout.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - opt: optimizer to use for training</span>
+<span class="sd">        - opt_state: initial optimizer state</span>
+<span class="sd">        - loss: loss function to use for training</span>
+<span class="sd">        - data: data to use for training</span>
+<span class="sd">        - epochs: number of epochs to train for per round</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt_state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">batch_size</span>
@@ -94,6 +111,17 @@
 
 <span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,))</span>
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Local learning step.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    - opt: optimizer</span>
+<span class="sd">    - loss: loss function</span>
+<span class="sd">    - params: model parameters</span>
+<span class="sd">    - opt_state: optimizer state</span>
+<span class="sd">    - X: samples</span>
+<span class="sd">    - y: labels</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span>
@@ -114,7 +142,18 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Scout</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;An endpoint for federated learning, holds its own data and personal learning variables.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">epochs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for a Scout.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - opt: optimizer to use for training</span>
+<span class="sd">        - opt_state: initial optimizer state</span>
+<span class="sd">        - loss: loss function to use for training</span>
+<span class="sd">        - data: data to use for training</span>
+<span class="sd">        - epochs: number of epochs to train for per round</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt_state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">batch_size</span>
@@ -126,7 +165,9 @@
 
         </details>
 
-    
+            <div class="docstring"><p>An endpoint for federated learning, holds its own data and personal learning variables.</p>
+</div>
+
 
                             <div id="Scout.__init__" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#Scout.__init__">#&nbsp;&nbsp</a>
@@ -138,6 +179,16 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">epochs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor for a Scout.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - opt: optimizer to use for training</span>
+<span class="sd">        - opt_state: initial optimizer state</span>
+<span class="sd">        - loss: loss function to use for training</span>
+<span class="sd">        - data: data to use for training</span>
+<span class="sd">        - epochs: number of epochs to train for per round</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt_state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">batch_size</span>
@@ -149,7 +200,19 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Constructor for a Scout.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>opt: optimizer to use for training</li>
+<li>opt_state: initial optimizer state</li>
+<li>loss: loss function to use for training</li>
+<li>data: data to use for training</li>
+<li>epochs: number of epochs to train for per round</li>
+</ul>
+</div>
+
 
                             </div>
                 </section>
@@ -166,6 +229,17 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,))</span>
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Local learning step.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    - opt: optimizer</span>
+<span class="sd">    - loss: loss function</span>
+<span class="sd">    - params: model parameters</span>
+<span class="sd">    - opt_state: optimizer state</span>
+<span class="sd">    - X: samples</span>
+<span class="sd">    - y: labels</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">updates</span>
@@ -173,7 +247,20 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Local learning step.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>opt: optimizer</li>
+<li>loss: loss function</li>
+<li>params: model parameters</li>
+<li>opt_state: optimizer state</li>
+<li>X: samples</li>
+<li>y: labels</li>
+</ul>
+</div>
+
 
                 </section>
     </main>
