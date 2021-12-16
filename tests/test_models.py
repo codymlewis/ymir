@@ -17,7 +17,7 @@ class TestModels(parameterized.TestCase):
     )
     def test_conv_models(self, model):
         X = jnp.ones((4, 3, 4, 4), dtype=jnp.float32)
-        net = hk.without_apply_rng(hk.transform(lambda x: getattr(ymir.mp.models, model)(2)(x)))
+        net = hk.without_apply_rng(hk.transform(lambda x: getattr(ymir.mp.models, model)(2, x)))
         params = net.init(jax.random.PRNGKey(42), X[0])
         chex.assert_type(net.apply(params, X), jnp.float32)
         chex.assert_shape(net.apply(params, X), (4, 2))
@@ -30,7 +30,7 @@ class TestModels(parameterized.TestCase):
     )
     def test_ff_models(self, model):
         X = jnp.ones((4, 4), dtype=jnp.float32)
-        net = hk.without_apply_rng(hk.transform(lambda x: getattr(ymir.mp.models, model)(2)(x)))
+        net = hk.without_apply_rng(hk.transform(lambda x: getattr(ymir.mp.models, model)(2, x)))
         params = net.init(jax.random.PRNGKey(42), X[0])
         chex.assert_type(net.apply(params, X), jnp.float32)
         chex.assert_shape(net.apply(params, X), (4, 2))

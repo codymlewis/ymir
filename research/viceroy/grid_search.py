@@ -30,7 +30,7 @@ def main(_):
         cur = {"beta": beta, "gamma": gamma}
         for acal in [0.3, 0.5]:
             print(f"Running {ALG} with {acal:.0%} {ADV} adversaries")
-            net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(DS.classes)(x)))
+            net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(DS.classes, x)))
 
             train_eval = DS.get_iter("train", 10_000)
             test_eval = DS.get_iter("test")

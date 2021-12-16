@@ -12,7 +12,7 @@ class TestScoutFunctions(absltest.TestCase):
         rng = np.random.default_rng(0)
         dataset = ymir.mp.datasets.Dataset((X := rng.random((50, 1))), np.sin(X).reshape(-1), np.full(len(X), True))
         self.data = dataset.get_iter("train")
-        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(dataset.classes)(x)))
+        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(dataset.classes, x)))
         params = net.init(jax.random.PRNGKey(42), next(self.data)[0])
         opt = optax.sgd(0.1)
         self.opt_state = opt.init(params)

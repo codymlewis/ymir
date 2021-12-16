@@ -24,7 +24,7 @@ def main(_):
     train_eval = dataset.get_iter("train", 10_000)
     test_eval = dataset.get_iter("test")
 
-    net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(dataset.classes)(x)))
+    net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(dataset.classes, x)))
     opt = ymir.mp.optimizers.pgd(0.01, 1, local_epochs=local_epochs)
     params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
     opt_state = opt.init(params)

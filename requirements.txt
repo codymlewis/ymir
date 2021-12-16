@@ -1,7 +1,10 @@
-optax==0.1.0
-dm-haiku==0.0.5
-chex==0.1.0
-absl-py==1.0.0
-scikit-learn==1.0.1
-numpy==1.21.4
-hdbscan==0.8.27
+git+git://github.com/deepmind/tree.git
+absl-py
+chex
+dm-haiku
+numpy
+optax
+scikit-learn
+pandas
+tqdm
+git+https://github.com/scikit-learn-contrib/hdbscan.git#egg=hdbscan

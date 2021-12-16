@@ -15,6 +15,7 @@ py_library(
     deps = [
         requirement('scikit-learn'),
         requirement('absl-py'),
+        requirement('pandas'),
     ],
 )
 

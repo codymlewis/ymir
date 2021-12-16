@@ -53,9 +53,9 @@ def main(_):
                         train_eval = dataset.get_iter("train", 10_000)
                         test_eval = dataset.get_iter("test")
 
-                        selected_model = lambda: ymir.mp.models.LeNet_300_100(dataset.classes)
-                        net = hk.without_apply_rng(hk.transform(lambda x: selected_model()(x)))
-                        net_act = hk.without_apply_rng(hk.transform(lambda x: selected_model().act(x)))
+                        selected_model = lambda x, a: ymir.mp.models.LeNet_300_100(dataset.classes, x, a)
+                        net = hk.without_apply_rng(hk.transform(lambda x: selected_model(x, False)))
+                        net_act = hk.without_apply_rng(hk.transform(lambda x: selected_model(x, True)))
                         opt = optax.sgd(0.01)
                         params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
                         opt_state = opt.init(params)

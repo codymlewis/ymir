@@ -49,9 +49,9 @@ def main(_):
     rng = np.random.default_rng(0)
     print(f"Running {ALG} on {DATASET} with {aper:.0%} {ADV} adversaries")
     if DATASET == 'cifar10':
-        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.ConvLeNet(DS.classes)(x)))
+        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.ConvLeNet(DS.classes, x)))
     else:
-        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(DS.classes)(x)))
+        net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(DS.classes, x)))
 
     train_eval = DS.get_iter("train", 10_000, rng=rng)
     test_eval = DS.get_iter("test", rng=rng)
