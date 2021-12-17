@@ -47,14 +47,14 @@
                     <ul>
   <li><a href="#mp">MP</a>
   <ul>
-    <li><a href="#compressionymirmpcompression"><a href="/ymir/mp/compression">Compression</a></a></li>
-    <li><a href="#datasetsymirmpdatasets"><a href="/ymir/mp/datasets">Datasets</a></a></li>
-    <li><a href="#distributionsymirmpdistributions"><a href="/ymir/mp/distributions">Distributions</a></a></li>
-    <li><a href="#lossesymirmplosses"><a href="/ymir/mp/losses">Losses</a></a></li>
-    <li><a href="#metricsymirmpmetrics"><a href="/ymir/mp/metrics">Metrics</a></a></li>
-    <li><a href="#modelsymirmpmodels"><a href="/ymir/mp/models">Models</a></a></li>
-    <li><a href="#networkymirmpnetwork"><a href="/ymir/mp/network">Network</a></a></li>
-    <li><a href="#optimizersymirmpoptimizers"><a href="/ymir/mp/optimizers">Optimizers</a></a></li>
+    <li><a href="#compressionmpcompression"><a href="mp/compression">Compression</a></a></li>
+    <li><a href="#datasetsmpdatasets"><a href="mp/datasets">Datasets</a></a></li>
+    <li><a href="#distributionsmpdistributions"><a href="mp/distributions">Distributions</a></a></li>
+    <li><a href="#lossesmplosses"><a href="mp/losses">Losses</a></a></li>
+    <li><a href="#metricsmpmetrics"><a href="mp/metrics">Metrics</a></a></li>
+    <li><a href="#modelsmpmodels"><a href="mp/models">Models</a></a></li>
+    <li><a href="#networkmpnetwork"><a href="mp/network">Network</a></a></li>
+    <li><a href="#optimizersmpoptimizers"><a href="mp/optimizers">Optimizers</a></a></li>
   </ul></li>
 </ul>
 
@@ -89,32 +89,32 @@
 
 <p>Shared utilities to be used between both the endpoints and the server</p>
 
-<h2 id="compressionymirmpcompression"><a href="/ymir/mp/compression">Compression</a></h2>
+<h2 id="compressionmpcompression"><a href="mp/compression">Compression</a></h2>
 
 <p>Functions and transforms for compressing the internal communications of federated learning.</p>
 
-<h2 id="datasetsymirmpdatasets"><a href="/ymir/mp/datasets">Datasets</a></h2>
+<h2 id="datasetsmpdatasets"><a href="mp/datasets">Datasets</a></h2>
 
 <p>Contains functions and classes to handle the loading, division, and interface of datasets.</p>
 
-<h2 id="distributionsymirmpdistributions"><a href="/ymir/mp/distributions">Distributions</a></h2>
+<h2 id="distributionsmpdistributions"><a href="mp/distributions">Distributions</a></h2>
 
 <p>Contains functions to handle the generation of distributions of data across endpoints.</p>
 
-<h2 id="lossesymirmplosses"><a href="/ymir/mp/losses">Losses</a></h2>
+<h2 id="lossesmplosses"><a href="mp/losses">Losses</a></h2>
 
 <p>Collection of jax-based loss functions, they have a curried format so the network may be saved for a jit compiled function</p>
 
-<h2 id="metricsymirmpmetrics"><a href="/ymir/mp/metrics">Metrics</a></h2>
+<h2 id="metricsmpmetrics"><a href="mp/metrics">Metrics</a></h2>
 
 <p>Collection of functions for measuring the performance of the federated learning, also includes an object to perform running measurements of the
 system performance.</p>
 
-<h2 id="modelsymirmpmodels"><a href="/ymir/mp/models">Models</a></h2>
+<h2 id="modelsmpmodels"><a href="mp/models">Models</a></h2>
 
 <p>Collection of haiku defined neural networks</p>
 
-<h2 id="networkymirmpnetwork"><a href="/ymir/mp/network">Network</a></h2>
+<h2 id="networkmpnetwork"><a href="mp/network">Network</a></h2>
 
 <p>Allows for the definition of the network structure for the FL process. Generally the following steps are performed; first the <code>Network</code> object
 is constructed using an optimizer and loss function as arguments, next controllers are added, then clients are added to those controllers. Where
@@ -128,7 +128,7 @@ controllers are a non-training node that connects to other controllers and a col
     <span class="n">network</span><span class="o">.</span><span class="n">add_host</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">,</span> <span class="n">ymir</span><span class="o">.</span><span class="n">regiment</span><span class="o">.</span><span class="n">Scout</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">epochs</span><span class="p">))</span>
 </code></pre></div>
 
-<h2 id="optimizersymirmpoptimizers"><a href="/ymir/mp/optimizers">Optimizers</a></h2>
+<h2 id="optimizersmpoptimizers"><a href="mp/optimizers">Optimizers</a></h2>
 
 <p>Collection of optax-based optimizers to be used on both endpoints and the server</p>
 </div>
