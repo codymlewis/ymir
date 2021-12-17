@@ -64,7 +64,7 @@ def ConvLeNet(classes, x, act=False):
 
 
 def CNN(classes, x, act=False):
-    """LeNet 300-100 network with a convolutional layer and max pooling layer prepended"""
+    """A convolutional neural network"""
     x = hk.Sequential([
         hk.Conv2D(64, kernel_shape=11, stride=2), jax.nn.relu,
         hk.MaxPool(3, strides=2, padding="VALID"),
