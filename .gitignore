@@ -6,6 +6,6 @@ __pycache__/
 *.xlsx
 .~*
 *.egg-info
-/bazel-*
 data/
-results.*
+dist/
+build/

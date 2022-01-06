@@ -1,0 +1,3 @@
+tqdm
+git+https://github.com/codymlewis/hkzoo.git
+git+https://github.com/codymlewis/tenjin.git

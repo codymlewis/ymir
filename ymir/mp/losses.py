@@ -9,7 +9,7 @@ import jax
 import jax.numpy as jnp
 import optax
 
-import ymirlib
+import ymir.lib
 
 
 def cross_entropy_loss(net, classes):
@@ -90,7 +90,7 @@ def constrain_distance_loss(alpha, loss, opt, opt_state):
         grads = jax.grad(loss)(params, X, y)
         updates, _ = opt.update(grads, opt_state)
         params = optax.apply_updates(params, updates)
-        return alpha * loss(params, X, y) + (1 - alpha) * jnp.mean(optax.l2_loss(ymirlib.tree_flatten(params), ymirlib.tree_flatten(global_params)))
+        return alpha * loss(params, X, y) + (1 - alpha) * jnp.mean(optax.l2_loss(ymir.lib.tree_flatten(params), ymir.lib.tree_flatten(global_params)))
     return _apply
 
 
@@ -110,5 +110,5 @@ def constrain_cosine_loss(alpha, loss, opt, opt_state):
         grads = jax.grad(loss)(params, X, y)
         updates, _ = opt.update(grads, opt_state)
         params = optax.apply_updates(params, updates)
-        return alpha * loss(params, X, y) + (1 - alpha) * (1 - optax.cosine_similarity(ymirlib.tree_flatten(params), ymirlib.tree_flatten(global_params)))
+        return alpha * loss(params, X, y) + (1 - alpha) * (1 - optax.cosine_similarity(ymir.lib.tree_flatten(params), ymir.lib.tree_flatten(global_params)))
     return _apply

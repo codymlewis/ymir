@@ -7,5 +7,4 @@ This library is divided into the three following modules:
 
 ## Supporting Libraries
 We also include the following independent libraries:
-- [ymirlib](ymirlib) contains generic utility functions used throughout ymir
-- [datalib](datalib) contains functions for the downloading, preprocessing, and caching of datasets
+- [ymir.lib](ymir/lib) contains generic utility functions used throughout ymir

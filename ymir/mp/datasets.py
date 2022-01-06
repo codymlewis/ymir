@@ -3,19 +3,6 @@ Load a dataset, handle the subset distribution, and provide an iterator.
 """
 
 import numpy as np
-import os
-
-import datalib
-
-
-def load(dataset, dir="data"):
-    """Load a dataset according to the datalib module."""
-    fn = f"{dir}/{dataset}.npz"
-    if not os.path.exists(fn):
-        datalib.download(dir, dataset)
-    ds = np.load(f"{dir}/{dataset}.npz")
-    X, y, train = ds['X'], ds['y'], ds['train']
-    return Dataset(X, y, train)
 
 
 class DataIter:

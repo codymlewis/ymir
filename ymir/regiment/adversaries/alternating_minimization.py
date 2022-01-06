@@ -8,7 +8,7 @@ import jax
 import optax
 
 import ymir.regiment.scout
-import ymirlib
+import ymir.lib
 
 
 def convert(client,  poison_epochs, stealth_epochs, stealth_data):
@@ -35,9 +35,9 @@ def update(self, params, opt_state, X, y):
     for _ in range(self.poison_epochs):
         grads, opt_state, updates = self.poison_update(params, opt_state, X, y)
         params = optax.apply_updates(params, updates)
-        sum_grads = grads if sum_grads is None else ymirlib.tree_add(sum_grads, grads)
+        sum_grads = grads if sum_grads is None else ymir.lib.tree_add(sum_grads, grads)
     for _ in range(self.stealth_epochs):
         grads, opt_state, updates = self.stealth_update(params, opt_state, *next(self.stealth_data))
         params = optax.apply_updates(params, updates)
-        sum_grads = grads if sum_grads is None else ymirlib.tree_add(sum_grads, grads)
+        sum_grads = grads if sum_grads is None else ymir.lib.tree_add(sum_grads, grads)
     return sum_grads, opt_state, updates

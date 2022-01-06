@@ -1,11 +1,11 @@
-from absl.testing import absltest
+import unittest
 
 import chex
 import numpy as np
 
 import ymir
 
-class TestDatasets(absltest.TestCase):
+class TestDatasets(unittest.TestCase):
     def setUp(self):
         self.rng = np.random.default_rng(0)
         self.X = self.rng.random((50, 1))
@@ -35,4 +35,4 @@ class TestDatasets(absltest.TestCase):
 
 
 if __name__ == '__main__':
-    absltest.main()
+    unittest.main()

@@ -6,8 +6,6 @@ from functools import partial
 
 import jax
 
-import ymirlib
-
 
 def convert(client, dataset, attack_from, attack_to):
     """

@@ -1,4 +1,4 @@
-from absl.testing import absltest
+import unittest
 
 import chex
 import jax.numpy as jnp
@@ -8,7 +8,7 @@ import ymir
 from ymir.mp.metrics import Neurometer
 
 
-class TestMetrics(absltest.TestCase):
+class TestMetrics(unittest.TestCase):
     def setUp(self):
         self.params = jnp.ones(2)
         class _Net:
@@ -20,7 +20,7 @@ class TestMetrics(absltest.TestCase):
         y_true = np.array([1])
         evaluator = ymir.mp.metrics.evaluator(self.net)
         y, y_pred = evaluator(self.params, jnp.ones(2), y_true)
-        chex.assert_tree_all_close(y, y_true)
+        chex.assert_trees_all_close(y, y_true)
         self.assertEqual(y_pred, 0)
 
     def test_accuracy_score(self):
@@ -42,4 +42,4 @@ class TestMetrics(absltest.TestCase):
 
 
 if __name__ == '__main__':
-    absltest.main()
+    unittest.main()

@@ -1,5 +1,5 @@
-from absl.testing import absltest
-from absl.testing import parameterized
+import unittest
+from parameterized import parameterized
 
 import numpy as np
 
@@ -28,7 +28,7 @@ class Params:
     b: chex.ArrayDevice
 
 
-class TestAggregators(parameterized.TestCase):
+class TestAggregators(unittest.TestCase):
     def setUp(self):
         self.params = Params(w=jnp.ones(10, dtype=jnp.float32), b=jnp.ones(2, dtype=jnp.float32))
         self.network = Network([Client(batch_size=32, epochs=10) for _ in range(10)])
@@ -36,12 +36,9 @@ class TestAggregators(parameterized.TestCase):
         self.opt_state = self.opt.init(self.params)
         self.rng = np.random.default_rng()
 
-    @parameterized.named_parameters(
-        [
-            {"testcase_name": f"_{server_name=}", "server_name": server_name}
-            for server_name in ["fedavg", "foolsgold", "krum", "norm_clipping", "std_dagmm", "viceroy"]
-        ]
-    )
+    @parameterized.expand([
+            (server_name) for server_name in ["fedavg", "foolsgold", "krum", "norm_clipping", "std_dagmm", "viceroy"]
+    ])
     def test_scale_servers(self, server_name):
         server = getattr(ymir.garrison, server_name).Captain(self.params, self.opt, self.opt_state, self.network, self.rng)
         rngs = jax.random.split(jax.random.PRNGKey(0))
@@ -60,12 +57,9 @@ class TestAggregators(parameterized.TestCase):
         chex.assert_shape(alpha, (len(self.network.clients),))
         chex.assert_type(alpha, jnp.float32)
 
-    @parameterized.named_parameters(
-        [
-            {"testcase_name": f"_{server_name=}", "server_name": server_name}
-            for server_name in ["flguard"]
-        ]
-    )
+    @parameterized.expand([
+        (server_name) for server_name in ["flguard"]
+    ])
     def test_aggregate_servers(self, server_name):
         server = getattr(ymir.garrison, server_name).Captain(self.params, self.opt, self.opt_state, self.network, self.rng)
         rngs = jax.random.split(jax.random.PRNGKey(0))
@@ -84,4 +78,4 @@ class TestAggregators(parameterized.TestCase):
         
 
 if __name__ == '__main__':
-    absltest.main()
+    unittest.main()

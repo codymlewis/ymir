@@ -3,9 +3,7 @@ The bad and good mouthing attacks for federated learning.
 """
 
 
-from ymir import mp
-
-import ymirlib
+import ymir.lib
 
 
 class GradientTransform:
@@ -29,6 +27,6 @@ class GradientTransform:
         """Copy victim gradient to all adversaries, negate the adversary gradients if bad mouthing."""
         grad = all_grads[self.victim]
         if "bad" in self.attack_type:
-            grad = ymirlib.tree_mul(grad, -1)
-        all_grads[-self.num_adv:] = [ymirlib.tree_add_normal(grad, loc=0.0, scale=10e-4) for _ in range(self.num_adv)]
+            grad = ymir.lib.tree_mul(grad, -1)
+        all_grads[-self.num_adv:] = [ymir.lib.tree_add_normal(grad, loc=0.0, scale=10e-4) for _ in range(self.num_adv)]
         return all_grads

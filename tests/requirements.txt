@@ -1,0 +1,3 @@
+chex
+parameterized
+git+https://github.com/codymlewis/hkzoo.git

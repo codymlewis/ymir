@@ -14,7 +14,7 @@ And they all return a list of lists of indices, where the outer list is indexed 
 import itertools
 
 import numpy as np
-from absl import logging
+import logging
 
 
 def homogeneous(X, y, nendpoints, nclasses, rng):

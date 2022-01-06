@@ -17,9 +17,6 @@ Collection of jax-based loss functions, they have a curried format so the networ
 Collection of functions for measuring the performance of the federated learning, also includes an object to perform running measurements of the
 system performance.
 
-## [Models](mp/models)
-Collection of haiku defined neural networks
-
 ## [Network](mp/network)
 Allows for the definition of the network structure for the FL process. Generally the following steps are performed; first the `Network` object
 is constructed using an optimizer and loss function as arguments, next controllers are added, then clients are added to those controllers. Where

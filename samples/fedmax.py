@@ -1,29 +1,29 @@
-import re
-import jax
-import haiku as hk
-import optax
-from absl import app
-
-from tqdm import trange
-
-import ymir
-
 """
 Example of federated averaging on the MNIST dataset
 """
 
+import jax
+import haiku as hk
+import optax
 
-def main(_):
+from tqdm import trange
+
+import hkzoo
+import tenjin
+import ymir
+
+
+if __name__ == "__main__":
     # setup
     print("Setting up the system...")
     num_endpoints = 20
-    dataset = ymir.mp.datasets.load('kddcup99')
+    dataset = ymir.mp.datasets.Dataset(*tenjin.load('kddcup99'))
     batch_sizes = [64 for _ in range(num_endpoints)]
     data = dataset.fed_split(batch_sizes, ymir.mp.distributions.lda)
     train_eval = dataset.get_iter("train", 10_000)
     test_eval = dataset.get_iter("test")
 
-    selected_model = lambda x, a: ymir.mp.models.LeNet_300_100(dataset.classes, x, a)
+    selected_model = lambda x, a: hkzoo.LeNet_300_100(dataset.classes, x, a)
     net = hk.without_apply_rng(hk.transform(lambda x: selected_model(x, False)))
     net_act = hk.without_apply_rng(hk.transform(lambda x: selected_model(x, True)))
     opt = optax.sgd(0.01)
@@ -45,7 +45,3 @@ def main(_):
         results = meter.measure(model.params, ['test'])
         pbar.set_postfix({'ACC': f"{results['test acc']:.3f}"})
         model.step()
-
-
-if __name__ == "__main__":
-    app.run(main)

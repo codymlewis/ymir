@@ -1,30 +1,30 @@
-import re
-import jax
-import haiku as hk
-import optax
-from absl import app
-
-from tqdm import tqdm, trange
-
-import ymir
-
 """
 Example of FedProx on the MNIST dataset
 """
 
+import jax
+import haiku as hk
+import optax
 
-def main(_):
+from tqdm import trange
+
+import hkzoo
+import tenjin
+import ymir
+
+
+if __name__ == "__main__":
     # setup
     print("Setting up the system...")
     num_endpoints = 10
     local_epochs = 10
-    dataset = ymir.mp.datasets.load('mnist')
+    dataset = ymir.mp.datasets.Dataset(*tenjin.load('mnist'))
     batch_sizes = [8 for _ in range(num_endpoints)]
     data = dataset.fed_split(batch_sizes, ymir.mp.distributions.lda)
     train_eval = dataset.get_iter("train", 10_000)
     test_eval = dataset.get_iter("test")
 
-    net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(dataset.classes, x)))
+    net = hk.without_apply_rng(hk.transform(lambda x: hkzoo.LeNet_300_100(dataset.classes, x)))
     opt = ymir.mp.optimizers.pgd(0.01, 1, local_epochs=local_epochs)
     params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
     opt_state = opt.init(params)
@@ -47,7 +47,3 @@ def main(_):
         results = meter.measure(model.params, ['test'])
         pbar.set_postfix({'ACC': f"{results['test acc']:.3f}"})
         model.step()
-
-
-if __name__ == "__main__":
-    app.run(main)

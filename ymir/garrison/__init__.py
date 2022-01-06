@@ -2,10 +2,6 @@ r"""
 .. include:: README.md
 """
 
-import jax
-import optax
-
-import ymirlib
 
 from . import contra
 from . import fedavg

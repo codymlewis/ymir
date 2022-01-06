@@ -1,21 +1,22 @@
+"""
+Example of a backdoor attack on Federated Averaging
+"""
+
 from functools import partial
 
 import numpy as np
 import jax
 import haiku as hk
 import optax
-from absl import app
 
 from tqdm import trange
 
+import hkzoo
+import tenjin
 import ymir
 
-"""
-Example of parameter poisoning on Federated Averaging
-"""
 
-
-def main(_):
+if __name__ == "__main__":
     print("Setting up the system...")
     num_endpoints = 10
     num_adversaries = 2
@@ -23,14 +24,14 @@ def main(_):
     rng = np.random.default_rng(0)
 
     # Setup the dataset
-    dataset = ymir.mp.datasets.load('mnist')
+    dataset = ymir.mp.datasets.Dataset(*tenjin.load('mnist'))
     batch_sizes = [8 for _ in range(num_endpoints)]
     data = dataset.fed_split(batch_sizes, partial(ymir.mp.distributions.lda, alpha=0.05), rng)
     train_eval = dataset.get_iter("train", 10_000, rng=rng)
     test_eval = dataset.get_iter("test", rng=rng)
 
     # Setup the network
-    net = hk.without_apply_rng(hk.transform(lambda x: ymir.mp.models.LeNet_300_100(dataset.classes, x)))
+    net = hk.without_apply_rng(hk.transform(lambda x: hkzoo.LeNet_300_100(dataset.classes, x)))
     client_opt = optax.sgd(0.01)
     params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
     client_opt_state = client_opt.init(params)
@@ -45,8 +46,8 @@ def main(_):
     for i in range(num_adversaries):
         c = ymir.regiment.Scout(client_opt, client_opt_state, adv_loss, data[i + num_clients], 1)
         ymir.regiment.adversaries.backdoor.convert(c, dataset, "mnist", 0, 1)
+        ymir.regiment.adversaries.scaler.convert(c, num_endpoints)
         network.add_host("main", c)
-    network.get_controller("main").add_update_transform(ymir.regiment.adversaries.scaler.GradientTransform(network, params, "foolsgold", num_adversaries))
 
     backdoor_eval = dataset.get_iter("test", map=partial(ymir.regiment.adversaries.backdoor.mnist_backdoor_map, 0, 1, no_label=True))
 
@@ -63,7 +64,3 @@ def main(_):
             results = meter.measure(model.params, ['test'], {'from': 0, 'to': 1, 'datasets': ['backdoor']})
             pbar.set_postfix({'ACC': f"{results['test acc']:.3f}", 'ASR': f"{results['backdoor asr']:.3f}"})
         model.step()
-
-
-if __name__ == "__main__":
-    app.run(main)

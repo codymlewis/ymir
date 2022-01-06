@@ -1,11 +1,11 @@
-from absl.testing import absltest
+import unittest
 
 import jax.numpy as jnp
 
 import ymir
 
 
-class TestLosses(absltest.TestCase):
+class TestLosses(unittest.TestCase):
     def setUp(self):
         self.params = jnp.ones(2)
         class _Net:
@@ -24,4 +24,4 @@ class TestLosses(absltest.TestCase):
 
 
 if __name__ == '__main__':
-    absltest.main()
+    unittest.main()

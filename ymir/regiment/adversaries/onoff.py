@@ -7,7 +7,6 @@ from functools import partial
 import numpy as np
 
 from ymir import garrison
-from ymir import mp
 from ymir.regiment import scout
 
 

@@ -1,8 +1,8 @@
-from absl.testing import absltest
+import unittest
 
 import ymir
 
-class TestNetwork(absltest.TestCase):
+class TestNetwork(unittest.TestCase):
     def test_controller(self):
         controller = ymir.mp.network.Controller(0.1)
         self.assertListEqual(controller.clients, [])
@@ -19,4 +19,4 @@ class TestNetwork(absltest.TestCase):
 
 
 if __name__ == '__main__':
-    absltest.main()
+    unittest.main()

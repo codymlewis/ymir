@@ -1,10 +1,7 @@
 git+git://github.com/deepmind/tree.git
-absl-py
 chex
 dm-haiku
 numpy
 optax
 scikit-learn
-pandas
-tqdm
 git+https://github.com/scikit-learn-contrib/hdbscan.git#egg=hdbscan
