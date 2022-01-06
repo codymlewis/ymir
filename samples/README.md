@@ -1,1 +1,1 @@
-To execute samples, first install the requirements file in this directory, also install the ymir library.
+To execute samples, first install the requirements file in the root, also install the ymir library.

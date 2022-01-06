@@ -48,5 +48,5 @@ jobs:
         run: |
           pip install git+https://github.com/codymlewis/ymir.git
           pip install jax
-          pip install -r tests/requirements.txt
+          pip install -r requirements.txt
           python -m unittest discover -s tests
