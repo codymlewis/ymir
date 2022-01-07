@@ -24,6 +24,7 @@ setuptools.setup(
         'numpy',
         'optax',
         'scikit-learn',
+        'hdbscan',
     ],
     include_package_data=True,
 )
