@@ -7,7 +7,7 @@ import jax
 import jax.numpy as jnp
 import chex
 
-import ymir.lib
+import ymir.path
 
 
 @chex.dataclass
@@ -27,13 +27,13 @@ class TestTreeFunctions(unittest.TestCase):
     def test_chain(self):
         f = lambda x: x - 1
         g = lambda x: x**3
-        self.assertEqual(ymir.lib.chain([f, g], 2), g(f(2)))
+        self.assertEqual(ymir.path.chain([f, g], 2), g(f(2)))
 
     @parameterized.expand([
         (low, high) for low, high in [(0.5, 0.7), (-0.5, 0.5), (10, 1000), (-1000, -10)]
     ])
     def test_tree_uniform(self, low, high):
-        uniform_params = ymir.lib.tree_uniform(self.params, low=low, high=high)
+        uniform_params = ymir.path.tree_uniform(self.params, low=low, high=high)
         chex.assert_trees_all_equal_shapes(self.params, uniform_params)
         chex.assert_tree_all_finite(uniform_params)
         chex.assert_tree_no_nones(uniform_params)
@@ -44,7 +44,7 @@ class TestTreeFunctions(unittest.TestCase):
         (loc, scale) for loc, scale in [(0.0, 1.0), (0.5, 0.7), (-0.5, 0.5), (2, 10), (-1000, 10)]
     ])
     def test_tree_add_normal(self, loc, scale):
-        normal_params = ymir.lib.tree_add_normal(self.params, loc=loc, scale=scale)
+        normal_params = ymir.path.tree_add_normal(self.params, loc=loc, scale=scale)
         chex.assert_trees_all_equal_shapes(self.params, normal_params)
         chex.assert_tree_all_finite(normal_params)
         chex.assert_tree_no_nones(normal_params)
@@ -56,7 +56,7 @@ class TestTreeFunctions(unittest.TestCase):
         (mul,) for mul in [2, -1, 0, 1, 3, 5]
     ])
     def test_tree_mul(self, mul):
-        mul_params = ymir.lib.tree_mul(self.params, mul)
+        mul_params = ymir.path.tree_mul(self.params, mul)
         chex.assert_trees_all_equal_shapes(self.params, mul_params)
         chex.assert_tree_all_finite(mul_params)
         chex.assert_tree_no_nones(mul_params)
@@ -69,7 +69,7 @@ class TestTreeFunctions(unittest.TestCase):
             (a, b) for a, b in itertools.product([2, -1, 0, 1, 3, 5], repeat=2)
     ])
     def test_tree_add(self, a, b):
-        add_params = ymir.lib.tree_add(
+        add_params = ymir.path.tree_add(
             Params(w=jnp.full(self.length, a), b=jnp.full(self.length, a)),
             Params(w=jnp.full(self.length, b), b=jnp.full(self.length, b))
         )

@@ -13,7 +13,7 @@ import optax
 import jax
 import jaxlib
 
-import ymir.lib
+import ymir.path
 
 from ymir.mp.network import Network
 
@@ -101,8 +101,8 @@ def update(opt):
 
 def apply_scale(alpha, all_grads):
     """Scale a collection of gradients by the value of alpha"""
-    return [ymir.lib.tree_mul(g, a) for g, a in zip(all_grads, alpha)]
+    return [ymir.path.tree_mul(g, a) for g, a in zip(all_grads, alpha)]
 
 def sum_grads(all_grads):
     """Element-wise sum together a collection of gradients, simplifies boilerplate"""
-    return ymir.lib.tree_add(*all_grads)
+    return ymir.path.tree_add(*all_grads)
