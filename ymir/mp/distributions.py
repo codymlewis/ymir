@@ -78,3 +78,16 @@ def assign_classes(X, y, nendpoints, nclasses, rng, classes=None):
     if classes is None:
         raise ValueError("Classes not specified in distribution")
     return [np.isin(y, classes[i]) for i in range(nendpoints)]
+
+
+def documented(document):
+    """
+    Return a distribution function, resulting distribution uses a document
+    which is an array of indices allocating endpoints to samples.
+
+    Arguments:
+    - document: a list of lists of indices, where the outer list is indexed by endpoint.
+    """
+    def _distribution(X, y, nendpoints, nclasses, rng):
+        return document
+    return _distribution
