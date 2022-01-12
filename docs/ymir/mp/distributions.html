@@ -65,6 +65,9 @@
             <li>
                     <a class="function" href="#assign_classes">assign_classes</a>
             </li>
+            <li>
+                    <a class="function" href="#documented">documented</a>
+            </li>
     </ul>
 
 
@@ -178,6 +181,19 @@
     <span class="k">if</span> <span class="n">classes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Classes not specified in distribution&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
+
+
+<span class="k">def</span> <span class="nf">documented</span><span class="p">(</span><span class="n">document</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a distribution function, resulting distribution uses a document</span>
+<span class="sd">    which is an array of indices allocating endpoints to samples.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    - document: a list of lists of indices, where the outer list is indexed by endpoint.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_distribution</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">document</span>
+    <span class="k">return</span> <span class="n">_distribution</span>
 </pre></div>
 
         </details>
@@ -364,6 +380,43 @@ shards are even partitions of the data after sorting by class.</p>
 
 <ul>
 <li>classes: a list of classes to assign to each endpoint.</li>
+</ul>
+</div>
+
+
+                </section>
+                <section id="documented">
+                            <div class="attr function"><a class="headerlink" href="#documented">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">documented</span><span class="signature">(document)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">documented</span><span class="p">(</span><span class="n">document</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a distribution function, resulting distribution uses a document</span>
+<span class="sd">    which is an array of indices allocating endpoints to samples.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    - document: a list of lists of indices, where the outer list is indexed by endpoint.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_distribution</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">document</span>
+    <span class="k">return</span> <span class="n">_distribution</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Return a distribution function, resulting distribution uses a document
+which is an array of indices allocating endpoints to samples.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>document: a list of lists of indices, where the outer list is indexed by endpoint.</li>
 </ul>
 </div>
 
