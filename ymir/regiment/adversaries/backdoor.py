@@ -7,45 +7,40 @@ from functools import partial
 import jax
 
 
-def convert(client, dataset, dataset_name, attack_from, attack_to):
+def convert(client, dataset, attack_from, attack_to, trigger):
     """
     Convert an endpoint into a backdoor adversary.
 
     Arguments:
     - client: the endpoint to convert
     - dataset: the dataset to use
-    - dataset_name: the name of the dataset
     - attack_from: the label to attack
     - attack_to: the label to replace the attack_from label with
+    - trigger: the trigger to use
     """
-    bd_map = partial(globals()[f"{dataset_name}_backdoor_map"], attack_from, attack_to)
     data = dataset.get_iter(
         "train",
         client.batch_size,
         filter=lambda y: y == attack_from,
-        map=bd_map
+        map=partial(backdoor_map, attack_from, attack_to, trigger)
     )
     client.update = partial(update, client.opt, client.loss, data)
 
 
-def mnist_backdoor_map(attack_from, attack_to, X, y, no_label=False):
-    idx = y == attack_from
-    X[idx, 0:5, 0:5] = 1
-    if not no_label:
-        y[idx] = attack_to
-    return (X, y)
+def backdoor_map(attack_from, attack_to, trigger, X, y, no_label=False):
+    """
+    Function that maps a backdoor trigger on a dataset.
 
-def cifar10_backdoor_map(attack_from, attack_to, X, y, no_label=False):
+    Arguments:
+    - attack_from: the label to attack
+    - attack_to: the label to replace the attack_from label with
+    - trigger: the trigger to use
+    - X: the data to map
+    - y: the labels to map
+    - no_label: whether to apply the map to the label
+    """
     idx = y == attack_from
-    X[idx, 0:5, 0:5] = 1
-    if not no_label:
-        y[idx] = attack_to
-    return (X, y)
-
-
-def kddcup99_backdoor_map(attack_from, attack_to, X, y, no_label=False):
-    idx = y == attack_from
-    X[idx, 0:5] = 1
+    X[idx, :trigger.shape[0], :trigger.shape[1]] = trigger
     if not no_label:
         y[idx] = attack_to
     return (X, y)
