@@ -11,13 +11,13 @@ import optax
 import chex
 
 
-def pgd(learning_rate, mu, local_epochs=1):
+def pgd(opt, mu, local_epochs=1):
     """
     Perturbed gradient descent proposed as the mechanism for FedProx in `https://arxiv.org/abs/1812.06127 <https://arxiv.org/abs/1812.06127>`_
     """
     return optax.chain(
         _add_prox(mu, local_epochs),
-        optax.scale(learning_rate)
+        opt
     )
 
 
