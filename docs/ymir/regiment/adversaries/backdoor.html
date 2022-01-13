@@ -51,13 +51,7 @@
                     <a class="function" href="#convert">convert</a>
             </li>
             <li>
-                    <a class="function" href="#mnist_backdoor_map">mnist_backdoor_map</a>
-            </li>
-            <li>
-                    <a class="function" href="#cifar10_backdoor_map">cifar10_backdoor_map</a>
-            </li>
-            <li>
-                    <a class="function" href="#kddcup99_backdoor_map">kddcup99_backdoor_map</a>
+                    <a class="function" href="#backdoor_map">backdoor_map</a>
             </li>
             <li>
                     <a class="function" href="#update">update</a>
@@ -92,45 +86,40 @@
 <span class="kn">import</span> <span class="nn">jax</span>
 
 
-<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert an endpoint into a backdoor adversary.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">    - client: the endpoint to convert</span>
 <span class="sd">    - dataset: the dataset to use</span>
-<span class="sd">    - dataset_name: the name of the dataset</span>
 <span class="sd">    - attack_from: the label to attack</span>
 <span class="sd">    - attack_to: the label to replace the attack_from label with</span>
+<span class="sd">    - trigger: the trigger to use</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">bd_map</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="n">f</span><span class="s2">&quot;{dataset_name}_backdoor_map&quot;</span><span class="p">],</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span>
         <span class="s2">&quot;train&quot;</span><span class="p">,</span>
         <span class="n">client</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
         <span class="nb">filter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span><span class="p">,</span>
-        <span class="nb">map</span><span class="o">=</span><span class="n">bd_map</span>
+        <span class="nb">map</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">backdoor_map</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">mnist_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
-    <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>
-        <span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">attack_to</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that maps a backdoor trigger on a dataset.</span>
 
-<span class="k">def</span> <span class="nf">cifar10_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">    - attack_from: the label to attack</span>
+<span class="sd">    - attack_to: the label to replace the attack_from label with</span>
+<span class="sd">    - trigger: the trigger to use</span>
+<span class="sd">    - X: the data to map</span>
+<span class="sd">    - y: the labels to map</span>
+<span class="sd">    - no_label: whether to apply the map to the label</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
-    <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>
-        <span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">attack_to</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">kddcup99_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
-    <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:</span><span class="n">trigger</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="n">trigger</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">trigger</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>
         <span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">attack_to</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -152,28 +141,27 @@
 
         
             <span class="def">def</span>
-            <span class="name">convert</span><span class="signature">(client, dataset, dataset_name, attack_from, attack_to)</span>:
+            <span class="name">convert</span><span class="signature">(client, dataset, attack_from, attack_to, trigger)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert an endpoint into a backdoor adversary.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">    - client: the endpoint to convert</span>
 <span class="sd">    - dataset: the dataset to use</span>
-<span class="sd">    - dataset_name: the name of the dataset</span>
 <span class="sd">    - attack_from: the label to attack</span>
 <span class="sd">    - attack_to: the label to replace the attack_from label with</span>
+<span class="sd">    - trigger: the trigger to use</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">bd_map</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="n">f</span><span class="s2">&quot;{dataset_name}_backdoor_map&quot;</span><span class="p">],</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span>
         <span class="s2">&quot;train&quot;</span><span class="p">,</span>
         <span class="n">client</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
         <span class="nb">filter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span><span class="p">,</span>
-        <span class="nb">map</span><span class="o">=</span><span class="n">bd_map</span>
+        <span class="nb">map</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">backdoor_map</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 </pre></div>
@@ -187,27 +175,38 @@
 <ul>
 <li>client: the endpoint to convert</li>
 <li>dataset: the dataset to use</li>
-<li>dataset_name: the name of the dataset</li>
 <li>attack_from: the label to attack</li>
 <li>attack_to: the label to replace the attack_from label with</li>
+<li>trigger: the trigger to use</li>
 </ul>
 </div>
 
 
                 </section>
-                <section id="mnist_backdoor_map">
-                            <div class="attr function"><a class="headerlink" href="#mnist_backdoor_map">#&nbsp;&nbsp</a>
+                <section id="backdoor_map">
+                            <div class="attr function"><a class="headerlink" href="#backdoor_map">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">mnist_backdoor_map</span><span class="signature">(attack_from, attack_to, X, y, no_label=False)</span>:
+            <span class="name">backdoor_map</span><span class="signature">(attack_from, attack_to, trigger, X, y, no_label=False)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">mnist_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that maps a backdoor trigger on a dataset.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">    - attack_from: the label to attack</span>
+<span class="sd">    - attack_to: the label to replace the attack_from label with</span>
+<span class="sd">    - trigger: the trigger to use</span>
+<span class="sd">    - X: the data to map</span>
+<span class="sd">    - y: the labels to map</span>
+<span class="sd">    - no_label: whether to apply the map to the label</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
-    <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:</span><span class="n">trigger</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="n">trigger</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">trigger</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>
         <span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">attack_to</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
@@ -215,53 +214,20 @@
 
         </details>
 
-    
+            <div class="docstring"><p>Function that maps a backdoor trigger on a dataset.</p>
 
-                </section>
-                <section id="cifar10_backdoor_map">
-                            <div class="attr function"><a class="headerlink" href="#cifar10_backdoor_map">#&nbsp;&nbsp</a>
+<p>Arguments:</p>
 
-        
-            <span class="def">def</span>
-            <span class="name">cifar10_backdoor_map</span><span class="signature">(attack_from, attack_to, X, y, no_label=False)</span>:
-    </div>
+<ul>
+<li>attack_from: the label to attack</li>
+<li>attack_to: the label to replace the attack_from label with</li>
+<li>trigger: the trigger to use</li>
+<li>X: the data to map</li>
+<li>y: the labels to map</li>
+<li>no_label: whether to apply the map to the label</li>
+</ul>
+</div>
 
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">cifar10_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
-    <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>
-        <span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">attack_to</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-    
-
-                </section>
-                <section id="kddcup99_backdoor_map">
-                            <div class="attr function"><a class="headerlink" href="#kddcup99_backdoor_map">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">kddcup99_backdoor_map</span><span class="signature">(attack_from, attack_to, X, y, no_label=False)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">kddcup99_backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-    <span class="n">idx</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
-    <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>
-        <span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">attack_to</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-    
 
                 </section>
                 <section id="update">
