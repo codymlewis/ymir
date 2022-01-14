@@ -48,15 +48,15 @@ if __name__ == "__main__":
         adv_opt_state = adv_opt.init(params)
         for i in range(num_adversaries):
             c = ymir.regiment.Scout(adv_opt, adv_opt_state, adv_loss, data[i + num_clients], 1)
-            ymir.regiment.adversaries.labelflipper.convert(c, dataset, 0, 1)
+            ymir.fritz.labelflipper.convert(c, dataset, 0, 1)
             network.add_host("main", c)
     else:
         # setup for the alternating minimization attack
         stealth_data = dataset.get_iter("test", 8, rng=rng)
         for i in range(num_adversaries):
             c = ymir.regiment.Scout(client_opt, client_opt_state, loss, data[i + num_clients], 10)
-            ymir.regiment.adversaries.labelflipper.convert(c, dataset, 0, 1, 10)
-            ymir.regiment.adversaries.alternating_minimization.convert(c, 1, 10, stealth_data)
+            ymir.fritz.labelflipper.convert(c, dataset, 0, 1, 10)
+            ymir.fritz.alternating_minimization.convert(c, 1, 10, stealth_data)
             network.add_host("main", c)
 
     server_opt = optax.sgd(0.1)

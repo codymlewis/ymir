@@ -45,11 +45,11 @@ if __name__ == "__main__":
     adv_loss = ymir.mp.losses.constrain_cosine_loss(0.4, loss, client_opt, client_opt_state)
     for i in range(num_adversaries):
         c = ymir.regiment.Scout(client_opt, client_opt_state, adv_loss, data[i + num_clients], 1)
-        ymir.regiment.adversaries.backdoor.convert(c, dataset, 0, 1, np.ones((5, 5, 1)))
-        ymir.regiment.adversaries.scaler.convert(c, num_endpoints)
+        ymir.fritz.backdoor.convert(c, dataset, 0, 1, np.ones((5, 5, 1)))
+        ymir.fritz.scaler.convert(c, num_endpoints)
         network.add_host("main", c)
 
-    backdoor_eval = dataset.get_iter("test", map=partial(ymir.regiment.adversaries.backdoor.backdoor_map, 0, 1, np.ones((5, 5, 1)), no_label=True))
+    backdoor_eval = dataset.get_iter("test", map=partial(ymir.fritz.backdoor.backdoor_map, 0, 1, np.ones((5, 5, 1)), no_label=True))
 
     server_opt = optax.sgd(0.1)
     server_opt_state = server_opt.init(params)

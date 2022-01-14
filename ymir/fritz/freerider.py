@@ -3,9 +3,9 @@ Federated learning free rider attack proposed in `https://arxiv.org/abs/1911.125
 """
 
 
-import ymir.path
-
 import numpy as np
+
+import ymir.path
 
 
 def convert(client, attack_type, params, rng=np.random.default_rng()):

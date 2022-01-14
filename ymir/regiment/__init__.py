@@ -3,7 +3,4 @@
 """
 
 
-from . import adversaries
-
-
 from .scout import Scout

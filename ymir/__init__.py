@@ -6,4 +6,5 @@ from ymir import (
     garrison,
     mp,
     regiment,
+    fritz,
 )

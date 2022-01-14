@@ -4,7 +4,6 @@ Alternating minimization model poisoning, proposed in `https://arxiv.org/abs/181
 
 from functools import partial
 
-import jax
 import optax
 
 import ymir.regiment.scout
