@@ -1,11 +1,13 @@
+"""
+General utility library for ymir
+"""
+
+
 from functools import partial
 
 import jax
 import numpy as np
 
-"""
-General utility library for ymir
-"""
 
 def chain(funclist, x):
     """Chain a list of function together and return their composition upon x"""
