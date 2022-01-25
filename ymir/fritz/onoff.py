@@ -60,15 +60,15 @@ class GradientTransform:
             q = not self.attacking and avg_syb_alpha > self.gamma * self.max_alpha
         return p or q
 
-    def __call__(self, all_grads):
+    def __call__(self, all_updates):
         """Update each connected client and return the generated gradients. Recursively call in connected controllers"""
-        self.server.update(all_grads)
-        alpha = self.server.scale(all_grads)
+        self.server.update(all_updates)
+        alpha = self.server.scale(all_updates)
         if self.should_toggle(alpha):
             self.attacking = not self.attacking
             for a in self.adversaries:
                 a.toggle()
-        return all_grads
+        return all_updates
 
 
 def convert(client):
@@ -80,4 +80,4 @@ def convert(client):
 
 def toggle(self):
     """Toggle the attack."""
-    self.update, shadow_update = self.shadow_update, self.update
+    self.update, self.shadow_update = self.shadow_update, self.update

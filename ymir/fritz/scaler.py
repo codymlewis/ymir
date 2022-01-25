@@ -4,6 +4,8 @@ Scale the updates submitted from selected endpoints.
 
 
 import numpy as np
+import jax
+import optax
 
 from ymir import garrison
 
@@ -13,14 +15,14 @@ import ymir.path
 def convert(client, num_endpoints):
     """A simple naive scaled model replacement attack."""
     client.quantum_update = client.update
-    client.update = lambda p, o, X, y: update(client.opt, num_endpoints, p, o, client.quantum_update(p, o, X, y)[0])
+    client.update = lambda p, o, X, y: _scale(num_endpoints, p, *client.quantum_update(p, o, X, y))
 
 
-def update(opt, scale, params, opt_state, grads):
-    """Scale the gradient and resulting update."""
-    grads = ymir.path.tree_mul(grads, scale)
-    updates, opt_state = opt.update(grads, opt_state, params)
-    return grads, opt_state, updates
+@jax.jit
+def _scale(scale, global_params, client_params, opt_state):
+    params = ymir.path.tree_sub(client_params, global_params)
+    params = ymir.path.tree_mul(params, scale)
+    return ymir.path.tree_add(params, global_params), opt_state
 
 
 class GradientTransform:
@@ -44,12 +46,12 @@ class GradientTransform:
         self.alg = alg
         self.server = getattr(garrison, self.alg).Captain(params, opt, opt_state, network, rng, **kwargs)
 
-    def __call__(self, all_grads):
+    def __call__(self, all_updates):
         """Get the scale value and scale the gradients."""
-        self.server.update(all_grads)
-        alpha = np.array(self.server.scale(all_grads))
+        self.server.update(all_updates)
+        alpha = np.array(self.server.scale(all_updates))
         idx = np.arange(len(alpha) - self.num_adv, len(alpha))[alpha[-self.num_adv:] > 0.0001]
         alpha[idx] = 1 / alpha[idx]
         for i in idx:
-            all_grads[i] = ymir.path.tree_mul(all_grads[i], alpha[i])
-        return all_grads
+            all_updates[i] = ymir.path.tree_mul(all_updates[i], alpha[i])
+        return all_updates

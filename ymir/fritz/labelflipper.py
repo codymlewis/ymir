@@ -5,6 +5,7 @@ Targeted model poisoning (label flipping) attack, proposed in `https://arxiv.org
 from functools import partial
 
 import jax
+import optax
 
 
 def convert(client, dataset, attack_from, attack_to):
@@ -38,4 +39,5 @@ def update(opt, loss, data, params, opt_state, X, y):
     """Label flipping update function for endpoints."""
     grads = jax.grad(loss)(params, *next(data))
     updates, opt_state = opt.update(grads, opt_state, params)
-    return grads, opt_state, updates
+    params = optax.apply_updates(params, updates)
+    return params, opt_state

@@ -4,6 +4,7 @@ Standard endpoint collaborators for federated learning.
 
 from functools import partial
 import jax
+import optax
 
 class Scout:
     """An endpoint for federated learning, holds its own data and personal learning variables."""
@@ -42,4 +43,5 @@ def update(opt, loss, params, opt_state, X, y):
     """
     grads = jax.grad(loss)(params, X, y)
     updates, opt_state = opt.update(grads, opt_state, params)
-    return grads, opt_state, updates
+    params = optax.apply_updates(params, updates)
+    return params, opt_state

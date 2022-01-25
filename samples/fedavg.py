@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     # Setup the network
     net = hk.without_apply_rng(hk.transform(lambda x: hkzoo.LeNet_300_100(dataset.classes, x)))
-    client_opt = optax.sgd(0.01)
+    client_opt = optax.sgd(0.1)
     params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
     client_opt_state = client_opt.init(params)
     loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     for d in data:
         network.add_host("main", ymir.regiment.Scout(client_opt, client_opt_state, loss, d, 1))
 
-    server_opt = optax.sgd(0.1)
+    server_opt = optax.sgd(1)
     server_opt_state = server_opt.init(params)
     model = ymir.garrison.fedavg.Captain(params, server_opt, server_opt_state, network, rng)
     meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval})

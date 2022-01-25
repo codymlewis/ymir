@@ -7,6 +7,7 @@ from functools import partial
 import numpy as np
 
 import jax
+import optax
 
 
 def convert(client, dataset, attack_from, attack_to, trigger):
@@ -51,7 +52,8 @@ def backdoor_map(attack_from, attack_to, trigger, X, y, no_label=False):
 
 @partial(jax.jit, static_argnums=(0, 1, 2))
 def update(opt, loss, data, params, opt_state, X, y):
-    """Backdoor update function for endpoints."""
+    """Backdoor update function for endpoints."""   
     grads = jax.grad(loss)(params, *next(data))
     updates, opt_state = opt.update(grads, opt_state, params)
-    return grads, opt_state, updates
+    params = optax.apply_updates(params, updates)
+    return params, opt_state

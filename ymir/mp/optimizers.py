@@ -17,7 +17,7 @@ def pgd(opt, mu, local_epochs=1):
     """
     return optax.chain(
         _add_prox(mu, local_epochs),
-        opt
+        opt,
     )
 
 

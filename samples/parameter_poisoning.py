@@ -59,7 +59,7 @@ if __name__ == "__main__":
             ymir.fritz.alternating_minimization.convert(c, 1, 10, stealth_data)
             network.add_host("main", c)
 
-    server_opt = optax.sgd(0.1)
+    server_opt = optax.sgd(1)
     server_opt_state = server_opt.init(params)
     model = ymir.garrison.fedavg.Captain(params, server_opt, server_opt_state, network, rng)
     meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval})

@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     backdoor_eval = dataset.get_iter("test", map=partial(ymir.fritz.backdoor.backdoor_map, 0, 1, np.ones((5, 5, 1)), no_label=True))
 
-    server_opt = optax.sgd(0.1)
+    server_opt = optax.sgd(1)
     server_opt_state = server_opt.init(params)
     model = ymir.garrison.foolsgold.Captain(params, server_opt, server_opt_state, network, rng)
     meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval, 'backdoor': backdoor_eval})

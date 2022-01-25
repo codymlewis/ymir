@@ -35,7 +35,9 @@ if __name__ == "__main__":
     for d in data:
         network.add_host("main", ymir.regiment.Scout(opt, opt_state, loss, d, 10))
 
-    model = ymir.garrison.fedavg.Captain(params, opt, opt_state, network)
+    server_opt = optax.sgd(1)
+    server_opt_state = server_opt.init(params)
+    model = ymir.garrison.fedavg.Captain(params, server_opt, server_opt_state, network)
     meter = ymir.mp.metrics.Neurometer(net, {'train': train_eval, 'test': test_eval})
 
     print("Done, beginning training.")

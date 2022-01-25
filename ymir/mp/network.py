@@ -4,7 +4,6 @@ Defines the network architecture for the FL system.
 
 
 import numpy as  np
-import optax
 
 import ymir.path
 
@@ -58,13 +57,10 @@ class Controller:
             all_updates.extend(switch(params, rng, return_weights))
         idx = rng.choice(self.K, size=int(self.C * self.K), replace=False)
         for i in idx:
-            p = params
-            sum_grads = None
+            p = params  # set client parameters to global parameters
             for _ in range(self.clients[i].epochs):
-                grads, self.clients[i].opt_state, updates = self.clients[i].update(p, self.clients[i].opt_state, *next(self.clients[i].data))
-                p = optax.apply_updates(p, updates)
-                sum_grads = grads if sum_grads is None else ymir.path.tree_add(sum_grads, grads)
-            all_updates.append(p if return_weights else sum_grads)
+                p, self.clients[i].opt_state = self.clients[i].update(p, self.clients[i].opt_state, *next(self.clients[i].data))
+            all_updates.append(p if return_weights else ymir.path.tree_sub(params, p))
         return ymir.path.chain(self.update_transform_chain, all_updates)
 
 

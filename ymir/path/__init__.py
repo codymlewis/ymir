@@ -38,6 +38,11 @@ def tree_add(*trees):
     """Element-wise add any number of pytrees"""
     return jax.tree_multimap(lambda *xs: sum(xs), *trees)
 
+@jax.jit
+def tree_sub(tree_a, tree_b):
+    """Subtract tree_b from tree_a"""
+    return jax.tree_map(lambda a, b: a - b, tree_a, tree_b)
+
 
 @jax.jit
 def tree_flatten(tree):

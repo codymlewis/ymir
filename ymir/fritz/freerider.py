@@ -33,7 +33,7 @@ def update(opt):
             grads = ymir.path.tree_add(params, ymir.path.tree_mul(self.prev_params, -1))
             if "advanced" in self.attack_type:
                 grads = ymir.path.tree_add_normal(grads, loc=0.0, scale=10e-4, rng=self.rng)
-        updates, opt_state = opt.update(grads, opt_state, params)
+        # updates, opt_state = opt.update(grads, opt_state, params)
         self.prev_params = params
-        return grads, opt_state, updates
+        return grads, opt_state
     return _apply

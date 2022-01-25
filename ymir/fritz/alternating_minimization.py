@@ -4,8 +4,6 @@ Alternating minimization model poisoning, proposed in `https://arxiv.org/abs/181
 
 from functools import partial
 
-import optax
-
 import ymir.regiment.scout
 import ymir.path
 
@@ -30,13 +28,8 @@ def convert(client,  poison_epochs, stealth_epochs, stealth_data):
 
 def update(self, params, opt_state, X, y):
     """Alternating minimization update function for endpoints."""
-    sum_grads = None
     for _ in range(self.poison_epochs):
-        grads, opt_state, updates = self.poison_update(params, opt_state, X, y)
-        params = optax.apply_updates(params, updates)
-        sum_grads = grads if sum_grads is None else ymir.path.tree_add(sum_grads, grads)
+        params, opt_state = self.poison_update(params, opt_state, X, y)
     for _ in range(self.stealth_epochs):
-        grads, opt_state, updates = self.stealth_update(params, opt_state, *next(self.stealth_data))
-        params = optax.apply_updates(params, updates)
-        sum_grads = grads if sum_grads is None else ymir.path.tree_add(sum_grads, grads)
-    return sum_grads, opt_state, updates
+        params, opt_state = self.stealth_update(params, opt_state, *next(self.stealth_data))
+    return params, opt_state

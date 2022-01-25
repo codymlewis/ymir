@@ -25,7 +25,7 @@ if __name__ == "__main__":
     test_eval = dataset.get_iter("test")
 
     net = hk.without_apply_rng(hk.transform(lambda x: hkzoo.LeNet_300_100(dataset.classes, x)))
-    opt = ymir.mp.optimizers.pgd(optax.sgd(0.01), 1, local_epochs=local_epochs)
+    opt = ymir.mp.optimizers.pgd(optax.sgd(0.1), 0.01, local_epochs=local_epochs)
     params = net.init(jax.random.PRNGKey(42), next(test_eval)[0])
     opt_state = opt.init(params)
     loss = ymir.mp.losses.cross_entropy_loss(net, dataset.classes)
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     for d in data:
         network.add_host("main", ymir.regiment.Scout(opt, opt_state, loss, d, local_epochs))
 
-    server_opt = optax.sgd(0.01)
+    server_opt = optax.sgd(1)
     server_opt_state = server_opt.init(params)
 
     model = ymir.garrison.fedavg.Captain(params, server_opt, server_opt_state, network)
