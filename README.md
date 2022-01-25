@@ -1,5 +1,5 @@
 # Ymir
-[![Test libraries](https://github.com/codymlewis/ymir/actions/workflows/main.yml/badge.svg)](https://github.com/codymlewis/ymir/actions/workflows/main.yml)
+[![Tests status](https://github.com/codymlewis/ymir/actions/workflows/main.yml/badge.svg)](https://github.com/codymlewis/ymir/actions/workflows/main.yml)
 [![License](https://img.shields.io/github/license/codymlewis/ymir?color=blue)](LICENSE)
 ![Commit activity](https://img.shields.io/github/commit-activity/m/codymlewis/ymir?color=red)
 
