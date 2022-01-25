@@ -99,10 +99,11 @@ $\frac{n_i}{\sum_{i \in \mathcal{U}} n_i}$.</p>
 
 
 <span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">ScaleCaptain</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
-    
+
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update the stored batch sizes ($n_i$).&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
@@ -126,10 +127,11 @@ $\frac{n_i}{\sum_{i \in \mathcal{U}} n_i}$.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">ScaleCaptain</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
-    
+
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update the stored batch sizes ($n_i$).&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
@@ -153,7 +155,7 @@ $\frac{n_i}{\sum_{i \in \mathcal{U}} n_i}$.</p>
     opt,
     opt_state,
     network,
-    rng=Generator(PCG64) at 0x7F4DEAE5D460
+    rng=Generator(PCG64) at 0x7F956E8C1C40
 )</span>
     </div>
 

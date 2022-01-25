@@ -81,7 +81,6 @@
 <span class="sd">The bad and good mouthing attacks for federated learning.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-
 <span class="kn">import</span> <span class="nn">ymir.path</span>
 
 
@@ -89,6 +88,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gradient transformation that copies the gradient of the victim client to the adversaries.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">,</span> <span class="n">victim</span><span class="p">,</span> <span class="n">attack_type</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the gradient transformation.</span>
@@ -101,7 +101,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span> <span class="o">=</span> <span class="n">num_adversaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">victim</span> <span class="o">=</span> <span class="n">victim</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attack_type</span> <span class="o">=</span> <span class="n">attack_type</span>
-        
+
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Copy victim gradient to all adversaries, negate the adversary gradients if bad mouthing.&quot;&quot;&quot;</span>
         <span class="n">grad</span> <span class="o">=</span> <span class="n">all_grads</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">victim</span><span class="p">]</span>
@@ -129,6 +129,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gradient transformation that copies the gradient of the victim client to the adversaries.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="p">,</span> <span class="n">victim</span><span class="p">,</span> <span class="n">attack_type</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the gradient transformation.</span>
@@ -141,7 +142,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span> <span class="o">=</span> <span class="n">num_adversaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">victim</span> <span class="o">=</span> <span class="n">victim</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attack_type</span> <span class="o">=</span> <span class="n">attack_type</span>
-        
+
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Copy victim gradient to all adversaries, negate the adversary gradients if bad mouthing.&quot;&quot;&quot;</span>
         <span class="n">grad</span> <span class="o">=</span> <span class="n">all_grads</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">victim</span><span class="p">]</span>

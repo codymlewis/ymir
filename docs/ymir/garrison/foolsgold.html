@@ -92,15 +92,16 @@ it is designed to provide robustness to (Sybil) adversarial attacks within non-i
 <span class="sd">it is designed to provide robustness to (Sybil) adversarial attacks within non-i.i.d. environments.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="k">as</span> <span class="nn">smp</span>
 <span class="kn">import</span> <span class="nn">jax</span>
 <span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="k">as</span> <span class="nn">smp</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">captain</span>
 
 
 <span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">ScaleCaptain</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">kappa</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the FoolsGold captain.</span>
@@ -144,6 +145,7 @@ it is designed to provide robustness to (Sybil) adversarial attacks within non-i
         <span class="n">wv</span><span class="p">[(</span><span class="n">wv</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="n">wv</span>
 
+
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">histories</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Perform histories + all_grads elementwise.&quot;&quot;&quot;</span>
@@ -165,6 +167,7 @@ it is designed to provide robustness to (Sybil) adversarial attacks within non-i
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">ScaleCaptain</span><span class="p">):</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">kappa</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the FoolsGold captain.</span>
@@ -224,7 +227,7 @@ it is designed to provide robustness to (Sybil) adversarial attacks within non-i
     opt,
     opt_state,
     network,
-    rng=Generator(PCG64) at 0x7F4DEAE5EB20,
+    rng=Generator(PCG64) at 0x7F956E8C33E0,
     kappa=1.0
 )</span>
     </div>

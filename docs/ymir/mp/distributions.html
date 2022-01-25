@@ -115,9 +115,9 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">logging</span>
 
 
 <span class="k">def</span> <span class="nf">homogeneous</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
@@ -166,9 +166,15 @@
 <span class="sd">    - shards_per_endpoint: the number of shards to assign to each endpoint.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>  <span class="c1"># sort by label</span>
-    <span class="n">shards</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span><span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)])</span>
+    <span class="n">shards</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+        <span class="n">idx</span><span class="p">,</span>
+        <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span><span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)]</span>
+    <span class="p">)</span>
     <span class="n">assignment</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shards</span><span class="p">)),</span> <span class="p">(</span><span class="n">nendpoints</span><span class="p">,</span> <span class="n">shards_per_endpoint</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">shards</span><span class="p">[</span><span class="n">assignment</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">shards_per_endpoint</span><span class="p">)]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">shards</span><span class="p">[</span><span class="n">assignment</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">shards_per_endpoint</span><span class="p">)]))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)</span>
+    <span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">assign_classes</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -191,8 +197,10 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">    - document: a list of lists of indices, where the outer list is indexed by endpoint.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">_distribution</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">document</span>
+
     <span class="k">return</span> <span class="n">_distribution</span>
 </pre></div>
 
@@ -331,9 +339,15 @@ the distribution is more i.i.d. as $\alpha \to \infty$ and less i.i.d. as $\alph
 <span class="sd">    - shards_per_endpoint: the number of shards to assign to each endpoint.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>  <span class="c1"># sort by label</span>
-    <span class="n">shards</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span><span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)])</span>
+    <span class="n">shards</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+        <span class="n">idx</span><span class="p">,</span>
+        <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span><span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)]</span>
+    <span class="p">)</span>
     <span class="n">assignment</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shards</span><span class="p">)),</span> <span class="p">(</span><span class="n">nendpoints</span><span class="p">,</span> <span class="n">shards_per_endpoint</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">shards</span><span class="p">[</span><span class="n">assignment</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">shards_per_endpoint</span><span class="p">)]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">shards</span><span class="p">[</span><span class="n">assignment</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">shards_per_endpoint</span><span class="p">)]))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)</span>
+    <span class="p">]</span>
 </pre></div>
 
         </details>
@@ -403,8 +417,10 @@ shards are even partitions of the data after sorting by class.</p>
 <span class="sd">    Arguments:</span>
 <span class="sd">    - document: a list of lists of indices, where the outer list is indexed by endpoint.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">_distribution</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">document</span>
+
     <span class="k">return</span> <span class="n">_distribution</span>
 </pre></div>
 

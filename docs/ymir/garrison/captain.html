@@ -115,17 +115,15 @@
 <span class="sd">- AggregateCaptain: a server that takes in a collection of weights and aggregates them into a single weight</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">import</span> <span class="nn">optax</span>
 <span class="kn">import</span> <span class="nn">jax</span>
 <span class="kn">import</span> <span class="nn">jaxlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">optax</span>
 
 <span class="kn">import</span> <span class="nn">ymir.path</span>
-
 <span class="kn">from</span> <span class="nn">ymir.mp.network</span> <span class="kn">import</span> <span class="n">Network</span>
 
 
@@ -202,17 +200,20 @@
 <span class="sd">    This is a curried function, so first initialize with the selected optimizer.</span>
 <span class="sd">    The return function may then be used to update the global parameters based on the endpoint gradients</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">grads</span><span class="p">):</span>
         <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
         <span class="n">new_params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_params</span><span class="p">,</span> <span class="n">opt_state</span>
+
     <span class="k">return</span> <span class="n">_apply</span>
 
 
 <span class="k">def</span> <span class="nf">apply_scale</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Scale a collection of gradients by the value of alpha&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree_mul</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_grads</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)]</span>
+
 
 <span class="k">def</span> <span class="nf">sum_grads</span><span class="p">(</span><span class="n">all_grads</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Element-wise sum together a collection of gradients, simplifies boilerplate&quot;&quot;&quot;</span>
@@ -473,11 +474,13 @@ a step of the optimizer to the stored global parameters using the sum of those s
 <span class="sd">    This is a curried function, so first initialize with the selected optimizer.</span>
 <span class="sd">    The return function may then be used to update the global parameters based on the endpoint gradients</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
     <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">grads</span><span class="p">):</span>
         <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
         <span class="n">new_params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_params</span><span class="p">,</span> <span class="n">opt_state</span>
+
     <span class="k">return</span> <span class="n">_apply</span>
 </pre></div>
 

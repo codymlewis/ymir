@@ -102,7 +102,23 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gradient transform for determining when to toggle the attack.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">adversaries</span><span class="p">,</span> <span class="n">max_alpha</span><span class="p">,</span> <span class="n">sharp</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="n">timer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">,</span>
+        <span class="n">opt</span><span class="p">,</span>
+        <span class="n">opt_state</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">,</span>
+        <span class="n">alg</span><span class="p">,</span>
+        <span class="n">adversaries</span><span class="p">,</span>
+        <span class="n">max_alpha</span><span class="p">,</span>
+        <span class="n">sharp</span><span class="p">,</span>
+        <span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">gamma</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span>
+        <span class="n">timer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the gradient transform.</span>
 
@@ -132,7 +148,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">timer_mode</span> <span class="o">=</span> <span class="n">timer</span>
         <span class="k">if</span> <span class="n">timer</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="mi">0</span>
-        
+
     <span class="k">def</span> <span class="nf">should_toggle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return whether the attack should be toggled based on the current scale value.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer_mode</span><span class="p">:</span>
@@ -189,7 +205,23 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gradient transform for determining when to toggle the attack.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">adversaries</span><span class="p">,</span> <span class="n">max_alpha</span><span class="p">,</span> <span class="n">sharp</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="n">timer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">,</span>
+        <span class="n">opt</span><span class="p">,</span>
+        <span class="n">opt_state</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">,</span>
+        <span class="n">alg</span><span class="p">,</span>
+        <span class="n">adversaries</span><span class="p">,</span>
+        <span class="n">max_alpha</span><span class="p">,</span>
+        <span class="n">sharp</span><span class="p">,</span>
+        <span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">gamma</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span>
+        <span class="n">timer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the gradient transform.</span>
 
@@ -219,7 +251,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">timer_mode</span> <span class="o">=</span> <span class="n">timer</span>
         <span class="k">if</span> <span class="n">timer</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="mi">0</span>
-        
+
     <span class="k">def</span> <span class="nf">should_toggle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return whether the attack should be toggled based on the current scale value.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer_mode</span><span class="p">:</span>
@@ -268,14 +300,29 @@
     beta=1.0,
     gamma=0.85,
     timer=False,
-    rng=Generator(PCG64) at 0x7F4DEAEE8660,
+    rng=Generator(PCG64) at 0x7F956E27C820,
     **kwargs
 )</span>
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">adversaries</span><span class="p">,</span> <span class="n">max_alpha</span><span class="p">,</span> <span class="n">sharp</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="n">timer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">,</span>
+        <span class="n">opt</span><span class="p">,</span>
+        <span class="n">opt_state</span><span class="p">,</span>
+        <span class="n">network</span><span class="p">,</span>
+        <span class="n">alg</span><span class="p">,</span>
+        <span class="n">adversaries</span><span class="p">,</span>
+        <span class="n">max_alpha</span><span class="p">,</span>
+        <span class="n">sharp</span><span class="p">,</span>
+        <span class="n">beta</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">gamma</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span>
+        <span class="n">timer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the gradient transform.</span>
 
