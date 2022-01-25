@@ -3,15 +3,16 @@ The FoolsGold algorithm proposed in `https://arxiv.org/abs/1808.04866 <https://a
 it is designed to provide robustness to (Sybil) adversarial attacks within non-i.i.d. environments.
 """
 
-import numpy as np
-import sklearn.metrics.pairwise as smp
 import jax
 import jax.numpy as jnp
+import numpy as np
+import sklearn.metrics.pairwise as smp
 
 from . import captain
 
 
 class Captain(captain.ScaleCaptain):
+
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), kappa=1.0):
         """
         Construct the FoolsGold captain.
@@ -54,6 +55,7 @@ class Captain(captain.ScaleCaptain):
         wv[(np.isinf(wv) + wv > 1)] = 1
         wv[(wv < 0)] = 0
         return wv
+
 
 @jax.jit
 def update(histories, all_grads):

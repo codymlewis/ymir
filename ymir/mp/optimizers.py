@@ -2,13 +2,12 @@
 Unique optimizers proposed in the FL literature
 """
 
-
 from typing import NamedTuple
 
+import chex
 import jax
 import jax.numpy as jnp
 import optax
-import chex
 
 
 def pgd(opt, mu, local_epochs=1):
@@ -42,19 +41,16 @@ def _add_prox(mu: float, local_epochs: int) -> optax.GradientTransformation:
             raise ValueError("params argument required for this transform")
         updates = jax.tree_multimap(lambda g, w, wt: g + mu * ((w - g) - wt), grads, params, state.params)
         return updates, PgdState(
-            jax.lax.cond(state.counter == 0, lambda _: params, lambda _: state.params, None), (state.counter + 1) % local_epochs
+            jax.lax.cond(state.counter == 0, lambda _: params, lambda _: state.params, None),
+            (state.counter + 1) % local_epochs
         )
 
     return optax.GradientTransformation(init_fn, update_fn)
 
 
-
 def smp_opt(opt, rho):
     """Optimizer for stealthy model poisoning https://arxiv.org/abs/1811.12470"""
-    return optax.chain(
-        _add_stealth(rho),
-        opt
-    )
+    return optax.chain(_add_stealth(rho), opt)
 
 
 def _add_stealth(rho: float) -> optax.GradientTransformation:

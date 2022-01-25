@@ -15,7 +15,6 @@ import hkzoo
 import tenjin
 import ymir
 
-
 if __name__ == "__main__":
     print("Setting up the system...")
     num_endpoints = 10
@@ -40,7 +39,7 @@ if __name__ == "__main__":
     network.add_controller("main", server=True)
     for i in range(num_clients):
         network.add_host("main", ymir.regiment.Scout(client_opt, client_opt_state, loss, data[i], 1))
-    
+
     # Setup for the constrain and scale attack
     adv_loss = ymir.mp.losses.constrain_cosine_loss(0.4, loss, client_opt, client_opt_state)
     for i in range(num_adversaries):
@@ -49,7 +48,9 @@ if __name__ == "__main__":
         ymir.fritz.scaler.convert(c, num_endpoints)
         network.add_host("main", c)
 
-    backdoor_eval = dataset.get_iter("test", map=partial(ymir.fritz.backdoor.backdoor_map, 0, 1, np.ones((5, 5, 1)), no_label=True))
+    backdoor_eval = dataset.get_iter(
+        "test", map=partial(ymir.fritz.backdoor.backdoor_map, 0, 1, np.ones((5, 5, 1)), no_label=True)
+    )
 
     server_opt = optax.sgd(1)
     server_opt_state = server_opt.init(params)

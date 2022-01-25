@@ -3,13 +3,14 @@ The multi-Krum algorithm proposed in `https://papers.nips.cc/paper/2017/hash/f4b
 it is designed to be robust to Byzantine faults with i.i.d. environments.
 """
 
-import numpy as np
 import jax
+import numpy as np
 
 from . import captain
 
 
 class Captain(captain.ScaleCaptain):
+
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), clip=3):
         """
         Construct the Krum captain.

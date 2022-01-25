@@ -2,7 +2,6 @@
 Federated learning free rider attack proposed in `https://arxiv.org/abs/1911.12560 <https://arxiv.org/abs/1911.12560>`_
 """
 
-
 import numpy as np
 
 import ymir.path
@@ -26,6 +25,7 @@ def convert(client, attack_type, params, rng=np.random.default_rng()):
 
 def update(opt):
     """Free rider update function for endpoints."""
+
     def _apply(self, params, opt_state, X, y):
         if self.attack_type == "random":
             grads = ymir.path.tree_uniform(params, low=-10e-3, high=10e-3, rng=self.rng)
@@ -36,4 +36,5 @@ def update(opt):
         # updates, opt_state = opt.update(grads, opt_state, params)
         self.prev_params = params
         return grads, opt_state
+
     return _apply

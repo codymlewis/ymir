@@ -4,9 +4,8 @@ Federated learning backdoor attack proposed in `https://arxiv.org/abs/1807.00459
 
 from functools import partial
 
-import numpy as np
-
 import jax
+import numpy as np
 import optax
 
 
@@ -44,7 +43,7 @@ def backdoor_map(attack_from, attack_to, trigger, X, y, no_label=False):
     - no_label: whether to apply the map to the label
     """
     idx = y == attack_from
-    X[idx, :trigger.shape[0], :trigger.shape[1]] = np.minimum(1, X[idx, :trigger.shape[0], :trigger.shape[1]] +  trigger)
+    X[idx, :trigger.shape[0], :trigger.shape[1]] = np.minimum(1, X[idx, :trigger.shape[0], :trigger.shape[1]] + trigger)
     if not no_label:
         y[idx] = attack_to
     return (X, y)
@@ -52,7 +51,7 @@ def backdoor_map(attack_from, attack_to, trigger, X, y, no_label=False):
 
 @partial(jax.jit, static_argnums=(0, 1, 2))
 def update(opt, loss, data, params, opt_state, X, y):
-    """Backdoor update function for endpoints."""   
+    """Backdoor update function for endpoints."""
     grads = jax.grad(loss)(params, *next(data))
     updates, opt_state = opt.update(grads, opt_state, params)
     params = optax.apply_updates(params, updates)

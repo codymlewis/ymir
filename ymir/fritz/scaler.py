@@ -2,14 +2,12 @@
 Scale the updates submitted from selected endpoints.
 """
 
-
-import numpy as np
 import jax
+import numpy as np
 import optax
 
-from ymir import garrison
-
 import ymir.path
+from ymir import garrison
 
 
 def convert(client, num_endpoints):
@@ -29,6 +27,7 @@ class GradientTransform:
     """
     Gradient transform that scales updates based on the inverse of the result from the aggregation scale value.
     """
+
     def __init__(self, params, opt, opt_state, network, alg, num_adversaries, rng=np.random.default_rng(), **kwargs):
         """
         Construct the gradient transform.

@@ -5,16 +5,16 @@ Viceroy algorithm for mitigating the impact of the on-off toggling attack.
 import sys
 from functools import partial
 
-import numpy as np
-import sklearn.metrics.pairwise as smp
-
 import jax
 import jax.numpy as jnp
+import numpy as np
+import sklearn.metrics.pairwise as smp
 
 from . import captain
 
 
 class Captain(captain.ScaleCaptain):
+
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), tau_0=56, tau_1=5):
         r"""
         Construct the Viceroy captain.
@@ -27,7 +27,7 @@ class Captain(captain.ScaleCaptain):
         self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
         self.reps = np.array([1.0 for _ in range(len(network))])
         self.round = 1
-        self.omega = (abs(sys.float_info.epsilon))**(1/tau_0)
+        self.omega = (abs(sys.float_info.epsilon))**(1 / tau_0)
         self.eta = 1 / tau_1
 
     def update(self, all_grads):
@@ -39,7 +39,8 @@ class Captain(captain.ScaleCaptain):
         self.histories = update(self.omega, self.histories, all_grads)
 
     def scale(self, all_grads):
-        return (self.reps * scale(self.histories)) + ((1 - self.reps) * scale(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads])))
+        return (self.reps * scale(self.histories)
+                ) + ((1 - self.reps) * scale(jnp.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads])))
 
 
 def scale(X):
@@ -67,7 +68,8 @@ def scale(X):
     wv[(wv < 0)] = 0
     return wv
 
-@partial(jax.jit, static_argnums=(0,))
+
+@partial(jax.jit, static_argnums=(0, ))
 def update(omega, histories, all_grads):
     r"""A decayed histories update, $H_{i, t + 1} \gets \omega H_{i, t} + \Delta_{i, t + 1} : \forall i \in \mathcal{U}$."""
     return jnp.array([omega * h + jax.flatten_util.ravel_pytree(g)[0] for h, g in zip(histories, all_grads)])

@@ -11,6 +11,7 @@ from . import captain
 
 
 class Captain(captain.ScaleCaptain):
+
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), M=1.0):
         """
         Construct the norm clipping aggregator.
@@ -20,7 +21,7 @@ class Captain(captain.ScaleCaptain):
         """
         super().__init__(params, opt, opt_state, network, rng)
         self.M = M
-    
+
     def update(self, all_grads):
         pass
 

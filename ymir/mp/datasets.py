@@ -7,6 +7,7 @@ import numpy as np
 
 class DataIter:
     """Iterator that gives random batchs in pairs of $(X_i, y_i) : i \subseteq {1, \ldots, N}$"""
+
     def __init__(self, X, y, batch_size, classes, rng):
         """
         Construct a data iterator.
@@ -37,6 +38,7 @@ class DataIter:
 
 class Dataset:
     """Object that contains the full dataset, primarily to prevent the need for reloading for each endpoint."""
+
     def __init__(self, X, y, train):
         """
         Construct the dataset.
@@ -57,7 +59,9 @@ class Dataset:
         """Get the testing subset"""
         return self.X[~self.train_idx], self.y[~self.train_idx]
 
-    def get_iter(self, split, batch_size=None, idx=None, filter=None, map=None, rng=np.random.default_rng()) -> DataIter:
+    def get_iter(
+        self, split, batch_size=None, idx=None, filter=None, map=None, rng=np.random.default_rng()
+    ) -> DataIter:
         """
         Generate an iterator out of the dataset.
         
@@ -79,7 +83,7 @@ class Dataset:
         if map is not None:
             X, y = map(X, y)
         return DataIter(X, y, batch_size, self.classes, rng)
-    
+
     def fed_split(self, batch_sizes, mapping=None, rng=np.random.default_rng()):
         """
         Divide the dataset for federated learning.

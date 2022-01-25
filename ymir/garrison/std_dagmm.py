@@ -2,36 +2,36 @@
 STD-DAGMM algorithm proposed in `https://arxiv.org/abs/1911.12560 <https://arxiv.org/abs/1911.12560>`_ designed to mitigate free-rider attacks
 """
 
+import haiku as hk
 import jax
 import jax.flatten_util
 import jax.numpy as jnp
-import haiku as hk
-import optax
-
 import numpy as np
+import optax
 from sklearn import mixture
 
 from . import captain
 
-
 # Utility functions/classes
+
 
 class _DA(hk.Module):
     """A simple deep autoencoder model."""
+
     def __init__(self, in_len, name=None):
         super().__init__(name=name)
-        self.encoder = hk.Sequential([
-            hk.Linear(60), jax.nn.relu,
-            hk.Linear(30), jax.nn.relu,
-            hk.Linear(10), jax.nn.relu,
-            hk.Linear(1)
-        ])
-        self.decoder = hk.Sequential([
-            hk.Linear(10), jax.nn.tanh,
-            hk.Linear(30), jax.nn.tanh,
-            hk.Linear(60), jax.nn.tanh,
-            hk.Linear(in_len)
-        ])
+        self.encoder = hk.Sequential(
+            [hk.Linear(60), jax.nn.relu,
+             hk.Linear(30), jax.nn.relu,
+             hk.Linear(10), jax.nn.relu,
+             hk.Linear(1)]
+        )
+        self.decoder = hk.Sequential(
+            [hk.Linear(10), jax.nn.tanh,
+             hk.Linear(30), jax.nn.tanh,
+             hk.Linear(60), jax.nn.tanh,
+             hk.Linear(in_len)]
+        )
 
     def __call__(self, X):
         enc = self.encoder(X)
@@ -40,21 +40,25 @@ class _DA(hk.Module):
 
 def _loss(net):
     """MSE loss for the deep autoencoder."""
+
     @jax.jit
     def _apply(params, x):
         _, z = net.apply(params, x)
         return jnp.mean(optax.l2_loss(z, x))
+
     return _apply
 
 
 def _da_update(opt, loss):
     """Update function for the autoencoder."""
+
     @jax.jit
     def _apply(params, opt_state, batch):
         grads = jax.grad(loss)(params, batch)
         updates, opt_state = opt.update(grads, opt_state, params)
         params = optax.apply_updates(params, updates)
         return params, opt_state
+
     return _apply
 
 
@@ -67,12 +71,14 @@ def _relative_euclidean_distance(a, b):
 def _predict(params, net, gmm, X):
     """Make the STD-DAGMM prediction."""
     enc, dec = net.apply(params, X)
-    z = jnp.array([[
-        jnp.squeeze(e),
-        _relative_euclidean_distance(x, d),
-        optax.cosine_similarity(x, d),
-        jnp.std(x)
-    ] for x, e, d in zip(X, enc, dec)])
+    z = jnp.array(
+        [
+            [jnp.squeeze(e),
+             _relative_euclidean_distance(x, d),
+             optax.cosine_similarity(x, d),
+             jnp.std(x)] for x, e, d in zip(X, enc, dec)
+        ]
+    )
     return gmm.score_samples(z)
 
 
@@ -80,6 +86,7 @@ def _predict(params, net, gmm, X):
 
 
 class Captain(captain.ScaleCaptain):
+
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng()):
         super().__init__(params, opt, opt_state, network, rng)
         self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in network.clients])
@@ -98,12 +105,14 @@ class Captain(captain.ScaleCaptain):
         grads = jnp.array([jax.flatten_util.ravel_pytree(g)[0].tolist() for g in all_grads])
         self.da_params, self.da_opt_state = self.da_update(self.da_params, self.da_opt_state, grads)
         enc, dec = self.da.apply(self.da_params, grads)
-        z = jnp.array([[
-            jnp.squeeze(e),
-            _relative_euclidean_distance(x, d),
-            optax.cosine_similarity(x, d),
-            jnp.std(x)
-        ] for x, e, d in zip(grads, enc, dec)])
+        z = jnp.array(
+            [
+                [jnp.squeeze(e),
+                 _relative_euclidean_distance(x, d),
+                 optax.cosine_similarity(x, d),
+                 jnp.std(x)] for x, e, d in zip(grads, enc, dec)
+            ]
+        )
         self.gmm = self.gmm.fit(z)
 
     def scale(self, all_grads):

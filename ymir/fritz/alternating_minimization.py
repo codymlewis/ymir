@@ -4,11 +4,11 @@ Alternating minimization model poisoning, proposed in `https://arxiv.org/abs/181
 
 from functools import partial
 
-import ymir.regiment.scout
 import ymir.path
+import ymir.regiment.scout
 
 
-def convert(client,  poison_epochs, stealth_epochs, stealth_data):
+def convert(client, poison_epochs, stealth_epochs, stealth_data):
     """
     Convert an endpoint into an alternating minimization adversary.
     

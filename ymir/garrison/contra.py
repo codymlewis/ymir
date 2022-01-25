@@ -3,15 +3,16 @@ The CONTRA algorithm proposed in `https://www.ittc.ku.edu/~bluo/pubs/Awan2021ESO
 it is designed to provide robustness to poisoning adversaries within many statistically heterogenous environments.
 """
 
-import numpy as np
-import sklearn.metrics.pairwise as smp
 import jax
 import jax.numpy as jnp
+import numpy as np
+import sklearn.metrics.pairwise as smp
 
 from . import captain
 
 
 class Captain(captain.ScaleCaptain):
+
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), C=0.1, k=10, delta=0.1, t=0.5):
         """
         Construct the CONTRA captain.

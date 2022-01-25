@@ -4,17 +4,15 @@ There are two generic forms of servers defined here:
 - AggregateCaptain: a server that takes in a collection of weights and aggregates them into a single weight
 """
 
-
 from abc import ABC, abstractmethod
 from typing import Iterable
-import numpy as np
 
-import optax
 import jax
 import jaxlib
+import numpy as np
+import optax
 
 import ymir.path
-
 from ymir.mp.network import Network
 
 
@@ -91,17 +89,20 @@ def update(opt):
     This is a curried function, so first initialize with the selected optimizer.
     The return function may then be used to update the global parameters based on the endpoint gradients
     """
+
     @jax.jit
     def _apply(params, opt_state, grads):
         updates, opt_state = opt.update(grads, opt_state, params)
         new_params = optax.apply_updates(params, updates)
         return new_params, opt_state
+
     return _apply
 
 
 def apply_scale(alpha, all_grads):
     """Scale a collection of gradients by the value of alpha"""
     return [ymir.path.tree_mul(g, a) for g, a in zip(all_grads, alpha)]
+
 
 def sum_grads(all_grads):
     """Element-wise sum together a collection of gradients, simplifies boilerplate"""

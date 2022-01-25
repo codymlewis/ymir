@@ -2,12 +2,4 @@ r"""
 .. include:: README.md
 """
 
-
-from . import contra
-from . import fedavg
-from . import flguard
-from . import foolsgold
-from . import krum
-from . import norm_clipping
-from . import std_dagmm
-from . import viceroy
+from . import (contra, fedavg, flguard, foolsgold, krum, norm_clipping, std_dagmm, viceroy)

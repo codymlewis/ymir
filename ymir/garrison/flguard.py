@@ -4,16 +4,17 @@ it is designed to provide robustness against adversaries, inclusive of multiple 
 heterogeneity environments.
 """
 
-import numpy as np
-import sklearn.metrics.pairwise as smp
+import hdbscan
 import jax
 import jax.flatten_util
-import hdbscan
+import numpy as np
+import sklearn.metrics.pairwise as smp
 
 from . import captain
 
 
 class Captain(captain.AggregateCaptain):
+
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), lamb=0.001):
         """
         Construct the FLGuard captain.
@@ -30,7 +31,9 @@ class Captain(captain.AggregateCaptain):
         Ws = np.array([jax.flatten_util.ravel_pytree(w)[0] for w in all_weights])
         n_clients = Ws.shape[0]
         cs = smp.cosine_distances(Ws).astype(np.double)
-        clusters = hdbscan.HDBSCAN(min_cluster_size=n_clients // 2 + 1, metric='precomputed', allow_single_cluster=True).fit_predict(cs)
+        clusters = hdbscan.HDBSCAN(
+            min_cluster_size=n_clients // 2 + 1, metric='precomputed', allow_single_cluster=True
+        ).fit_predict(cs)
         bs = np.arange(len(clusters))[clusters == np.argmax(np.bincount(clusters[clusters != -1]))]
         es = np.linalg.norm(G - Ws, axis=1)  # Euclidean distance between G and each Ws
         S = np.median(es)

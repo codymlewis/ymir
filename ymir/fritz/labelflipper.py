@@ -34,7 +34,11 @@ def labelflip_map(attack_from, attack_to, X, y):
     return (X, y)
 
 
-@partial(jax.jit, static_argnums=(0, 1, 2,))
+@partial(jax.jit, static_argnums=(
+    0,
+    1,
+    2,
+))
 def update(opt, loss, data, params, opt_state, X, y):
     """Label flipping update function for endpoints."""
     grads = jax.grad(loss)(params, *next(data))

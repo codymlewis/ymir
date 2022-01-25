@@ -2,8 +2,7 @@
 Defines the network architecture for the FL system.
 """
 
-
-import numpy as  np
+import numpy as np
 
 import ymir.path
 
@@ -14,6 +13,7 @@ class Controller:
     Handles the update step of each of the clients and passes the respective gradients
     up the chain.
     """
+
     def __init__(self, C):
         """
         Construct the Controller.
@@ -38,7 +38,7 @@ class Controller:
     def add_switch(self, switch):
         """Connect another controller (referred to as switch) to this controller"""
         self.switches.append(switch)
-    
+
     def add_update_transform(self, update_transform):
         """Add a function that transforms the updates before passing them up the chain"""
         self.update_transform_chain.append(update_transform)
@@ -59,13 +59,16 @@ class Controller:
         for i in idx:
             p = params  # set client parameters to global parameters
             for _ in range(self.clients[i].epochs):
-                p, self.clients[i].opt_state = self.clients[i].update(p, self.clients[i].opt_state, *next(self.clients[i].data))
+                p, self.clients[i].opt_state = self.clients[i].update(
+                    p, self.clients[i].opt_state, *next(self.clients[i].data)
+                )
             all_updates.append(p if return_weights else ymir.path.tree_sub(params, p))
         return ymir.path.chain(self.update_transform_chain, all_updates)
 
 
 class Network:
     """Higher level class for tracking each controller and client"""
+
     def __init__(self, C=1.0):
         """Construct the Network.
 
@@ -86,7 +89,7 @@ class Network:
         self.controllers[name] = Controller(self.C)
         if server:
             self.server_name = name
-    
+
     def get_controller(self, name):
         """Get the controller with the specified name"""
         return self.controllers[name]

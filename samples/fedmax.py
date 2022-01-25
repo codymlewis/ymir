@@ -12,7 +12,6 @@ import hkzoo
 import tenjin
 import ymir
 
-
 if __name__ == "__main__":
     # setup
     print("Setting up the system...")

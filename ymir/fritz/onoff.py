@@ -14,7 +14,23 @@ class GradientTransform:
     """
     Gradient transform for determining when to toggle the attack.
     """
-    def __init__(self, params, opt, opt_state, network, alg, adversaries, max_alpha, sharp, beta=1.0, gamma=0.85, timer=False, rng=np.random.default_rng(), **kwargs):
+
+    def __init__(
+        self,
+        params,
+        opt,
+        opt_state,
+        network,
+        alg,
+        adversaries,
+        max_alpha,
+        sharp,
+        beta=1.0,
+        gamma=0.85,
+        timer=False,
+        rng=np.random.default_rng(),
+        **kwargs
+    ):
         """
         Construct the gradient transform.
 
@@ -44,7 +60,7 @@ class GradientTransform:
         self.timer_mode = timer
         if timer:
             self.timer = 0
-        
+
     def should_toggle(self, alpha):
         """Return whether the attack should be toggled based on the current scale value."""
         if self.timer_mode:

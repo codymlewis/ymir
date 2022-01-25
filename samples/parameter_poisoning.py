@@ -2,7 +2,6 @@
 Example of parameter poisoning on Federated Averaging
 """
 
-
 import numpy as np
 import jax
 import haiku as hk
@@ -13,7 +12,6 @@ from tqdm import trange
 import hkzoo
 import tenjin
 import ymir
-
 
 if __name__ == "__main__":
     print("Setting up the system...")
@@ -40,7 +38,7 @@ if __name__ == "__main__":
     network.add_controller("main", server=True)
     for i in range(num_clients):
         network.add_host("main", ymir.regiment.Scout(client_opt, client_opt_state, loss, data[i], 1))
-    
+
     if attack == "smp":
         # Setup for the stealthy model poisoning attack
         adv_loss = ymir.mp.losses.smp_loss(net, 10, loss, test_eval.X[:100], test_eval.y[:100], 10)

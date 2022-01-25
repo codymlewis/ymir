@@ -2,7 +2,6 @@
 The bad and good mouthing attacks for federated learning.
 """
 
-
 import ymir.path
 
 
@@ -10,6 +9,7 @@ class GradientTransform:
     """
     Gradient transformation that copies the gradient of the victim client to the adversaries.
     """
+
     def __init__(self, num_adversaries, victim, attack_type):
         """
         Construct the gradient transformation.
@@ -22,7 +22,7 @@ class GradientTransform:
         self.num_adv = num_adversaries
         self.victim = victim
         self.attack_type = attack_type
-        
+
     def __call__(self, all_grads):
         """Copy victim gradient to all adversaries, negate the adversary gradients if bad mouthing."""
         grad = all_grads[self.victim]

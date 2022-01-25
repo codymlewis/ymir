@@ -1,4 +1,3 @@
-
 """
 Example of federated averaging on the MNIST dataset
 """
@@ -13,7 +12,6 @@ from tqdm import trange
 import hkzoo
 import tenjin
 import ymir
-
 
 if __name__ == "__main__":
     print("Setting up the system...")

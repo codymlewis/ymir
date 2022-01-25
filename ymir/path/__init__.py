@@ -2,7 +2,6 @@
 General utility library for ymir
 """
 
-
 from functools import partial
 
 import jax
@@ -15,13 +14,22 @@ def chain(funclist, x):
         x = f(x)
     return x
 
-@partial(jax.jit, static_argnums=(1, 2, 3,))
+
+@partial(jax.jit, static_argnums=(
+    1,
+    2,
+    3,
+))
 def tree_uniform(tree, low=0.0, high=1.0, rng=np.random.default_rng()):
     """Create an equivalently shaped tree with random number elements in the range [low, high)"""
     return jax.tree_map(lambda x: rng.uniform(low=low, high=high, size=x.shape), tree)
 
 
-@partial(jax.jit, static_argnums=(1, 2, 3,))
+@partial(jax.jit, static_argnums=(
+    1,
+    2,
+    3,
+))
 def tree_add_normal(tree, loc=0.0, scale=1.0, rng=np.random.default_rng()):
     """Add normally distributed noise to each element of the tree, (mu=loc, sigma=scale)"""
     return jax.tree_map(lambda x: x + rng.normal(loc=loc, scale=scale, size=x.shape), tree)
@@ -37,6 +45,7 @@ def tree_mul(tree, scale):
 def tree_add(*trees):
     """Element-wise add any number of pytrees"""
     return jax.tree_multimap(lambda *xs: sum(xs), *trees)
+
 
 @jax.jit
 def tree_sub(tree_a, tree_b):

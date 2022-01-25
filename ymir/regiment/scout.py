@@ -3,11 +3,14 @@ Standard endpoint collaborators for federated learning.
 """
 
 from functools import partial
+
 import jax
 import optax
 
+
 class Scout:
     """An endpoint for federated learning, holds its own data and personal learning variables."""
+
     def __init__(self, opt, opt_state, loss, data, epochs):
         """
         Constructor for a Scout.
@@ -28,7 +31,10 @@ class Scout:
         self.update = partial(update, opt, loss)
 
 
-@partial(jax.jit, static_argnums=(0, 1,))
+@partial(jax.jit, static_argnums=(
+    0,
+    1,
+))
 def update(opt, loss, params, opt_state, X, y):
     """
     Local learning step.

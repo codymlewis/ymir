@@ -12,10 +12,11 @@ from . import captain
 
 
 class Captain(captain.ScaleCaptain):
+
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng()):
         super().__init__(params, opt, opt_state, network, rng)
         self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in network.clients])
-    
+
     def update(self, all_grads):
         """Update the stored batch sizes ($n_i$)."""
         self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in self.network.clients])

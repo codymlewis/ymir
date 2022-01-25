@@ -1,0 +1,6 @@
+[style]
+based_on_style = pep8
+spaces_before_comment = 2
+dedent_closing_brackets = true
+column_limit = 120
+blank_line_before_nested_class_or_def = true
