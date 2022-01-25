@@ -1,4 +1,4 @@
-name: Generate Docs -> Test libraries
+name: Test libraries
 
 # Controls when the workflow will run
 on:
@@ -13,27 +13,6 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  docs:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
-      # Runs a single command using the runners shell
-      - name: Create/update docs
-        run: |
-          pip install jax jaxlib pdoc
-          pip install -r requirements.txt
-          rm -r docs
-          pdoc --math -d restructuredtext -o docs ymir
-          git config --global user.name 'Cody Lewis'
-          git config --global user.email 'codymlewis@users.noreply.github.com'
-          git add docs
-          git commit -m "Update docs"
-          git push
   test:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
