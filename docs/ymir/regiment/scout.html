@@ -53,6 +53,9 @@
                         <li>
                                 <a class="function" href="#Scout.__init__">Scout</a>
                         </li>
+                        <li>
+                                <a class="function" href="#Scout.step">step</a>
+                        </li>
                 </ul>
 
             </li>
@@ -89,6 +92,8 @@
 <span class="kn">import</span> <span class="nn">jax</span>
 <span class="kn">import</span> <span class="nn">optax</span>
 
+<span class="kn">import</span> <span class="nn">ymir.path</span>
+
 
 <span class="k">class</span> <span class="nc">Scout</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;An endpoint for federated learning, holds its own data and personal learning variables.&quot;&quot;&quot;</span>
@@ -111,6 +116,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">opt</span> <span class="o">=</span> <span class="n">opt</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform a single local training loop.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the global model from the most recent round</span>
+<span class="sd">        - return_weights: if True, return the weights of the clients else return the gradients from the local training</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">):</span>
+            <span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">p</span> <span class="k">if</span> <span class="n">return_weights</span> <span class="k">else</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree_sub</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 
 
 <span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span>
@@ -170,6 +188,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">opt</span> <span class="o">=</span> <span class="n">opt</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform a single local training loop.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the global model from the most recent round</span>
+<span class="sd">        - return_weights: if True, return the weights of the clients else return the gradients from the local training</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">):</span>
+            <span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">p</span> <span class="k">if</span> <span class="n">return_weights</span> <span class="k">else</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree_sub</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -219,6 +250,44 @@
 <li>loss: loss function to use for training</li>
 <li>data: data to use for training</li>
 <li>epochs: number of epochs to train for per round</li>
+</ul>
+</div>
+
+
+                            </div>
+                            <div id="Scout.step" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Scout.step">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">step</span><span class="signature">(self, params, return_weights=False)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform a single local training loop.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the parameters of the global model from the most recent round</span>
+<span class="sd">        - return_weights: if True, return the weights of the clients else return the gradients from the local training</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">):</span>
+            <span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">p</span> <span class="k">if</span> <span class="n">return_weights</span> <span class="k">else</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree_sub</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Perform a single local training loop.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>params: the parameters of the global model from the most recent round</li>
+<li>return_weights: if True, return the weights of the clients else return the gradients from the local training</li>
 </ul>
 </div>
 

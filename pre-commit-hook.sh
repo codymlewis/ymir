@@ -1,7 +1,6 @@
 #!/bin/sh
 
 isort ymir
-yapf -i -p -vv -r ymir
-rm -r docs
+yapf -i -p -r ymir
 pdoc --math -d restructuredtext -o docs ./ymir
 git add -A

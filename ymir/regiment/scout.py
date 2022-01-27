@@ -7,6 +7,8 @@ from functools import partial
 import jax
 import optax
 
+import ymir.path
+
 
 class Scout:
     """An endpoint for federated learning, holds its own data and personal learning variables."""
@@ -29,6 +31,19 @@ class Scout:
         self.opt = opt
         self.loss = loss
         self.update = partial(update, opt, loss)
+
+    def step(self, params, return_weights=False):
+        """
+        Perform a single local training loop.
+
+        Arguments:
+        - params: the parameters of the global model from the most recent round
+        - return_weights: if True, return the weights of the clients else return the gradients from the local training
+        """
+        p = params
+        for _ in range(self.epochs):
+            p, self.opt_state = self.update(p, self.opt_state, *next(self.data))
+        return p if return_weights else ymir.path.tree_sub(params, p)
 
 
 @partial(jax.jit, static_argnums=(

@@ -20,20 +20,28 @@ def convert(client, attack_type, params, rng=np.random.default_rng()):
     client.attack_type = attack_type
     client.prev_params = params
     client.rng = rng
-    client.update = update(client.opt).__get__(client)
+    client.update = update.__get__(client)
+    client.step = step.__get__(client)
 
 
-def update(opt):
-    """Free rider update function for endpoints."""
+def update(self, *_):
+    """Stub for non-existent free-rider update function."""
+    pass
 
-    def _apply(self, params, opt_state, X, y):
-        if self.attack_type == "random":
-            new_params = ymir.path.tree_uniform(params, low=-10e-3, high=10e-3, rng=self.rng)
-        else:
-            new_params = self.prev_params  # since at the higher level, the gradient is calculated as start_params - updated_params
-            if "advanced" in self.attack_type:
-                new_params = ymir.path.tree_add_normal(new_params, loc=0.0, scale=10e-4, rng=self.rng)
-        self.prev_params = params
-        return new_params, opt_state
 
-    return _apply
+def step(self, params, return_weights=False):
+    """
+    Perform a single local training loop.
+
+    Arguments:
+    - params: the parameters of the global model from the most recent round
+    - return_weights: if True, return the weights of the clients else return the gradients from the local training
+    """
+    if self.attack_type == "random":
+        grad = ymir.path.tree_uniform(params, low=-10e-3, high=10e-3, rng=self.rng)
+    else:
+        grad = ymir.path.tree_sub(params, self.prev_params)
+        if "advanced" in self.attack_type:
+            grad = ymir.path.tree_add_normal(grad, loc=0.0, scale=10e-4, rng=self.rng)
+    self.prev_params = params
+    return ymir.path.tree_add(params, grad) if return_weights else grad

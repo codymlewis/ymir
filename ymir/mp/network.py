@@ -57,12 +57,7 @@ class Controller:
             all_updates.extend(switch(params, rng, return_weights))
         idx = rng.choice(self.K, size=int(self.C * self.K), replace=False)
         for i in idx:
-            p = params  # set client parameters to global parameters
-            for _ in range(self.clients[i].epochs):
-                p, self.clients[i].opt_state = self.clients[i].update(
-                    p, self.clients[i].opt_state, *next(self.clients[i].data)
-                )
-            all_updates.append(p if return_weights else ymir.path.tree_sub(params, p))
+            all_updates.append(self.clients[i].step(params, return_weights))
         return ymir.path.chain(self.update_transform_chain, all_updates)
 
 
