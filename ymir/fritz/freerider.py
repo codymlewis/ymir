@@ -28,13 +28,12 @@ def update(opt):
 
     def _apply(self, params, opt_state, X, y):
         if self.attack_type == "random":
-            grads = ymir.path.tree_uniform(params, low=-10e-3, high=10e-3, rng=self.rng)
+            new_params = ymir.path.tree_uniform(params, low=-10e-3, high=10e-3, rng=self.rng)
         else:
-            grads = ymir.path.tree_add(params, ymir.path.tree_mul(self.prev_params, -1))
+            new_params = self.prev_params  # since at the higher level, the gradient is calculated as start_params - updated_params
             if "advanced" in self.attack_type:
-                grads = ymir.path.tree_add_normal(grads, loc=0.0, scale=10e-4, rng=self.rng)
-        # updates, opt_state = opt.update(grads, opt_state, params)
+                new_params = ymir.path.tree_add_normal(new_params, loc=0.0, scale=10e-4, rng=self.rng)
         self.prev_params = params
-        return grads, opt_state
+        return new_params, opt_state
 
     return _apply

@@ -94,7 +94,6 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">ymir</span> <span class="kn">import</span> <span class="n">garrison</span>
 <span class="kn">from</span> <span class="nn">ymir.regiment</span> <span class="kn">import</span> <span class="n">scout</span>
 
 
@@ -136,13 +135,12 @@
 <span class="sd">        - timer: whether to use a timer to determine when to toggle</span>
 <span class="sd">        - rng: the random number generator to use</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attacking</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_alpha</span> <span class="o">=</span> <span class="n">max_alpha</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sharp</span> <span class="o">=</span> <span class="n">sharp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">alg</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">adversaries</span> <span class="o">=</span> <span class="n">adversaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">adversaries</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timer_mode</span> <span class="o">=</span> <span class="n">timer</span>
@@ -239,13 +237,12 @@
 <span class="sd">        - timer: whether to use a timer to determine when to toggle</span>
 <span class="sd">        - rng: the random number generator to use</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attacking</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_alpha</span> <span class="o">=</span> <span class="n">max_alpha</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sharp</span> <span class="o">=</span> <span class="n">sharp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">alg</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">adversaries</span> <span class="o">=</span> <span class="n">adversaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">adversaries</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timer_mode</span> <span class="o">=</span> <span class="n">timer</span>
@@ -300,7 +297,7 @@
     beta=1.0,
     gamma=0.85,
     timer=False,
-    rng=Generator(PCG64) at 0x7FDA1ED7C660,
+    rng=Generator(PCG64) at 0x7F636BEE0820,
     **kwargs
 )</span>
     </div>
@@ -340,13 +337,12 @@
 <span class="sd">        - timer: whether to use a timer to determine when to toggle</span>
 <span class="sd">        - rng: the random number generator to use</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">alg</span> <span class="o">=</span> <span class="n">alg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attacking</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_alpha</span> <span class="o">=</span> <span class="n">max_alpha</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sharp</span> <span class="o">=</span> <span class="n">sharp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">garrison</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alg</span><span class="p">)</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">alg</span><span class="o">.</span><span class="n">Captain</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">adversaries</span> <span class="o">=</span> <span class="n">adversaries</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_adv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">adversaries</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timer_mode</span> <span class="o">=</span> <span class="n">timer</span>

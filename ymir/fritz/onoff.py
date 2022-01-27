@@ -6,7 +6,6 @@ from functools import partial
 
 import numpy as np
 
-from ymir import garrison
 from ymir.regiment import scout
 
 
@@ -48,13 +47,12 @@ class GradientTransform:
         - timer: whether to use a timer to determine when to toggle
         - rng: the random number generator to use
         """
-        self.alg = alg
         self.attacking = False
         self.max_alpha = max_alpha
         self.sharp = sharp
         self.beta = beta
         self.gamma = gamma
-        self.server = getattr(garrison, self.alg).Captain(params, opt, opt_state, network, rng, **kwargs)
+        self.server = alg.Captain(params, opt, opt_state, network, rng, **kwargs)
         self.adversaries = adversaries
         self.num_adv = len(adversaries)
         self.timer_mode = timer
