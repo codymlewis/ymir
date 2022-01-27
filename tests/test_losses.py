@@ -6,11 +6,15 @@ import ymir
 
 
 class TestLosses(unittest.TestCase):
+
     def setUp(self):
         self.params = jnp.ones(2)
+
         class _Net:
+
             def apply(self, params, X):
                 return (params @ X) + jnp.ones(2)
+
         self.net = _Net()
 
     def test_cross_entropy_loss(self):

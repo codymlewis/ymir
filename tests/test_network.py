@@ -2,7 +2,9 @@ import unittest
 
 import ymir
 
+
 class TestNetwork(unittest.TestCase):
+
     def test_controller(self):
         controller = ymir.mp.network.Controller(0.1)
         self.assertListEqual(controller.clients, [])

@@ -2,15 +2,14 @@
 Example of parameter poisoning on Federated Averaging
 """
 
-import numpy as np
-import jax
 import haiku as hk
+import hkzoo
+import jax
+import numpy as np
 import optax
-
+import tenjin
 from tqdm import trange
 
-import hkzoo
-import tenjin
 import ymir
 
 if __name__ == "__main__":

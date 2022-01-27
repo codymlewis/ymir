@@ -2,14 +2,13 @@
 Example of FedProx on the MNIST dataset
 """
 
-import jax
 import haiku as hk
+import hkzoo
+import jax
 import optax
-
+import tenjin
 from tqdm import trange
 
-import hkzoo
-import tenjin
 import ymir
 
 if __name__ == "__main__":
