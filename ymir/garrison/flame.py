@@ -20,8 +20,8 @@ class Captain(captain.AggregateCaptain):
         Construct the FLAME captain.
 
         Optional arguments:
-        - eps: the epsilon parameter for the FLAME algorithm
-        - delta: the delta parameter for the FLAME algorithm
+        - eps: the epsilon parameter for the FLAME algorithm, respective to (\epsilon, \delta)-DP
+        - delta: the delta parameter for the FLAME algorithm, respective to (\epsilon, \delta)-DP
         """
         super().__init__(params, opt, opt_state, network, rng)
         self.G_unraveller = jax.flatten_util.ravel_pytree(params)[1]

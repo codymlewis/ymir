@@ -61,7 +61,7 @@ class TestAggregators(unittest.TestCase):
         chex.assert_shape(alpha, (len(self.network.clients), ))
         chex.assert_type(alpha, jnp.float32)
 
-    @parameterized.expand([(server_name) for server_name in ["flguard"]])
+    @parameterized.expand([(server_name) for server_name in ["flame"]])
     def test_aggregate_servers(self, server_name):
         server = getattr(ymir.garrison,
                          server_name).Captain(self.params, self.opt, self.opt_state, self.network, self.rng)
