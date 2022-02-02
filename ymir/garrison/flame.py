@@ -1,5 +1,5 @@
 """
-The FLGuard algorithm proposed in `https://arxiv.org/abs/2101.02281 <https://arxiv.org/abs/2101.02281>`_
+The FLAME algorithm proposed in `https://arxiv.org/abs/2101.02281 <https://arxiv.org/abs/2101.02281>`_
 it is designed to provide robustness against adversaries, inclusive of multiple attacks and statistical
 heterogeneity environments.
 """
@@ -15,16 +15,17 @@ from . import captain
 
 class Captain(captain.AggregateCaptain):
 
-    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), lamb=0.001):
+    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), eps=3705, delta=1):
         """
-        Construct the FLGuard captain.
+        Construct the FLAME captain.
 
         Optional arguments:
-        - lamb: the lambda parameter for the FLGuard algorithm, scales the noise added to the global weight.
+        - eps: the epsilon parameter for the FLAME algorithm
+        - delta: the delta parameter for the FLAME algorithm
         """
         super().__init__(params, opt, opt_state, network, rng)
         self.G_unraveller = jax.flatten_util.ravel_pytree(params)[1]
-        self.lamb = lamb  # 0.001 is good for image classification, 0.01 for IDS (according to the paper)
+        self.lamb = (1 / eps) * np.sqrt(2 * np.log(1.25 / delta))
 
     def update(self, all_weights):
         G = np.array(jax.flatten_util.ravel_pytree(self.params)[0])
@@ -37,10 +38,10 @@ class Captain(captain.AggregateCaptain):
         bs = np.arange(len(clusters))[clusters == np.argmax(np.bincount(clusters[clusters != -1]))]
         es = np.linalg.norm(G - Ws, axis=1)  # Euclidean distance between G and each Ws
         S = np.median(es)
-        Ws[bs] = (Ws[bs].T * np.minimum(1, S / es[bs])).T
+        Ws[bs] = G + ((Ws[bs] - G).T * np.minimum(1, S / es[bs])).T
         G = Ws[bs].mean(axis=0)
-        sigma = self.lamb / S
-        G = G + self.rng.normal(0, sigma, G.shape)
+        sigma = self.lamb * S
+        G = G + self.rng.normal(0, sigma**2, G.shape)
         return self.G_unraveller(G)
 
     def step(self):
