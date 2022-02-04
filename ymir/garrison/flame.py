@@ -41,7 +41,7 @@ class Captain(captain.AggregateCaptain):
         Ws[bs] = G + ((Ws[bs] - G).T * np.minimum(1, S / es[bs])).T
         G = Ws[bs].mean(axis=0)
         sigma = self.lamb * S
-        G = G + self.rng.normal(0, sigma**2, G.shape)
+        G = G + self.rng.normal(0, sigma, G.shape)
         return self.G_unraveller(G)
 
     def step(self):
