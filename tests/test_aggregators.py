@@ -41,7 +41,7 @@ class TestAggregators(unittest.TestCase):
         self.rng = np.random.default_rng()
 
     @parameterized.expand(
-        [(server_name) for server_name in ["fedavg", "foolsgold", "krum", "norm_clipping", "std_dagmm", "viceroy"]]
+        [(server_name) for server_name in ["average", "fedavg", "foolsgold", "krum", "norm_clipping", "std_dagmm", "viceroy"]]
     )
     def test_scale_servers(self, server_name):
         server = getattr(ymir.garrison,
