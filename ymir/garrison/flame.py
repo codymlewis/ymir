@@ -16,12 +16,12 @@ from . import captain
 class Captain(captain.AggregateCaptain):
 
     def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), eps=3705, delta=1):
-        """
+        r"""
         Construct the FLAME captain.
 
         Optional arguments:
-        - eps: the epsilon parameter for the FLAME algorithm, respective to (\epsilon, \delta)-DP
-        - delta: the delta parameter for the FLAME algorithm, respective to (\epsilon, \delta)-DP
+        - eps: the epsilon parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP
+        - delta: the delta parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP
         """
         super().__init__(params, opt, opt_state, network, rng)
         self.G_unraveller = jax.flatten_util.ravel_pytree(params)[1]

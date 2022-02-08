@@ -103,12 +103,12 @@ heterogeneity environments.</p>
 <span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">AggregateCaptain</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">eps</span><span class="o">=</span><span class="mi">3705</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the FLAME captain.</span>
 
 <span class="sd">        Optional arguments:</span>
-<span class="sd">        - eps: the epsilon parameter for the FLAME algorithm, respective to (\epsilon, \delta)-DP</span>
-<span class="sd">        - delta: the delta parameter for the FLAME algorithm, respective to (\epsilon, \delta)-DP</span>
+<span class="sd">        - eps: the epsilon parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP</span>
+<span class="sd">        - delta: the delta parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G_unraveller</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">params</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
@@ -156,12 +156,12 @@ heterogeneity environments.</p>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">AggregateCaptain</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">eps</span><span class="o">=</span><span class="mi">3705</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the FLAME captain.</span>
 
 <span class="sd">        Optional arguments:</span>
-<span class="sd">        - eps: the epsilon parameter for the FLAME algorithm, respective to (\epsilon, \delta)-DP</span>
-<span class="sd">        - delta: the delta parameter for the FLAME algorithm, respective to (\epsilon, \delta)-DP</span>
+<span class="sd">        - eps: the epsilon parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP</span>
+<span class="sd">        - delta: the delta parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G_unraveller</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">params</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
@@ -207,7 +207,7 @@ heterogeneity environments.</p>
     opt,
     opt_state,
     network,
-    rng=Generator(PCG64) at 0x7FCFE922B4C0,
+    rng=Generator(PCG64) at 0x7FDBA2CC7140,
     eps=3705,
     delta=1
 )</span>
@@ -216,12 +216,12 @@ heterogeneity environments.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">eps</span><span class="o">=</span><span class="mi">3705</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the FLAME captain.</span>
 
 <span class="sd">        Optional arguments:</span>
-<span class="sd">        - eps: the epsilon parameter for the FLAME algorithm, respective to (\epsilon, \delta)-DP</span>
-<span class="sd">        - delta: the delta parameter for the FLAME algorithm, respective to (\epsilon, \delta)-DP</span>
+<span class="sd">        - eps: the epsilon parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP</span>
+<span class="sd">        - delta: the delta parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">G_unraveller</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">params</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
@@ -235,8 +235,8 @@ heterogeneity environments.</p>
 <p>Optional arguments:</p>
 
 <ul>
-<li>eps: the epsilon parameter for the FLAME algorithm, respective to (\epsilon, \delta)-DP</li>
-<li>delta: the delta parameter for the FLAME algorithm, respective to (\epsilon, \delta)-DP</li>
+<li>eps: the epsilon parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP</li>
+<li>delta: the delta parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP</li>
 </ul>
 </div>
 
