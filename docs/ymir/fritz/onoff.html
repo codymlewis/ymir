@@ -174,7 +174,7 @@
 
 
 <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Convert an endpoint into an on-off toggle adversary.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Convert a client into an on-off toggle adversary.&quot;&quot;&quot;</span>
     <span class="n">client</span><span class="o">.</span><span class="n">shadow_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">update</span>
     <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">scout</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">toggle</span> <span class="o">=</span> <span class="n">toggle</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
@@ -297,7 +297,7 @@
     beta=1.0,
     gamma=0.85,
     timer=False,
-    rng=Generator(PCG64) at 0x7F0193CA8820,
+    rng=Generator(PCG64) at 0x7FCFE9CFD1C0,
     **kwargs
 )</span>
     </div>
@@ -419,7 +419,7 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Convert an endpoint into an on-off toggle adversary.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Convert a client into an on-off toggle adversary.&quot;&quot;&quot;</span>
     <span class="n">client</span><span class="o">.</span><span class="n">shadow_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">update</span>
     <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">scout</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">toggle</span> <span class="o">=</span> <span class="n">toggle</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
@@ -427,7 +427,7 @@
 
         </details>
 
-            <div class="docstring"><p>Convert an endpoint into an on-off toggle adversary.</p>
+            <div class="docstring"><p>Convert a client into an on-off toggle adversary.</p>
 </div>
 
 

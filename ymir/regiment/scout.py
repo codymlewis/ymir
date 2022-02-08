@@ -1,5 +1,5 @@
 """
-Standard endpoint collaborators for federated learning.
+Standard client collaborators for federated learning.
 """
 
 from functools import partial
@@ -11,7 +11,7 @@ import ymir.path
 
 
 class Scout:
-    """An endpoint for federated learning, holds its own data and personal learning variables."""
+    """A client for federated learning, holds its own data and personal learning variables."""
 
     def __init__(self, opt, opt_state, loss, data, epochs):
         """

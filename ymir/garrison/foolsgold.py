@@ -18,7 +18,7 @@ class Captain(captain.ScaleCaptain):
         Construct the FoolsGold captain.
 
         Optional arguments:
-        - kappa: value stating the distribution of classes across endpoints.
+        - kappa: value stating the distribution of classes across clients.
         """
         super().__init__(params, opt, opt_state, network, rng)
         self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))

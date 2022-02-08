@@ -13,7 +13,7 @@ from . import scout
 
 
 class Scout(scout.Scout):
-    """A federated learning endpoint which performs personalization according to the Ditto algorithm."""
+    """A federated learning client which performs personalization according to the Ditto algorithm."""
 
     def __init__(self, params, opt, opt_state, loss, data, epochs, lamb=0.1):
         """

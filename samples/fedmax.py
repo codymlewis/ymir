@@ -14,9 +14,9 @@ import ymir
 if __name__ == "__main__":
     # setup
     print("Setting up the system...")
-    num_endpoints = 20
+    num_clients = 20
     dataset = ymir.mp.datasets.Dataset(*tenjin.load('kddcup99'))
-    batch_sizes = [64 for _ in range(num_endpoints)]
+    batch_sizes = [64 for _ in range(num_clients)]
     data = dataset.fed_split(batch_sizes, ymir.mp.distributions.lda)
     train_eval = dataset.get_iter("train", 10_000)
     test_eval = dataset.get_iter("test")

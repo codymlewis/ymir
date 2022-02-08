@@ -2,4 +2,4 @@
 Endpoint side functionalities.
 
 
-The [Scout](regiment/scout) object is the basic/standard endpoint.
+The [Scout](regiment/scout) object is the basic/standard client.

@@ -10,10 +10,10 @@ import ymir.regiment.scout
 
 def convert(client, poison_epochs, stealth_epochs, stealth_data):
     """
-    Convert an endpoint into an alternating minimization adversary.
+    Convert a client into an alternating minimization adversary.
     
     Arguments:
-    - client: the endpoint to convert
+    - client: the client to convert
     - poison_epochs: the number of epochs to run the poisoned training for
     - stealth_epochs: the number of epochs to run the stealth training for
     - stealth_data: a generator that yields the stealth data
@@ -27,7 +27,7 @@ def convert(client, poison_epochs, stealth_epochs, stealth_data):
 
 
 def update(self, params, opt_state, X, y):
-    """Alternating minimization update function for endpoints."""
+    """Alternating minimization update function for clients."""
     for _ in range(self.poison_epochs):
         params, opt_state = self.poison_update(params, opt_state, X, y)
     for _ in range(self.stealth_epochs):

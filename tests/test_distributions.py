@@ -14,24 +14,24 @@ class TestDistributions(unittest.TestCase):
         self.X = self.rng.random((50, 1))
         self.y = np.sin(self.X).round().reshape(-1)
 
-    @parameterized.expand([(nendpoints, ) for nendpoints in range(1, 10)])
-    def test_homogeneous(self, nendpoints):
-        dist = ymir.mp.distributions.homogeneous(self.X, self.y, nendpoints, 2, self.rng)
-        self.assertEqual(len(dist), nendpoints)
+    @parameterized.expand([(nclients, ) for nclients in range(1, 10)])
+    def test_homogeneous(self, nclients):
+        dist = ymir.mp.distributions.homogeneous(self.X, self.y, nclients, 2, self.rng)
+        self.assertEqual(len(dist), nclients)
         for d in dist:
             chex.assert_trees_all_close(np.unique(self.y[d]), np.unique(self.y))
 
-    @parameterized.expand([(nendpoints, ) for nendpoints in range(1, 10)])
-    def test_extreme_heterogeneous(self, nendpoints):
-        dist = ymir.mp.distributions.extreme_heterogeneous(self.X, self.y, nendpoints, 2, self.rng)
-        self.assertEqual(len(dist), nendpoints)
+    @parameterized.expand([(nclients, ) for nclients in range(1, 10)])
+    def test_extreme_heterogeneous(self, nclients):
+        dist = ymir.mp.distributions.extreme_heterogeneous(self.X, self.y, nclients, 2, self.rng)
+        self.assertEqual(len(dist), nclients)
         for i, d in enumerate(dist):
             self.assertEqual(np.unique(self.y[d]), i % 2)
 
-    @parameterized.expand([(nendpoints, ) for nendpoints in range(1, 5)])
-    def test_lda(self, nendpoints):
-        dist = ymir.mp.distributions.lda(self.X, self.y, nendpoints, 2, self.rng)
-        self.assertEqual(len(dist), nendpoints)
+    @parameterized.expand([(nclients, ) for nclients in range(1, 5)])
+    def test_lda(self, nclients):
+        dist = ymir.mp.distributions.lda(self.X, self.y, nclients, 2, self.rng)
+        self.assertEqual(len(dist), nclients)
         for d in dist:
             chex.assert_trees_all_close(np.unique(self.y[d]), np.unique(self.y))
 

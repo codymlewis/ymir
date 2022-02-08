@@ -91,12 +91,12 @@
 <ul>
 <li>X: the samples</li>
 <li>y: the labels</li>
-<li>nendpoints: the number of endpoints</li>
+<li>nclients: the number of clients</li>
 <li>nclasses: the number of classes</li>
 <li>rng: the random number generator</li>
 </ul>
 
-<p>And they all return a list of lists of indices, where the outer list is indexed by endpoint.</p>
+<p>And they all return a list of lists of indices, where the outer list is indexed by client.</p>
 </div>
 
                         <details>
@@ -107,11 +107,11 @@
 <span class="sd">All functions take the following arguments:</span>
 <span class="sd">- X: the samples</span>
 <span class="sd">- y: the labels</span>
-<span class="sd">- nendpoints: the number of endpoints</span>
+<span class="sd">- nclients: the number of clients</span>
 <span class="sd">- nclasses: the number of classes</span>
 <span class="sd">- rng: the random number generator</span>
 
-<span class="sd">And they all return a list of lists of indices, where the outer list is indexed by endpoint.</span>
+<span class="sd">And they all return a list of lists of indices, where the outer list is indexed by client.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">itertools</span>
@@ -122,17 +122,17 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">homogeneous</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Assign all data to all endpoints&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
+<span class="k">def</span> <span class="nf">homogeneous</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assign all data to all clients&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nclients</span><span class="p">)]</span>
 
 
-<span class="k">def</span> <span class="nf">extreme_heterogeneous</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Assign each endpoint only the data from each class&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="n">nclasses</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
+<span class="k">def</span> <span class="nf">extreme_heterogeneous</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assign each client only the data from each class&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="n">nclasses</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nclients</span><span class="p">)]</span>
 
 
-<span class="k">def</span> <span class="nf">lda</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">lda</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Latent Dirichlet allocation defined in `https://arxiv.org/abs/1909.06335 &lt;https://arxiv.org/abs/1909.06335&gt;`_</span>
 <span class="sd">    default value from `https://arxiv.org/abs/2002.06440 &lt;https://arxiv.org/abs/2002.06440&gt;`_</span>
@@ -141,8 +141,8 @@
 <span class="sd">    - alpha: the $\alpha$ parameter of the Dirichlet function,</span>
 <span class="sd">    the distribution is more i.i.d. as $\alpha \to \infty$ and less i.i.d. as $\alpha \to 0$</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">distribution</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
-    <span class="n">proportions</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">dirichlet</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">nclasses</span><span class="p">)</span>
+    <span class="n">distribution</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nclients</span><span class="p">)]</span>
+    <span class="n">proportions</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">dirichlet</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">nclients</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">nclasses</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nclasses</span><span class="p">):</span>
         <span class="n">idx_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">idx_c</span><span class="p">)</span>
@@ -152,55 +152,53 @@
     <span class="k">return</span> <span class="n">distribution</span>
 
 
-<span class="k">def</span> <span class="nf">iid_partition</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Assign each endpoint iid the data from each class as defined in `https://arxiv.org/abs/1602.05629 &lt;https://arxiv.org/abs/1602.05629&gt;`_&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">iid_partition</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assign each client iid the data from each class as defined in `https://arxiv.org/abs/1602.05629 &lt;https://arxiv.org/abs/1602.05629&gt;`_&quot;&quot;&quot;</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
     <span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="n">nendpoints</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="n">nclients</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nclients</span><span class="p">)])</span>
 
 
-<span class="k">def</span> <span class="nf">shard</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">shards_per_endpoint</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">shard</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">shards_per_client</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The shard data distribution scheme as defined in `https://arxiv.org/abs/1602.05629 &lt;https://arxiv.org/abs/1602.05629&gt;`_</span>
 <span class="sd">    shards are even partitions of the data after sorting by class.</span>
 
 <span class="sd">    Optional arguments:</span>
-<span class="sd">    - shards_per_endpoint: the number of shards to assign to each endpoint.</span>
+<span class="sd">    - shards_per_client: the number of shards to assign to each client.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>  <span class="c1"># sort by label</span>
     <span class="n">shards</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
-        <span class="n">idx</span><span class="p">,</span>
-        <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span><span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)]</span>
+        <span class="n">idx</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span><span class="n">nclients</span> <span class="o">*</span> <span class="n">shards_per_client</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nclients</span> <span class="o">*</span> <span class="n">shards_per_client</span><span class="p">)]</span>
     <span class="p">)</span>
-    <span class="n">assignment</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shards</span><span class="p">)),</span> <span class="p">(</span><span class="n">nendpoints</span><span class="p">,</span> <span class="n">shards_per_endpoint</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">assignment</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shards</span><span class="p">)),</span> <span class="p">(</span><span class="n">nclients</span><span class="p">,</span> <span class="n">shards_per_client</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">[</span>
-        <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">shards</span><span class="p">[</span><span class="n">assignment</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">shards_per_endpoint</span><span class="p">)]))</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">shards</span><span class="p">[</span><span class="n">assignment</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">shards_per_client</span><span class="p">)]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nclients</span><span class="p">)</span>
     <span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">assign_classes</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">assign_classes</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Assign each endpoint only the data from the list specified class</span>
+<span class="sd">    Assign each client only the data from the list specified class</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">    - classes: a list of classes to assign to each endpoint.</span>
+<span class="sd">    - classes: a list of classes to assign to each client.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">classes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Classes not specified in distribution&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nclients</span><span class="p">)]</span>
 
 
 <span class="k">def</span> <span class="nf">documented</span><span class="p">(</span><span class="n">document</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a distribution function, resulting distribution uses a document</span>
-<span class="sd">    which is an array of indices allocating endpoints to samples.</span>
+<span class="sd">    which is an array of indices allocating clients to samples.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">    - document: a list of lists of indices, where the outer list is indexed by endpoint.</span>
+<span class="sd">    - document: a list of lists of indices, where the outer list is indexed by client.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_distribution</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_distribution</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">document</span>
 
     <span class="k">return</span> <span class="n">_distribution</span>
@@ -214,19 +212,19 @@
 
         
             <span class="def">def</span>
-            <span class="name">homogeneous</span><span class="signature">(X, y, nendpoints, nclasses, rng)</span>:
+            <span class="name">homogeneous</span><span class="signature">(X, y, nclients, nclasses, rng)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">homogeneous</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Assign all data to all endpoints&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">homogeneous</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assign all data to all clients&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nclients</span><span class="p">)]</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Assign all data to all endpoints</p>
+            <div class="docstring"><p>Assign all data to all clients</p>
 </div>
 
 
@@ -236,19 +234,19 @@
 
         
             <span class="def">def</span>
-            <span class="name">extreme_heterogeneous</span><span class="signature">(X, y, nendpoints, nclasses, rng)</span>:
+            <span class="name">extreme_heterogeneous</span><span class="signature">(X, y, nclients, nclasses, rng)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extreme_heterogeneous</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Assign each endpoint only the data from each class&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="n">nclasses</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">extreme_heterogeneous</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assign each client only the data from each class&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="n">nclasses</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nclients</span><span class="p">)]</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Assign each endpoint only the data from each class</p>
+            <div class="docstring"><p>Assign each client only the data from each class</p>
 </div>
 
 
@@ -258,12 +256,12 @@
 
         
             <span class="def">def</span>
-            <span class="name">lda</span><span class="signature">(X, y, nendpoints, nclasses, rng, alpha=0.5)</span>:
+            <span class="name">lda</span><span class="signature">(X, y, nclients, nclasses, rng, alpha=0.5)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">lda</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">lda</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Latent Dirichlet allocation defined in `https://arxiv.org/abs/1909.06335 &lt;https://arxiv.org/abs/1909.06335&gt;`_</span>
 <span class="sd">    default value from `https://arxiv.org/abs/2002.06440 &lt;https://arxiv.org/abs/2002.06440&gt;`_</span>
@@ -272,8 +270,8 @@
 <span class="sd">    - alpha: the $\alpha$ parameter of the Dirichlet function,</span>
 <span class="sd">    the distribution is more i.i.d. as $\alpha \to \infty$ and less i.i.d. as $\alpha \to 0$</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">distribution</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
-    <span class="n">proportions</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">dirichlet</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">nclasses</span><span class="p">)</span>
+    <span class="n">distribution</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nclients</span><span class="p">)]</span>
+    <span class="n">proportions</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">dirichlet</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">nclients</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">nclasses</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nclasses</span><span class="p">):</span>
         <span class="n">idx_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">c</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">idx_c</span><span class="p">)</span>
@@ -303,21 +301,21 @@ the distribution is more i.i.d. as $\alpha \to \infty$ and less i.i.d. as $\alph
 
         
             <span class="def">def</span>
-            <span class="name">iid_partition</span><span class="signature">(X, y, nendpoints, nclasses, rng)</span>:
+            <span class="name">iid_partition</span><span class="signature">(X, y, nclients, nclasses, rng)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">iid_partition</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Assign each endpoint iid the data from each class as defined in `https://arxiv.org/abs/1602.05629 &lt;https://arxiv.org/abs/1602.05629&gt;`_&quot;&quot;&quot;</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">iid_partition</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assign each client iid the data from each class as defined in `https://arxiv.org/abs/1602.05629 &lt;https://arxiv.org/abs/1602.05629&gt;`_&quot;&quot;&quot;</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
     <span class="n">rng</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="n">nendpoints</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="n">nclients</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nclients</span><span class="p">)])</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Assign each endpoint iid the data from each class as defined in <a href="https://arxiv.org/abs/1602.05629">https://arxiv.org/abs/1602.05629 </a></p>
+            <div class="docstring"><p>Assign each client iid the data from each class as defined in <a href="https://arxiv.org/abs/1602.05629">https://arxiv.org/abs/1602.05629 </a></p>
 </div>
 
 
@@ -327,28 +325,26 @@ the distribution is more i.i.d. as $\alpha \to \infty$ and less i.i.d. as $\alph
 
         
             <span class="def">def</span>
-            <span class="name">shard</span><span class="signature">(X, y, nendpoints, nclasses, rng, shards_per_endpoint=2)</span>:
+            <span class="name">shard</span><span class="signature">(X, y, nclients, nclasses, rng, shards_per_client=2)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">shard</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">shards_per_endpoint</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">shard</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">shards_per_client</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The shard data distribution scheme as defined in `https://arxiv.org/abs/1602.05629 &lt;https://arxiv.org/abs/1602.05629&gt;`_</span>
 <span class="sd">    shards are even partitions of the data after sorting by class.</span>
 
 <span class="sd">    Optional arguments:</span>
-<span class="sd">    - shards_per_endpoint: the number of shards to assign to each endpoint.</span>
+<span class="sd">    - shards_per_client: the number of shards to assign to each client.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>  <span class="c1"># sort by label</span>
     <span class="n">shards</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
-        <span class="n">idx</span><span class="p">,</span>
-        <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span><span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nendpoints</span> <span class="o">*</span> <span class="n">shards_per_endpoint</span><span class="p">)]</span>
+        <span class="n">idx</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span><span class="n">nclients</span> <span class="o">*</span> <span class="n">shards_per_client</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nclients</span> <span class="o">*</span> <span class="n">shards_per_client</span><span class="p">)]</span>
     <span class="p">)</span>
-    <span class="n">assignment</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shards</span><span class="p">)),</span> <span class="p">(</span><span class="n">nendpoints</span><span class="p">,</span> <span class="n">shards_per_endpoint</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">assignment</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shards</span><span class="p">)),</span> <span class="p">(</span><span class="n">nclients</span><span class="p">,</span> <span class="n">shards_per_client</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">[</span>
-        <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">shards</span><span class="p">[</span><span class="n">assignment</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">shards_per_endpoint</span><span class="p">)]))</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">shards</span><span class="p">[</span><span class="n">assignment</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">shards_per_client</span><span class="p">)]))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nclients</span><span class="p">)</span>
     <span class="p">]</span>
 </pre></div>
 
@@ -360,7 +356,7 @@ shards are even partitions of the data after sorting by class.</p>
 <p>Optional arguments:</p>
 
 <ul>
-<li>shards_per_endpoint: the number of shards to assign to each endpoint.</li>
+<li>shards_per_client: the number of shards to assign to each client.</li>
 </ul>
 </div>
 
@@ -371,31 +367,31 @@ shards are even partitions of the data after sorting by class.</p>
 
         
             <span class="def">def</span>
-            <span class="name">assign_classes</span><span class="signature">(X, y, nendpoints, nclasses, rng, classes=None)</span>:
+            <span class="name">assign_classes</span><span class="signature">(X, y, nclients, nclasses, rng, classes=None)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">assign_classes</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">assign_classes</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Assign each endpoint only the data from the list specified class</span>
+<span class="sd">    Assign each client only the data from the list specified class</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">    - classes: a list of classes to assign to each endpoint.</span>
+<span class="sd">    - classes: a list of classes to assign to each client.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">classes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Classes not specified in distribution&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nendpoints</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">classes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nclients</span><span class="p">)]</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Assign each endpoint only the data from the list specified class</p>
+            <div class="docstring"><p>Assign each client only the data from the list specified class</p>
 
 <p>Arguments:</p>
 
 <ul>
-<li>classes: a list of classes to assign to each endpoint.</li>
+<li>classes: a list of classes to assign to each client.</li>
 </ul>
 </div>
 
@@ -414,13 +410,13 @@ shards are even partitions of the data after sorting by class.</p>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">documented</span><span class="p">(</span><span class="n">document</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a distribution function, resulting distribution uses a document</span>
-<span class="sd">    which is an array of indices allocating endpoints to samples.</span>
+<span class="sd">    which is an array of indices allocating clients to samples.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">    - document: a list of lists of indices, where the outer list is indexed by endpoint.</span>
+<span class="sd">    - document: a list of lists of indices, where the outer list is indexed by client.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_distribution</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nendpoints</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_distribution</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nclients</span><span class="p">,</span> <span class="n">nclasses</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">document</span>
 
     <span class="k">return</span> <span class="n">_distribution</span>
@@ -429,12 +425,12 @@ shards are even partitions of the data after sorting by class.</p>
         </details>
 
             <div class="docstring"><p>Return a distribution function, resulting distribution uses a document
-which is an array of indices allocating endpoints to samples.</p>
+which is an array of indices allocating clients to samples.</p>
 
 <p>Arguments:</p>
 
 <ul>
-<li>document: a list of lists of indices, where the outer list is indexed by endpoint.</li>
+<li>document: a list of lists of indices, where the outer list is indexed by client.</li>
 </ul>
 </div>
 

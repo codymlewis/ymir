@@ -85,9 +85,9 @@ class AggregateCaptain(ABC):
 
 def update(opt):
     """
-    Update the global model using endpoint gradients.
+    Update the global model using client gradients.
     This is a curried function, so first initialize with the selected optimizer.
-    The return function may then be used to update the global parameters based on the endpoint gradients
+    The return function may then be used to update the global parameters based on the client gradients
     """
 
     @jax.jit

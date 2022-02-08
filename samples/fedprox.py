@@ -14,10 +14,10 @@ import ymir
 if __name__ == "__main__":
     # setup
     print("Setting up the system...")
-    num_endpoints = 10
+    num_clients = 10
     local_epochs = 10
     dataset = ymir.mp.datasets.Dataset(*tenjin.load('mnist'))
-    batch_sizes = [8 for _ in range(num_endpoints)]
+    batch_sizes = [8 for _ in range(num_clients)]
     data = dataset.fed_split(batch_sizes, ymir.mp.distributions.lda)
     train_eval = dataset.get_iter("train", 10_000)
     test_eval = dataset.get_iter("test")

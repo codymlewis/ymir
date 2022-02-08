@@ -107,7 +107,7 @@ it is designed to provide robustness to (Sybil) adversarial attacks within non-i
 <span class="sd">        Construct the FoolsGold captain.</span>
 
 <span class="sd">        Optional arguments:</span>
-<span class="sd">        - kappa: value stating the distribution of classes across endpoints.</span>
+<span class="sd">        - kappa: value stating the distribution of classes across clients.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">histories</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">network</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
@@ -173,7 +173,7 @@ it is designed to provide robustness to (Sybil) adversarial attacks within non-i
 <span class="sd">        Construct the FoolsGold captain.</span>
 
 <span class="sd">        Optional arguments:</span>
-<span class="sd">        - kappa: value stating the distribution of classes across endpoints.</span>
+<span class="sd">        - kappa: value stating the distribution of classes across clients.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">histories</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">network</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
@@ -227,7 +227,7 @@ it is designed to provide robustness to (Sybil) adversarial attacks within non-i
     opt,
     opt_state,
     network,
-    rng=Generator(PCG64) at 0x7F019324F680,
+    rng=Generator(PCG64) at 0x7FCFE922B760,
     kappa=1.0
 )</span>
     </div>
@@ -239,7 +239,7 @@ it is designed to provide robustness to (Sybil) adversarial attacks within non-i
 <span class="sd">        Construct the FoolsGold captain.</span>
 
 <span class="sd">        Optional arguments:</span>
-<span class="sd">        - kappa: value stating the distribution of classes across endpoints.</span>
+<span class="sd">        - kappa: value stating the distribution of classes across clients.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">histories</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">network</span><span class="p">),</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
@@ -253,7 +253,7 @@ it is designed to provide robustness to (Sybil) adversarial attacks within non-i
 <p>Optional arguments:</p>
 
 <ul>
-<li>kappa: value stating the distribution of classes across endpoints.</li>
+<li>kappa: value stating the distribution of classes across clients.</li>
 </ul>
 </div>
 

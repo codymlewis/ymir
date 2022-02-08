@@ -25,7 +25,7 @@ def _update(opt, loss):
 
 
 class Coder:
-    """Store the per-endpoint autoencoders and associated variables."""
+    """Store the per-client autoencoders and associated variables."""
 
     def __init__(self, gm_params, num_clients):
         """

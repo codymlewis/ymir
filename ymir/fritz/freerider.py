@@ -9,10 +9,10 @@ import ymir.path
 
 def convert(client, attack_type, params, rng=np.random.default_rng()):
     """
-    Convert an endpoint into a free rider adversary.
+    Convert a client into a free rider adversary.
 
     Arguments:
-    - client: the endpoint to convert
+    - client: the client to convert
     - attack_type: the attack type to use, options are "random", "delta, and "advanced delta"
     - params: the parameters of the starting model
     - rng: the random number generator to use

@@ -37,7 +37,7 @@ class DataIter:
 
 
 class Dataset:
-    """Object that contains the full dataset, primarily to prevent the need for reloading for each endpoint."""
+    """Object that contains the full dataset, primarily to prevent the need for reloading for each client."""
 
     def __init__(self, X, y, train):
         """
@@ -89,8 +89,8 @@ class Dataset:
         Divide the dataset for federated learning.
         
         Arguments:
-        - batch_sizes: the batch sizes for each endpoint
-        - mapping: a function that takes the dataset information and returns the indices for each endpoint
+        - batch_sizes: the batch sizes for each client
+        - mapping: a function that takes the dataset information and returns the indices for each client
         - rng: the random number generator
         """
         if mapping is not None:

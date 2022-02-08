@@ -10,10 +10,10 @@ import optax
 
 def convert(client, dataset, attack_from, attack_to):
     """
-    Convert an endpoint into a label flipping adversary.
+    Convert a client into a label flipping adversary.
 
     Arguments:
-    - client: the endpoint to convert
+    - client: the client to convert
     - dataset: the dataset to use
     - attack_from: the label to attack
     - attack_to: the label to replace the attack_from label with
@@ -40,7 +40,7 @@ def labelflip_map(attack_from, attack_to, X, y):
     2,
 ))
 def update(opt, loss, data, params, opt_state, X, y):
-    """Label flipping update function for endpoints."""
+    """Label flipping update function for clients."""
     grads = jax.grad(loss)(params, *next(data))
     updates, opt_state = opt.update(grads, opt_state, params)
     params = optax.apply_updates(params, updates)

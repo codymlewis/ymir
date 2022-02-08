@@ -16,14 +16,14 @@ import ymir
 
 if __name__ == "__main__":
     print("Setting up the system...")
-    num_endpoints = 10
+    num_honest = 10
     num_adversaries = 2
-    num_clients = num_endpoints - num_adversaries
+    num_clients = num_honest - num_adversaries
     rng = np.random.default_rng(0)
 
     # Setup the dataset
     dataset = ymir.mp.datasets.Dataset(*tenjin.load('mnist'))
-    batch_sizes = [8 for _ in range(num_endpoints)]
+    batch_sizes = [8 for _ in range(num_honest)]
     data = dataset.fed_split(batch_sizes, partial(ymir.mp.distributions.lda, alpha=0.05), rng)
     train_eval = dataset.get_iter("train", 10_000, rng=rng)
     test_eval = dataset.get_iter("test", rng=rng)
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     for i in range(num_adversaries):
         c = ymir.regiment.Scout(client_opt, client_opt_state, adv_loss, data[i + num_clients], 1)
         ymir.fritz.backdoor.convert(c, dataset, 0, 1, np.ones((5, 5, 1)))
-        ymir.fritz.scaler.convert(c, num_endpoints)
+        ymir.fritz.scaler.convert(c, num_honest)
         network.add_host("main", c)
 
     backdoor_eval = dataset.get_iter(

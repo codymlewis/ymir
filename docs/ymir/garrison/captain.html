@@ -196,9 +196,9 @@
 
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Update the global model using endpoint gradients.</span>
+<span class="sd">    Update the global model using client gradients.</span>
 <span class="sd">    This is a curried function, so first initialize with the selected optimizer.</span>
-<span class="sd">    The return function may then be used to update the global parameters based on the endpoint gradients</span>
+<span class="sd">    The return function may then be used to update the global parameters based on the client gradients</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
@@ -470,9 +470,9 @@ a step of the optimizer to the stored global parameters using the sum of those s
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Update the global model using endpoint gradients.</span>
+<span class="sd">    Update the global model using client gradients.</span>
 <span class="sd">    This is a curried function, so first initialize with the selected optimizer.</span>
-<span class="sd">    The return function may then be used to update the global parameters based on the endpoint gradients</span>
+<span class="sd">    The return function may then be used to update the global parameters based on the client gradients</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
@@ -486,9 +486,9 @@ a step of the optimizer to the stored global parameters using the sum of those s
 
         </details>
 
-            <div class="docstring"><p>Update the global model using endpoint gradients.
+            <div class="docstring"><p>Update the global model using client gradients.
 This is a curried function, so first initialize with the selected optimizer.
-The return function may then be used to update the global parameters based on the endpoint gradients</p>
+The return function may then be used to update the global parameters based on the client gradients</p>
 </div>
 
 

@@ -1,5 +1,5 @@
 """
-Scale the updates submitted from selected endpoints.
+Scale the updates submitted from selected clients.
 """
 
 import jax
@@ -10,10 +10,10 @@ import ymir.path
 from ymir import garrison
 
 
-def convert(client, num_endpoints):
+def convert(client, num_clients):
     """A simple naive scaled model replacement attack."""
     client.quantum_update = client.update
-    client.update = lambda p, o, X, y: _scale(num_endpoints, p, *client.quantum_update(p, o, X, y))
+    client.update = lambda p, o, X, y: _scale(num_clients, p, *client.quantum_update(p, o, X, y))
 
 
 @jax.jit

@@ -11,10 +11,10 @@ import optax
 
 def convert(client, dataset, attack_from, attack_to, trigger):
     """
-    Convert an endpoint into a backdoor adversary.
+    Convert a client into a backdoor adversary.
 
     Arguments:
-    - client: the endpoint to convert
+    - client: the client to convert
     - dataset: the dataset to use
     - attack_from: the label to attack
     - attack_to: the label to replace the attack_from label with
@@ -51,7 +51,7 @@ def backdoor_map(attack_from, attack_to, trigger, X, y, no_label=False):
 
 @partial(jax.jit, static_argnums=(0, 1, 2))
 def update(opt, loss, data, params, opt_state, X, y):
-    """Backdoor update function for endpoints."""
+    """Backdoor update function for clients."""
     grads = jax.grad(loss)(params, *next(data))
     updates, opt_state = opt.update(grads, opt_state, params)
     params = optax.apply_updates(params, updates)

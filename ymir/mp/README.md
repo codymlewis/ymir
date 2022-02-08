@@ -1,5 +1,5 @@
 # MP
-Shared utilities to be used between both the endpoints and the server
+Shared utilities to be used between both the clients and the server
 
 ## [Compression](mp/compression)
 Functions and transforms for compressing the internal communications of federated learning.
@@ -8,7 +8,7 @@ Functions and transforms for compressing the internal communications of federate
 Contains functions and classes to handle the loading, division, and interface of datasets.
 
 ## [Distributions](mp/distributions)
-Contains functions to handle the generation of distributions of data across endpoints.
+Contains functions to handle the generation of distributions of data across clients.
 
 ## [Losses](mp/losses)
 Collection of jax-based loss functions, they have a curried format so the network may be saved for a jit compiled function
@@ -32,4 +32,4 @@ for d in data:
 ```
 
 ## [Optimizers](mp/optimizers)
-Collection of optax-based optimizers to be used on both endpoints and the server
+Collection of optax-based optimizers to be used on both clients and the server

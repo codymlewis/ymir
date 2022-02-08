@@ -1,6 +1,6 @@
 """
 Federated learning-based adversaries.  
-The `convert` function is used to convert an existing endpoint object (Scout) into the specified adversary.  
+The `convert` function is used to convert an existing client object (Scout) into the specified adversary.  
 The `GradientTransform` classes perform the adversarial activity at the network level,
 and are to be added to the network controller.
 """

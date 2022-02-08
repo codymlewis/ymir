@@ -75,13 +75,13 @@
                     <h1 class="modulename">
 <a href="./../../ymir.html">ymir</a><wbr>.<a href="./../fritz.html">fritz</a><wbr>.scaler    </h1>
 
-                        <div class="docstring"><p>Scale the updates submitted from selected endpoints.</p>
+                        <div class="docstring"><p>Scale the updates submitted from selected clients.</p>
 </div>
 
                         <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Scale the updates submitted from selected endpoints.</span>
+<span class="sd">Scale the updates submitted from selected clients.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">jax</span>
@@ -92,10 +92,10 @@
 <span class="kn">from</span> <span class="nn">ymir</span> <span class="kn">import</span> <span class="n">garrison</span>
 
 
-<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">num_endpoints</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">num_clients</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A simple naive scaled model replacement attack.&quot;&quot;&quot;</span>
     <span class="n">client</span><span class="o">.</span><span class="n">quantum_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">update</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">_scale</span><span class="p">(</span><span class="n">num_endpoints</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="o">*</span><span class="n">client</span><span class="o">.</span><span class="n">quantum_update</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">_scale</span><span class="p">(</span><span class="n">num_clients</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="o">*</span><span class="n">client</span><span class="o">.</span><span class="n">quantum_update</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
 
 
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
@@ -146,15 +146,15 @@
 
         
             <span class="def">def</span>
-            <span class="name">convert</span><span class="signature">(client, num_endpoints)</span>:
+            <span class="name">convert</span><span class="signature">(client, num_clients)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">num_endpoints</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">num_clients</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A simple naive scaled model replacement attack.&quot;&quot;&quot;</span>
     <span class="n">client</span><span class="o">.</span><span class="n">quantum_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">update</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">_scale</span><span class="p">(</span><span class="n">num_endpoints</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="o">*</span><span class="n">client</span><span class="o">.</span><span class="n">quantum_update</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">_scale</span><span class="p">(</span><span class="n">num_clients</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="o">*</span><span class="n">client</span><span class="o">.</span><span class="n">quantum_update</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
 </pre></div>
 
         </details>
@@ -225,7 +225,7 @@
     network,
     alg,
     num_adversaries,
-    rng=Generator(PCG64) at 0x7F0192C00BA0,
+    rng=Generator(PCG64) at 0x7FCFE8C58BA0,
     **kwargs
 )</span>
     </div>

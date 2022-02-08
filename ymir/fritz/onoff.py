@@ -86,7 +86,7 @@ class GradientTransform:
 
 
 def convert(client):
-    """Convert an endpoint into an on-off toggle adversary."""
+    """Convert a client into an on-off toggle adversary."""
     client.shadow_update = client.update
     client.update = partial(scout.update, client.opt, client.loss)
     client.toggle = toggle.__get__(client)

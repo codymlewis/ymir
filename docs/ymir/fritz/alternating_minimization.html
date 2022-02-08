@@ -86,10 +86,10 @@
 
 <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">poison_epochs</span><span class="p">,</span> <span class="n">stealth_epochs</span><span class="p">,</span> <span class="n">stealth_data</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert an endpoint into an alternating minimization adversary.</span>
+<span class="sd">    Convert a client into an alternating minimization adversary.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">    - client: the endpoint to convert</span>
+<span class="sd">    - client: the client to convert</span>
 <span class="sd">    - poison_epochs: the number of epochs to run the poisoned training for</span>
 <span class="sd">    - stealth_epochs: the number of epochs to run the stealth training for</span>
 <span class="sd">    - stealth_data: a generator that yields the stealth data</span>
@@ -103,7 +103,7 @@
 
 
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Alternating minimization update function for endpoints.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Alternating minimization update function for clients.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poison_epochs</span><span class="p">):</span>
         <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poison_update</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stealth_epochs</span><span class="p">):</span>
@@ -126,10 +126,10 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">poison_epochs</span><span class="p">,</span> <span class="n">stealth_epochs</span><span class="p">,</span> <span class="n">stealth_data</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert an endpoint into an alternating minimization adversary.</span>
+<span class="sd">    Convert a client into an alternating minimization adversary.</span>
 <span class="sd">    </span>
 <span class="sd">    Arguments:</span>
-<span class="sd">    - client: the endpoint to convert</span>
+<span class="sd">    - client: the client to convert</span>
 <span class="sd">    - poison_epochs: the number of epochs to run the poisoned training for</span>
 <span class="sd">    - stealth_epochs: the number of epochs to run the stealth training for</span>
 <span class="sd">    - stealth_data: a generator that yields the stealth data</span>
@@ -144,12 +144,12 @@
 
         </details>
 
-            <div class="docstring"><p>Convert an endpoint into an alternating minimization adversary.</p>
+            <div class="docstring"><p>Convert a client into an alternating minimization adversary.</p>
 
 <p>Arguments:</p>
 
 <ul>
-<li>client: the endpoint to convert</li>
+<li>client: the client to convert</li>
 <li>poison_epochs: the number of epochs to run the poisoned training for</li>
 <li>stealth_epochs: the number of epochs to run the stealth training for</li>
 <li>stealth_data: a generator that yields the stealth data</li>
@@ -169,7 +169,7 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Alternating minimization update function for endpoints.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Alternating minimization update function for clients.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poison_epochs</span><span class="p">):</span>
         <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poison_update</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stealth_epochs</span><span class="p">):</span>
@@ -179,7 +179,7 @@
 
         </details>
 
-            <div class="docstring"><p>Alternating minimization update function for endpoints.</p>
+            <div class="docstring"><p>Alternating minimization update function for clients.</p>
 </div>
 
 

@@ -88,10 +88,10 @@
 
 <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">attack_type</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert an endpoint into a free rider adversary.</span>
+<span class="sd">    Convert a client into a free rider adversary.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">    - client: the endpoint to convert</span>
+<span class="sd">    - client: the client to convert</span>
 <span class="sd">    - attack_type: the attack type to use, options are &quot;random&quot;, &quot;delta, and &quot;advanced delta&quot;</span>
 <span class="sd">    - params: the parameters of the starting model</span>
 <span class="sd">    - rng: the random number generator to use</span>
@@ -134,17 +134,17 @@
 
         
             <span class="def">def</span>
-            <span class="name">convert</span><span class="signature">(client, attack_type, params, rng=Generator(PCG64) at 0x7F0193CA8900)</span>:
+            <span class="name">convert</span><span class="signature">(client, attack_type, params, rng=Generator(PCG64) at 0x7FCFE9CFCBA0)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">attack_type</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert an endpoint into a free rider adversary.</span>
+<span class="sd">    Convert a client into a free rider adversary.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">    - client: the endpoint to convert</span>
+<span class="sd">    - client: the client to convert</span>
 <span class="sd">    - attack_type: the attack type to use, options are &quot;random&quot;, &quot;delta, and &quot;advanced delta&quot;</span>
 <span class="sd">    - params: the parameters of the starting model</span>
 <span class="sd">    - rng: the random number generator to use</span>
@@ -158,12 +158,12 @@
 
         </details>
 
-            <div class="docstring"><p>Convert an endpoint into a free rider adversary.</p>
+            <div class="docstring"><p>Convert a client into a free rider adversary.</p>
 
 <p>Arguments:</p>
 
 <ul>
-<li>client: the endpoint to convert</li>
+<li>client: the client to convert</li>
 <li>attack_type: the attack type to use, options are "random", "delta, and "advanced delta"</li>
 <li>params: the parameters of the starting model</li>
 <li>rng: the random number generator to use</li>
