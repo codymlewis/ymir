@@ -55,7 +55,7 @@ class Controller:
         all_updates = []
         for switch in self.switches:
             all_updates.extend(switch(params, rng, return_weights))
-        idx = rng.choice(self.K, size=int(self.C * self.K), replace=False)
+        idx = rng.choice(self.K, size=int(self.C * self.K), replace=False) if self.C < 1 else range(self.K)
         for i in idx:
             all_updates.append(self.clients[i].step(params, return_weights))
         return ymir.path.chain(self.update_transform_chain, all_updates)
