@@ -41,7 +41,7 @@ class Captain(captain.ScaleCaptain):
     def scale(self, all_grads):
         n_clients = self.histories.shape[0]
         p = self.C + self.lamb * self.reps
-        p[p == 0] = 0
+        p[p <= 0] = 0
         p = p / p.sum()
         idx = np.random.choice(n_clients, size=self.J, p=p)
         L = idx.shape[0]
@@ -56,6 +56,7 @@ class Captain(captain.ScaleCaptain):
         self.reps[idx] = self.reps[idx] / self.reps[idx].max()
         lr[idx] = lr[idx] / lr[idx].max()
         lr[(lr == 1)] = .99  # eliminate division by zero in logit
+        idx = idx[(lr[idx] > 0)]  # prevent inclusion of negatives in logit
         lr[idx] = np.log(lr[idx] / (1 - lr[idx])) + 0.5
         lr[(np.isinf(lr) + lr > 1)] = 1
         lr[(lr < 0)] = 0
