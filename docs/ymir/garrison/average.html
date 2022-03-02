@@ -102,7 +102,7 @@ this simply scales received gradients, $\Delta$, by $\frac{1}{|\Delta|}$</p>
 
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update the stored batch sizes ($n_i$).&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
+        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span>
@@ -129,7 +129,7 @@ this simply scales received gradients, $\Delta$, by $\frac{1}{|\Delta|}$</p>
 
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update the stored batch sizes ($n_i$).&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
+        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span>
@@ -150,7 +150,7 @@ this simply scales received gradients, $\Delta$, by $\frac{1}{|\Delta|}$</p>
     opt,
     opt_state,
     network,
-    rng=Generator(PCG64) at 0x7F81494FA260
+    rng=Generator(PCG64) at 0x7EFD16E26260
 )</span>
     </div>
 
@@ -177,7 +177,7 @@ this simply scales received gradients, $\Delta$, by $\frac{1}{|\Delta|}$</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update the stored batch sizes ($n_i$).&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
+        <span class="k">pass</span>
 </pre></div>
 
         </details>

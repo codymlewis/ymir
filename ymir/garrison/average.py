@@ -16,7 +16,7 @@ class Captain(captain.ScaleCaptain):
 
     def update(self, all_grads):
         """Update the stored batch sizes ($n_i$)."""
-        self.batch_sizes = jnp.array([c.batch_size * c.epochs for c in self.network.clients])
+        pass
 
     def scale(self, all_grads):
         return jnp.repeat(1 / len(all_grads), len(all_grads))
