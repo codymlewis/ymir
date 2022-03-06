@@ -71,6 +71,12 @@
             <li>
                     <a class="function" href="#flatten">flatten</a>
             </li>
+            <li>
+                    <a class="function" href="#minimum">minimum</a>
+            </li>
+            <li>
+                    <a class="function" href="#maximum">maximum</a>
+            </li>
     </ul>
 
 
@@ -99,6 +105,7 @@
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
 <span class="kn">import</span> <span class="nn">jax</span>
+<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
@@ -156,6 +163,18 @@
 <span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Flatten a pytree into a vector&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">flatten_util</span><span class="o">.</span><span class="n">ravel_pytree</span><span class="p">(</span><span class="n">tree</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">))</span>
+<span class="k">def</span> <span class="nf">minimum</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Multiply the elements of two pytrees&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">val</span><span class="p">),</span> <span class="n">tree</span><span class="p">)</span>
+
+
+<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">))</span>
+<span class="k">def</span> <span class="nf">maximum</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Multiply the elements of two pytrees&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">val</span><span class="p">),</span> <span class="n">tree</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -167,7 +186,7 @@
                 <div class="decorator">@partial(jax.jit, static_argnums=(1, 2, 3))</div>
 
             <span class="def">def</span>
-            <span class="name">uniform</span><span class="signature">(tree, low=0.0, high=1.0, rng=Generator(PCG64) at 0x7FDA5A1503C0)</span>:
+            <span class="name">uniform</span><span class="signature">(tree, low=0.0, high=1.0, rng=Generator(PCG64) at 0x7FACB5AC4740)</span>:
     </div>
 
                 <details>
@@ -195,7 +214,7 @@
                 <div class="decorator">@partial(jax.jit, static_argnums=(1, 2, 3))</div>
 
             <span class="def">def</span>
-            <span class="name">add_normal</span><span class="signature">(tree, loc=0.0, scale=1.0, rng=Generator(PCG64) at 0x7FDA5A150740)</span>:
+            <span class="name">add_normal</span><span class="signature">(tree, loc=0.0, scale=1.0, rng=Generator(PCG64) at 0x7FACB5AC4AC0)</span>:
     </div>
 
                 <details>
@@ -357,6 +376,54 @@
         </details>
 
             <div class="docstring"><p>Flatten a pytree into a vector</p>
+</div>
+
+
+                </section>
+                <section id="minimum">
+                            <div class="attr function"><a class="headerlink" href="#minimum">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@partial(jax.jit, static_argnums=(1,))</div>
+
+            <span class="def">def</span>
+            <span class="name">minimum</span><span class="signature">(tree, val)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">))</span>
+<span class="k">def</span> <span class="nf">minimum</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Multiply the elements of two pytrees&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">val</span><span class="p">),</span> <span class="n">tree</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Multiply the elements of two pytrees</p>
+</div>
+
+
+                </section>
+                <section id="maximum">
+                            <div class="attr function"><a class="headerlink" href="#maximum">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@partial(jax.jit, static_argnums=(1,))</div>
+
+            <span class="def">def</span>
+            <span class="name">maximum</span><span class="signature">(tree, val)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">))</span>
+<span class="k">def</span> <span class="nf">maximum</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Multiply the elements of two pytrees&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">val</span><span class="p">),</span> <span class="n">tree</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Multiply the elements of two pytrees</p>
 </div>
 
 

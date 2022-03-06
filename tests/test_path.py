@@ -4,6 +4,7 @@ import unittest
 import chex
 import jax
 import jax.numpy as jnp
+import numpy as np
 from parameterized import parameterized
 
 import ymir.path
@@ -96,6 +97,36 @@ class TestTreeFunctions(unittest.TestCase):
         chex.assert_tree_all_finite(add_params)
         chex.assert_tree_no_nones(add_params)
         chex.assert_trees_all_close(add_params, Params(w=jnp.full(self.length, a + b), b=jnp.full(self.length, a + b)))
+
+    @parameterized.expand([(val, ) for val in [2, -1, 0, 1, 3, 5]])
+    def test_tree_minimum(self, val):
+        rng = np.random.default_rng()
+        params = self.params = Params(w=jnp.array(rng.integers(-10, 10, self.length)), b=jnp.array(rng.integers(-10, 10, self.length)))
+        minimum_params = ymir.path.tree.minimum(params, val)
+        chex.assert_trees_all_equal_shapes(params, minimum_params)
+        chex.assert_tree_all_finite(minimum_params)
+        chex.assert_tree_no_nones(minimum_params)
+        # check that the generated tree values are within the range
+        chex.assert_trees_all_equal_comparator(
+            lambda x, y: (x == jnp.minimum(y, val)).all(), lambda x, y: f"{x} is not a {val} minimum of {y}",
+            minimum_params,
+            params
+        )
+
+    @parameterized.expand([(val, ) for val in [2, -1, 0, 1, 3, 5]])
+    def test_tree_maximum(self, val):
+        rng = np.random.default_rng()
+        params = self.params = Params(w=jnp.array(rng.integers(-10, 10, self.length)), b=jnp.array(rng.integers(-10, 10, self.length)))
+        maximum_params = ymir.path.tree.maximum(params, val)
+        chex.assert_trees_all_equal_shapes(params, maximum_params)
+        chex.assert_tree_all_finite(maximum_params)
+        chex.assert_tree_no_nones(maximum_params)
+        # check that the generated tree values are within the range
+        chex.assert_trees_all_equal_comparator(
+            lambda x, y: (x == jnp.maximum(y, val)).all(), lambda x, y: f"{x} is not a {val} maximum of {y}",
+            maximum_params,
+            params
+        )
 
 
 if __name__ == '__main__':

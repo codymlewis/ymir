@@ -5,6 +5,7 @@ General pytree related functions.
 from functools import partial
 
 import jax
+import jax.numpy as jnp
 import numpy as np
 
 
@@ -62,3 +63,15 @@ def sub(tree_a, tree_b):
 def flatten(tree):
     """Flatten a pytree into a vector"""
     return jax.flatten_util.ravel_pytree(tree)[0]
+
+
+@partial(jax.jit, static_argnums=(1, ))
+def minimum(tree, val):
+    """Multiply the elements of two pytrees"""
+    return jax.tree_map(lambda x: jnp.minimum(x, val), tree)
+
+
+@partial(jax.jit, static_argnums=(1, ))
+def maximum(tree, val):
+    """Multiply the elements of two pytrees"""
+    return jax.tree_map(lambda x: jnp.maximum(x, val), tree)
