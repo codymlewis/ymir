@@ -212,12 +212,12 @@
 
 <span class="k">def</span> <span class="nf">apply_scale</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Scale a collection of gradients by the value of alpha&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree_mul</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_grads</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_grads</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)]</span>
 
 
 <span class="k">def</span> <span class="nf">sum_grads</span><span class="p">(</span><span class="n">all_grads</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Element-wise sum together a collection of gradients, simplifies boilerplate&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree_add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -505,7 +505,7 @@ The return function may then be used to update the global parameters based on th
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">apply_scale</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Scale a collection of gradients by the value of alpha&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree_mul</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_grads</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_grads</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)]</span>
 </pre></div>
 
         </details>
@@ -527,7 +527,7 @@ The return function may then be used to update the global parameters based on th
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">sum_grads</span><span class="p">(</span><span class="n">all_grads</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Element-wise sum together a collection of gradients, simplifies boilerplate&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree_add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">)</span>
 </pre></div>
 
         </details>

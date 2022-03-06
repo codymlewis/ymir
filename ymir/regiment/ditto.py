@@ -47,7 +47,7 @@ class Scout(scout.Scout):
             self.params, self.opt_state = self.local_update(
                 self.params, params, self.opt_state, self.lamb, *next(self.data)
             )
-        return p if return_weights else ymir.path.tree_sub(params, p)
+        return p if return_weights else ymir.path.tree.sub(params, p)
 
 
 @partial(jax.jit, static_argnums=(
@@ -68,8 +68,8 @@ def update(opt, loss, local_params, global_params, opt_state, lamb, X, y):
     - X: samples
     - y: labels
     """
-    grads = ymir.path.tree_add(
-        jax.grad(loss)(local_params, X, y), ymir.path.tree_mul(ymir.path.tree_sub(local_params, global_params), lamb)
+    grads = ymir.path.tree.add(
+        jax.grad(loss)(local_params, X, y), ymir.path.tree.scale(ymir.path.tree.sub(local_params, global_params), lamb)
     )
     updates, opt_state = opt.update(grads, opt_state, local_params)
     local_params = optax.apply_updates(local_params, updates)

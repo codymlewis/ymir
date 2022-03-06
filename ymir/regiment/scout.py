@@ -43,7 +43,7 @@ class Scout:
         p = params
         for _ in range(self.epochs):
             p, self.opt_state = self.update(p, self.opt_state, *next(self.data))
-        return p if return_weights else ymir.path.tree_sub(params, p)
+        return p if return_weights else ymir.path.tree.sub(params, p)
 
 
 @partial(jax.jit, static_argnums=(

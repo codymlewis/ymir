@@ -101,9 +101,9 @@ def update(opt):
 
 def apply_scale(alpha, all_grads):
     """Scale a collection of gradients by the value of alpha"""
-    return [ymir.path.tree_mul(g, a) for g, a in zip(all_grads, alpha)]
+    return [ymir.path.tree.scale(g, a) for g, a in zip(all_grads, alpha)]
 
 
 def sum_grads(all_grads):
     """Element-wise sum together a collection of gradients, simplifies boilerplate"""
-    return ymir.path.tree_add(*all_grads)
+    return ymir.path.tree.add(*all_grads)
