@@ -26,6 +26,7 @@ class Controller:
         self.C = C
         self.K = 0
         self.update_transform_chain = []
+        self.metrics = []
 
     def __len__(self):
         return len(self.clients) + sum([len(s) for s in self.switches])
@@ -34,6 +35,7 @@ class Controller:
         """Connect a client directly to this controller"""
         self.clients.append(client)
         self.K += 1
+        self.metrics.append(None)
 
     def add_switch(self, switch):
         """Connect another controller (referred to as switch) to this controller"""
@@ -59,6 +61,37 @@ class Controller:
         for i in idx:
             all_updates.append(self.clients[i].step(params, return_weights))
         return ymir.path.functions.chain(self.update_transform_chain, all_updates)
+    
+    def add_metric(self, neurometer, data):
+        """Add the specified metric measurement for each connection to this controller"""
+        for switch in self.switches:
+            switch.add_metric(neurometer, data)
+        for i, c in enumerate(self.clients):
+            self.metrics[i] = neurometer(c.net, data)
+
+    def measure(self, accs=None, asrs=None):
+        """Return the metrics for each connection to this controller"""
+        results = [switch.measure(accs, asrs) for switch in self.switches]
+        results += [m.measure(c.params, accs, asrs) for m, c in zip(self.metrics, self.clients) if m is not None]
+        return _merge_dicts(results)
+    
+    def conclude(self):
+        """Conclude the metrics for each connection to this controller"""
+        conclusions = [switch.conclude() for switch in self.switches]
+        conclusions += [m.conclude() for m in self.metrics if m is not None]
+        return _merge_dicts(conclusions)
+
+
+def _merge_dicts(dicts):
+    """Merge a list of dictionaries into a single dictionary, where values are a list of dict values"""
+    if len(dicts):
+        final_dicts = {k: [] for k in dicts[0].keys()}
+    else:
+        return {}
+    for d in dicts:
+        for k, v in d.items():
+            final_dicts[k].append(v)
+    return final_dicts
 
 
 class Network:
@@ -108,3 +141,12 @@ class Network:
         - return_weights: if True, return the weights of the clients else return the gradients from the local training
         """
         return self.controllers[self.server_name](params, rng, return_weights)
+
+    def add_metric(self, neurometer, data):
+        self.controllers[self.server_name].add_metric(neurometer, data)
+
+    def measure(self, accs=None, asrs=None):
+        return self.controllers[self.server_name].measure(accs, asrs)
+
+    def conclude(self):
+        return self.controllers[self.server_name].conclude()
