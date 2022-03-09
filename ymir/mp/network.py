@@ -35,7 +35,6 @@ class Controller:
         """Connect a client directly to this controller"""
         self.clients.append(client)
         self.K += 1
-        self.metrics.append(None)
 
     def add_switch(self, switch):
         """Connect another controller (referred to as switch) to this controller"""
@@ -66,13 +65,13 @@ class Controller:
         """Add the specified metric measurement for each connection to this controller"""
         for switch in self.switches:
             switch.add_metric(neurometer, data)
-        for i, c in enumerate(self.clients):
-            self.metrics[i] = neurometer(c.net, data)
+        for c in self.clients:
+            self.metrics.append(neurometer(c.net, data))
 
     def measure(self, accs=None, asrs=None):
         """Return the metrics for each connection to this controller"""
         results = [switch.measure(accs, asrs) for switch in self.switches]
-        results += [m.measure(c.params, accs, asrs) for m, c in zip(self.metrics, self.clients) if m is not None]
+        results += [m.measure(c.params, accs, asrs) for m, c in zip(self.metrics, self.clients)]
         return _merge_dicts(results)
     
     def conclude(self):
