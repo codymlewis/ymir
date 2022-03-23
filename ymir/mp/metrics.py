@@ -77,3 +77,35 @@ class Neurometer:
                 skm.confusion_matrix(y_true, y_pred, labels=range(self.classes[k])) for y_true, y_pred in v
             ]
         return {k: np.array(v) for k, v in self.results.items()}
+
+
+class Accumeter:
+    """Measure just the accuracy of the model"""
+    def __init__(self, net, datasets):
+        """
+        Construct the Accumeter.
+
+        Arguments:
+        - net: the neural network apply function
+        - datasets: a dictionary that specified the datasets to evaluate. It maps the dataset names to the dataset iterators.
+        """
+        self.datasets = datasets
+        self.results = {d: [] for d in datasets.keys()}
+        self.evaluator = evaluator(net)
+        self.classes = {d: ds.classes for d, ds in datasets.items()}
+
+    def measure(self, params, accs: list = None, **kwargs):
+        """
+        Add a measurement of the chosen aspects with respect to the current params, return the latest results if specified.
+
+        Arguments:
+        - params: the current neural network parameters
+        - accs: a list of accuracy scores to measure, if None, the accuracy score will not be measured
+        """
+        results = {}
+        if accs is not None:
+            results.update({f"{a} acc": accuracy_score(*self.results[a][-1]) for a in accs})
+        return results
+
+    def conclude(self):
+        pass
