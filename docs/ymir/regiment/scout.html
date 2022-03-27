@@ -98,7 +98,7 @@
 <span class="k">class</span> <span class="nc">Scout</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;A client for federated learning, holds its own data and personal learning variables.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">epochs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for a Scout.</span>
 
@@ -108,6 +108,7 @@
 <span class="sd">        - loss: loss function to use for training</span>
 <span class="sd">        - data: data to use for training</span>
 <span class="sd">        - epochs: number of epochs to train for per round</span>
+<span class="sd">        - backend: backend to use for training, as in cpu, gpu, etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt_state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
@@ -115,7 +116,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt</span> <span class="o">=</span> <span class="n">opt</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">1</span><span class="p">,</span>
+        <span class="p">),</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">),</span> <span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -131,10 +136,6 @@
         <span class="k">return</span> <span class="n">p</span> <span class="k">if</span> <span class="n">return_weights</span> <span class="k">else</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 
 
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span>
-    <span class="mi">0</span><span class="p">,</span>
-    <span class="mi">1</span><span class="p">,</span>
-<span class="p">))</span>
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Local learning step.</span>
@@ -170,7 +171,7 @@
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Scout</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;A client for federated learning, holds its own data and personal learning variables.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">epochs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for a Scout.</span>
 
@@ -180,6 +181,7 @@
 <span class="sd">        - loss: loss function to use for training</span>
 <span class="sd">        - data: data to use for training</span>
 <span class="sd">        - epochs: number of epochs to train for per round</span>
+<span class="sd">        - backend: backend to use for training, as in cpu, gpu, etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt_state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
@@ -187,7 +189,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt</span> <span class="o">=</span> <span class="n">opt</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">1</span><span class="p">,</span>
+        <span class="p">),</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">),</span> <span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -213,12 +219,12 @@
                                         <div class="attr function"><a class="headerlink" href="#Scout.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">Scout</span><span class="signature">(opt, opt_state, loss, data, epochs)</span>
+            <span class="name">Scout</span><span class="signature">(opt, opt_state, loss, data, epochs, backend=None)</span>
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">epochs</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor for a Scout.</span>
 
@@ -228,6 +234,7 @@
 <span class="sd">        - loss: loss function to use for training</span>
 <span class="sd">        - data: data to use for training</span>
 <span class="sd">        - epochs: number of epochs to train for per round</span>
+<span class="sd">        - backend: backend to use for training, as in cpu, gpu, etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt_state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
@@ -235,7 +242,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">opt</span> <span class="o">=</span> <span class="n">opt</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="n">backend</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="mi">1</span><span class="p">,</span>
+        <span class="p">),</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">),</span> <span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -250,6 +261,7 @@
 <li>loss: loss function to use for training</li>
 <li>data: data to use for training</li>
 <li>epochs: number of epochs to train for per round</li>
+<li>backend: backend to use for training, as in cpu, gpu, etc.</li>
 </ul>
 </div>
 
@@ -297,19 +309,14 @@
                 <section id="update">
                             <div class="attr function"><a class="headerlink" href="#update">#&nbsp;&nbsp</a>
 
-                <div class="decorator">@partial(jax.jit, static_argnums=(0, 1))</div>
-
+        
             <span class="def">def</span>
             <span class="name">update</span><span class="signature">(opt, loss, params, opt_state, X, y)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span>
-    <span class="mi">0</span><span class="p">,</span>
-    <span class="mi">1</span><span class="p">,</span>
-<span class="p">))</span>
-<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Local learning step.</span>
 

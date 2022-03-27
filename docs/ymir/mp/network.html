@@ -62,6 +62,15 @@
                         <li>
                                 <a class="function" href="#Controller.add_update_transform">add_update_transform</a>
                         </li>
+                        <li>
+                                <a class="function" href="#Controller.add_metric">add_metric</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Controller.measure">measure</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Controller.conclude">conclude</a>
+                        </li>
                 </ul>
 
             </li>
@@ -82,6 +91,15 @@
                         </li>
                         <li>
                                 <a class="function" href="#Network.connect_controllers">connect_controllers</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Network.add_metric">add_metric</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Network.measure">measure</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Network.conclude">conclude</a>
                         </li>
                 </ul>
 
@@ -135,6 +153,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">])</span>
@@ -168,6 +187,37 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">idx</span><span class="p">:</span>
             <span class="n">all_updates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span><span class="p">,</span> <span class="n">all_updates</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neurometer</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add the specified metric measurement for each connection to this controller&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">:</span>
+            <span class="n">switch</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">neurometer</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">neurometer</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">net</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">asrs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the metrics for each connection to this controller&quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">switch</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="n">accs</span><span class="p">,</span> <span class="n">asrs</span><span class="p">)</span> <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">]</span>
+        <span class="n">results</span> <span class="o">+=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">accs</span><span class="p">,</span> <span class="n">asrs</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">_merge_dicts</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">conclude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Conclude the metrics for each connection to this controller&quot;&quot;&quot;</span>
+        <span class="n">conclusions</span> <span class="o">=</span> <span class="p">[</span><span class="n">switch</span><span class="o">.</span><span class="n">conclude</span><span class="p">()</span> <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">]</span>
+        <span class="n">conclusions</span> <span class="o">+=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">conclude</span><span class="p">()</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">_merge_dicts</span><span class="p">(</span><span class="n">conclusions</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_merge_dicts</span><span class="p">(</span><span class="n">dicts</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Merge a list of dictionaries into a single dictionary, where values are a list of dict values&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dicts</span><span class="p">):</span>
+        <span class="n">final_dicts</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dicts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dicts</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">final_dicts</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">final_dicts</span>
 
 
 <span class="k">class</span> <span class="nc">Network</span><span class="p">:</span>
@@ -217,6 +267,15 @@
 <span class="sd">        - return_weights: if True, return the weights of the clients else return the gradients from the local training</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">](</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neurometer</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">neurometer</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">asrs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="n">accs</span><span class="p">,</span> <span class="n">asrs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">conclude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span><span class="o">.</span><span class="n">conclude</span><span class="p">()</span>
 </pre></div>
 
         </details>
@@ -252,6 +311,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">])</span>
@@ -285,6 +345,25 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">idx</span><span class="p">:</span>
             <span class="n">all_updates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span><span class="p">,</span> <span class="n">all_updates</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neurometer</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add the specified metric measurement for each connection to this controller&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">:</span>
+            <span class="n">switch</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">neurometer</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">neurometer</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">net</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">asrs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the metrics for each connection to this controller&quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">switch</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="n">accs</span><span class="p">,</span> <span class="n">asrs</span><span class="p">)</span> <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">]</span>
+        <span class="n">results</span> <span class="o">+=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">accs</span><span class="p">,</span> <span class="n">asrs</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">_merge_dicts</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">conclude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Conclude the metrics for each connection to this controller&quot;&quot;&quot;</span>
+        <span class="n">conclusions</span> <span class="o">=</span> <span class="p">[</span><span class="n">switch</span><span class="o">.</span><span class="n">conclude</span><span class="p">()</span> <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">]</span>
+        <span class="n">conclusions</span> <span class="o">+=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">conclude</span><span class="p">()</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">_merge_dicts</span><span class="p">(</span><span class="n">conclusions</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -316,6 +395,7 @@ up the chain.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">K</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_transform_chain</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
 </pre></div>
 
         </details>
@@ -398,6 +478,79 @@ up the chain.</p>
 
 
                             </div>
+                            <div id="Controller.add_metric" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Controller.add_metric">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">add_metric</span><span class="signature">(self, neurometer, data)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">add_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neurometer</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add the specified metric measurement for each connection to this controller&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">:</span>
+            <span class="n">switch</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">neurometer</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">neurometer</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">net</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Add the specified metric measurement for each connection to this controller</p>
+</div>
+
+
+                            </div>
+                            <div id="Controller.measure" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Controller.measure">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">measure</span><span class="signature">(self, accs=None, asrs=None)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">asrs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the metrics for each connection to this controller&quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">switch</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="n">accs</span><span class="p">,</span> <span class="n">asrs</span><span class="p">)</span> <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">]</span>
+        <span class="n">results</span> <span class="o">+=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">accs</span><span class="p">,</span> <span class="n">asrs</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">_merge_dicts</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Return the metrics for each connection to this controller</p>
+</div>
+
+
+                            </div>
+                            <div id="Controller.conclude" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Controller.conclude">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">conclude</span><span class="signature">(self)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">conclude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Conclude the metrics for each connection to this controller&quot;&quot;&quot;</span>
+        <span class="n">conclusions</span> <span class="o">=</span> <span class="p">[</span><span class="n">switch</span><span class="o">.</span><span class="n">conclude</span><span class="p">()</span> <span class="k">for</span> <span class="n">switch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">switches</span><span class="p">]</span>
+        <span class="n">conclusions</span> <span class="o">+=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">conclude</span><span class="p">()</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">_merge_dicts</span><span class="p">(</span><span class="n">conclusions</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Conclude the metrics for each connection to this controller</p>
+</div>
+
+
+                            </div>
                 </section>
                 <section id="Network">
                                 <div class="attr class">
@@ -457,6 +610,15 @@ up the chain.</p>
 <span class="sd">        - return_weights: if True, return the weights of the clients else return the gradients from the local training</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">](</span><span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neurometer</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">neurometer</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">asrs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="n">accs</span><span class="p">,</span> <span class="n">asrs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">conclude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span><span class="o">.</span><span class="n">conclude</span><span class="p">()</span>
 </pre></div>
 
         </details>
@@ -588,6 +750,63 @@ up the chain.</p>
             <div class="docstring"><p>Connect two controllers in this network</p>
 </div>
 
+
+                            </div>
+                            <div id="Network.add_metric" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Network.add_metric">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">add_metric</span><span class="signature">(self, neurometer, data)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">add_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neurometer</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">neurometer</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="Network.measure" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Network.measure">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">measure</span><span class="signature">(self, accs=None, asrs=None)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">asrs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="n">accs</span><span class="p">,</span> <span class="n">asrs</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="Network.conclude" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Network.conclude">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">conclude</span><span class="signature">(self)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">conclude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">controllers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">server_name</span><span class="p">]</span><span class="o">.</span><span class="n">conclude</span><span class="p">()</span>
+</pre></div>
+
+        </details>
+
+    
 
                             </div>
                 </section>

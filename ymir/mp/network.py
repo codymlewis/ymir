@@ -60,7 +60,7 @@ class Controller:
         for i in idx:
             all_updates.append(self.clients[i].step(params, return_weights))
         return ymir.path.functions.chain(self.update_transform_chain, all_updates)
-    
+
     def add_metric(self, neurometer, data):
         """Add the specified metric measurement for each connection to this controller"""
         for switch in self.switches:
@@ -73,7 +73,7 @@ class Controller:
         results = [switch.measure(accs, asrs) for switch in self.switches]
         results += [m.measure(c.params, accs, asrs) for m, c in zip(self.metrics, self.clients)]
         return _merge_dicts(results)
-    
+
     def conclude(self):
         """Conclude the metrics for each connection to this controller"""
         conclusions = [switch.conclude() for switch in self.switches]

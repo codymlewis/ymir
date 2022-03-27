@@ -13,7 +13,7 @@ import ymir.path
 class Scout:
     """A client for federated learning, holds its own data and personal learning variables."""
 
-    def __init__(self, opt, opt_state, loss, data, epochs):
+    def __init__(self, opt, opt_state, loss, data, epochs, backend=None):
         """
         Constructor for a Scout.
 
@@ -23,6 +23,7 @@ class Scout:
         - loss: loss function to use for training
         - data: data to use for training
         - epochs: number of epochs to train for per round
+        - backend: backend to use for training, as in cpu, gpu, etc.
         """
         self.opt_state = opt_state
         self.data = data
@@ -30,7 +31,11 @@ class Scout:
         self.epochs = epochs
         self.opt = opt
         self.loss = loss
-        self.update = partial(update, opt, loss)
+        self.backend = backend
+        self.update = partial(jax.jit(update, static_argnums=(
+            0,
+            1,
+        ), backend=backend), opt, loss)
 
     def step(self, params, return_weights=False):
         """
@@ -46,10 +51,6 @@ class Scout:
         return p if return_weights else ymir.path.tree.sub(params, p)
 
 
-@partial(jax.jit, static_argnums=(
-    0,
-    1,
-))
 def update(opt, loss, params, opt_state, X, y):
     """
     Local learning step.
