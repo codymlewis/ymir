@@ -89,12 +89,7 @@ class GradientTransform:
 def convert(client):
     """Convert a client into an on-off toggle adversary."""
     client.shadow_update = client.update
-    client.update = partial(
-        jax.jit(scout.update, static_argnums=(
-            0,
-            1,
-        ), backend=client.backend), client.opt, client.loss
-    )
+    client.update = jax.jit(partial(scout.update, client.opt, client.loss), backend=client.backend)
     client.toggle = toggle.__get__(client)
 
 

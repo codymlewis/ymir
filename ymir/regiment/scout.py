@@ -32,10 +32,7 @@ class Scout:
         self.opt = opt
         self.loss = loss
         self.backend = backend
-        self.update = partial(jax.jit(update, static_argnums=(
-            0,
-            1,
-        ), backend=backend), opt, loss)
+        self.update = jax.jit(partial(update, opt, loss), backend=backend)
 
     def step(self, params, return_weights=False):
         """

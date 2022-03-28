@@ -96,12 +96,7 @@
 <span class="sd">    - stealth_data: a generator that yields the stealth data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">client</span><span class="o">.</span><span class="n">poison_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">update</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">stealth_update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
-        <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">scout</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span>
-            <span class="mi">0</span><span class="p">,</span>
-            <span class="mi">1</span><span class="p">,</span>
-        <span class="p">),</span> <span class="n">backend</span><span class="o">=</span><span class="n">client</span><span class="o">.</span><span class="n">backend</span><span class="p">),</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span>
-    <span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">stealth_update</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">scout</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">),</span> <span class="n">backend</span><span class="o">=</span><span class="n">client</span><span class="o">.</span><span class="n">backend</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">poison_epochs</span> <span class="o">=</span> <span class="n">poison_epochs</span>
     <span class="n">client</span><span class="o">.</span><span class="n">stealth_epochs</span> <span class="o">=</span> <span class="n">stealth_epochs</span>
     <span class="n">client</span><span class="o">.</span><span class="n">stealth_data</span> <span class="o">=</span> <span class="n">stealth_data</span>
@@ -141,12 +136,7 @@
 <span class="sd">    - stealth_data: a generator that yields the stealth data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">client</span><span class="o">.</span><span class="n">poison_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">update</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">stealth_update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
-        <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">scout</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span>
-            <span class="mi">0</span><span class="p">,</span>
-            <span class="mi">1</span><span class="p">,</span>
-        <span class="p">),</span> <span class="n">backend</span><span class="o">=</span><span class="n">client</span><span class="o">.</span><span class="n">backend</span><span class="p">),</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span>
-    <span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">stealth_update</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">scout</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">),</span> <span class="n">backend</span><span class="o">=</span><span class="n">client</span><span class="o">.</span><span class="n">backend</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">poison_epochs</span> <span class="o">=</span> <span class="n">poison_epochs</span>
     <span class="n">client</span><span class="o">.</span><span class="n">stealth_epochs</span> <span class="o">=</span> <span class="n">stealth_epochs</span>
     <span class="n">client</span><span class="o">.</span><span class="n">stealth_data</span> <span class="o">=</span> <span class="n">stealth_data</span>

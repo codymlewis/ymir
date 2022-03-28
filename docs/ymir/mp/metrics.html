@@ -71,6 +71,21 @@
                 </ul>
 
             </li>
+            <li>
+                    <a class="class" href="#Accumeter">Accumeter</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#Accumeter.__init__">Accumeter</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Accumeter.measure">measure</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Accumeter.conclude">conclude</a>
+                        </li>
+                </ul>
+
+            </li>
     </ul>
 
 
@@ -171,6 +186,39 @@
                 <span class="n">skm</span><span class="o">.</span><span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span> <span class="k">for</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="ow">in</span> <span class="n">v</span>
             <span class="p">]</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+
+<span class="k">class</span> <span class="nc">Accumeter</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Measure just the accuracy of the model&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">datasets</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the Accumeter.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - net: the neural network apply function</span>
+<span class="sd">        - datasets: a dictionary that specified the datasets to evaluate. It maps the dataset names to the dataset iterators.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="n">datasets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datasets</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span> <span class="o">=</span> <span class="n">evaluator</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="n">ds</span><span class="o">.</span><span class="n">classes</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">datasets</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">accs</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a measurement of the chosen aspects with respect to the current params, return the latest results if specified.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the current neural network parameters</span>
+<span class="sd">        - accs: a list of accuracy scores to measure, if None, the accuracy score will not be measured</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">accs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> acc&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">accs</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">def</span> <span class="nf">conclude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
 </pre></div>
 
         </details>
@@ -425,6 +473,151 @@
             <div class="docstring"><p>Return overall results formatted into jax.numpy arrays</p>
 </div>
 
+
+                            </div>
+                </section>
+                <section id="Accumeter">
+                                <div class="attr class">
+        <a class="headerlink" href="#Accumeter">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">Accumeter</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Accumeter</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Measure just the accuracy of the model&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">datasets</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the Accumeter.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - net: the neural network apply function</span>
+<span class="sd">        - datasets: a dictionary that specified the datasets to evaluate. It maps the dataset names to the dataset iterators.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="n">datasets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datasets</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span> <span class="o">=</span> <span class="n">evaluator</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="n">ds</span><span class="o">.</span><span class="n">classes</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">datasets</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">accs</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a measurement of the chosen aspects with respect to the current params, return the latest results if specified.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the current neural network parameters</span>
+<span class="sd">        - accs: a list of accuracy scores to measure, if None, the accuracy score will not be measured</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">accs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> acc&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">accs</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">def</span> <span class="nf">conclude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Measure just the accuracy of the model</p>
+</div>
+
+
+                            <div id="Accumeter.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Accumeter.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">Accumeter</span><span class="signature">(net, datasets)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">datasets</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct the Accumeter.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - net: the neural network apply function</span>
+<span class="sd">        - datasets: a dictionary that specified the datasets to evaluate. It maps the dataset names to the dataset iterators.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="n">datasets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">datasets</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluator</span> <span class="o">=</span> <span class="n">evaluator</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="n">ds</span><span class="o">.</span><span class="n">classes</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">datasets</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Construct the Accumeter.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>net: the neural network apply function</li>
+<li>datasets: a dictionary that specified the datasets to evaluate. It maps the dataset names to the dataset iterators.</li>
+</ul>
+</div>
+
+
+                            </div>
+                            <div id="Accumeter.measure" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Accumeter.measure">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">measure</span><span class="signature">(self, params, accs: list = None, **kwargs)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">measure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">accs</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a measurement of the chosen aspects with respect to the current params, return the latest results if specified.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        - params: the current neural network parameters</span>
+<span class="sd">        - accs: a list of accuracy scores to measure, if None, the accuracy score will not be measured</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">accs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> acc&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">accs</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">results</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Add a measurement of the chosen aspects with respect to the current params, return the latest results if specified.</p>
+
+<p>Arguments:</p>
+
+<ul>
+<li>params: the current neural network parameters</li>
+<li>accs: a list of accuracy scores to measure, if None, the accuracy score will not be measured</li>
+</ul>
+</div>
+
+
+                            </div>
+                            <div id="Accumeter.conclude" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Accumeter.conclude">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">conclude</span><span class="signature">(self)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">conclude</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+
+        </details>
+
+    
 
                             </div>
                 </section>

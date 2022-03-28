@@ -81,6 +81,7 @@ class Neurometer:
 
 class Accumeter:
     """Measure just the accuracy of the model"""
+
     def __init__(self, net, datasets):
         """
         Construct the Accumeter.

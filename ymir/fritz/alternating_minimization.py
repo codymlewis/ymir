@@ -20,12 +20,7 @@ def convert(client, poison_epochs, stealth_epochs, stealth_data):
     - stealth_data: a generator that yields the stealth data
     """
     client.poison_update = client.update
-    client.stealth_update = partial(
-        jax.jit(scout.update, static_argnums=(
-            0,
-            1,
-        ), backend=client.backend), client.opt, client.loss
-    )
+    client.stealth_update = jax.jit(partial(scout.update, client.opt, client.loss), backend=client.backend)
     client.poison_epochs = poison_epochs
     client.stealth_epochs = stealth_epochs
     client.stealth_data = stealth_data
