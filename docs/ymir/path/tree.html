@@ -150,7 +150,7 @@
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="o">*</span><span class="n">trees</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Element-wise add any number of pytrees&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_multimap</span><span class="p">(</span><span class="k">lambda</span> <span class="o">*</span><span class="n">xs</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">xs</span><span class="p">),</span> <span class="o">*</span><span class="n">trees</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="o">*</span><span class="n">xs</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">xs</span><span class="p">),</span> <span class="o">*</span><span class="n">trees</span><span class="p">)</span>
 
 
 <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
@@ -186,7 +186,7 @@
                 <div class="decorator">@partial(jax.jit, static_argnums=(1, 2, 3))</div>
 
             <span class="def">def</span>
-            <span class="name">uniform</span><span class="signature">(tree, low=0.0, high=1.0, rng=Generator(PCG64) at 0x7F40CD2C6960)</span>:
+            <span class="name">uniform</span><span class="signature">(tree, low=0.0, high=1.0, rng=Generator(PCG64) at 0x7F234C176F80)</span>:
     </div>
 
                 <details>
@@ -214,7 +214,7 @@
                 <div class="decorator">@partial(jax.jit, static_argnums=(1, 2, 3))</div>
 
             <span class="def">def</span>
-            <span class="name">add_normal</span><span class="signature">(tree, loc=0.0, scale=1.0, rng=Generator(PCG64) at 0x7F40CD2C67A0)</span>:
+            <span class="name">add_normal</span><span class="signature">(tree, loc=0.0, scale=1.0, rng=Generator(PCG64) at 0x7F234C176DC0)</span>:
     </div>
 
                 <details>
@@ -322,7 +322,7 @@
             <div class="codehilite"><pre><span></span><span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="o">*</span><span class="n">trees</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Element-wise add any number of pytrees&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_multimap</span><span class="p">(</span><span class="k">lambda</span> <span class="o">*</span><span class="n">xs</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">xs</span><span class="p">),</span> <span class="o">*</span><span class="n">trees</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="o">*</span><span class="n">xs</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">xs</span><span class="p">),</span> <span class="o">*</span><span class="n">trees</span><span class="p">)</span>
 </pre></div>
 
         </details>
