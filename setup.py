@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 setuptools.setup(
-    name="ymir",
+    name="tfymir",
     version="0.1.0",
     author="Cody Lewis",
     description="Jax-based federated learning library",

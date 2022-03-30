@@ -4,7 +4,7 @@ Defines the network architecture for the FL system.
 
 import numpy as np
 
-import ymir.path
+import tfymir.path
 
 
 class Controller:
@@ -59,7 +59,7 @@ class Controller:
         idx = rng.choice(self.K, size=int(self.C * self.K), replace=False) if self.C < 1 else range(self.K)
         for i in idx:
             all_updates.append(self.clients[i].step(params, return_weights))
-        return ymir.path.functions.chain(self.update_transform_chain, all_updates)
+        return tfymir.path.functions.chain(self.update_transform_chain, all_updates)
 
     def add_metric(self, neurometer, data):
         """Add the specified metric measurement for each connection to this controller"""

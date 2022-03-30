@@ -46,7 +46,7 @@ class Neurometer:
         """
         self.datasets = datasets
         self.results = {d: [] for d in datasets.keys()}
-        self.evaluator = evaluator(net)
+        self.model = net
         self.classes = {d: ds.classes for d, ds in datasets.items()}
 
     def measure(self, params, accs: list = None, asrs: dict = None):
@@ -58,8 +58,8 @@ class Neurometer:
         - accs: a list of accuracy scores to measure, if None, the accuracy score will not be measured
         - asrs: a dictionary of attack success rates to measure, if None, the attack success rates will not be measured
         """
-        for ds_type, ds in self.datasets.items():
-            self.results[ds_type].append(self.evaluator(params, *next(ds)))
+        for ds_type, (X, y) in self.datasets.items():
+            self.results[ds_type].append((y, self.model.predict(X)))
         results = {}
         if accs is not None:
             results.update({f"{a} acc": accuracy_score(*self.results[a][-1]) for a in accs})

@@ -2,5 +2,5 @@
 .. include:: README.md
 """
 
-from . import ditto
+# from . import ditto
 from .scout import Scout

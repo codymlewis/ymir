@@ -6,14 +6,14 @@ import jax
 import numpy as np
 import optax
 
-import ymir
+import tfymir
 
 
 class TestScoutFunctions(unittest.TestCase):
 
     def setUp(self):
         rng = np.random.default_rng(0)
-        dataset = ymir.mp.datasets.Dataset(
+        dataset = tfymir.mp.datasets.Dataset(
             (X := rng.random((50, 1), dtype=np.float32)),
             np.sin(X).reshape(-1), np.full(len(X), True)
         )
@@ -22,7 +22,7 @@ class TestScoutFunctions(unittest.TestCase):
         params = net.init(jax.random.PRNGKey(42), next(self.data)[0])
         opt = optax.sgd(0.1)
         self.opt_state = opt.init(params)
-        self.client = ymir.regiment.Scout(None, self.opt_state, None, self.data, 1)
+        self.client = tfymir.regiment.Scout(None, self.opt_state, None, self.data, 1)
 
     def test_member_variables(self):
         self.assertEqual(self.client.opt_state, self.opt_state)

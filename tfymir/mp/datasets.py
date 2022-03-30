@@ -2,38 +2,8 @@
 Load a dataset, handle the subset distribution, and provide an iterator.
 """
 
+from typing import Tuple
 import numpy as np
-
-
-class DataIter:
-    """Iterator that gives random batchs in pairs of $(X_i, y_i) : i \subseteq {1, \ldots, N}$"""
-
-    def __init__(self, X, y, batch_size, classes, rng):
-        """
-        Construct a data iterator.
-        
-        Arguments:
-        - X: the samples
-        - y: the labels
-        - batch_size: the batch size
-        - classes: the number of classes
-        - rng: the random number generator
-        """
-        self.X = X
-        self.y = y
-        self.batch_size = y.shape[0] if batch_size is None else min(batch_size, y.shape[0])
-        self.idx = np.arange(y.shape[0])
-        self.classes = classes
-        self.rng = rng
-
-    def __iter__(self):
-        """Return this as an iterator."""
-        return self
-
-    def __next__(self):
-        """Get a random batch."""
-        idx = self.rng.choice(self.idx, self.batch_size, replace=False)
-        return self.X[idx], self.y[idx]
 
 
 class Dataset:
@@ -59,9 +29,9 @@ class Dataset:
         """Get the testing subset"""
         return self.X[~self.train_idx], self.y[~self.train_idx]
 
-    def get_iter(
-        self, split, batch_size=None, idx=None, filter=None, map=None, rng=np.random.default_rng()
-    ) -> DataIter:
+    def get_subset(
+        self, split, idx=None, filter=None, map=None, rng=np.random.default_rng()
+    ) -> Tuple:
         """
         Generate an iterator out of the dataset.
         
@@ -82,7 +52,7 @@ class Dataset:
             X, y = X[fidx], y[fidx]
         if map is not None:
             X, y = map(X, y)
-        return DataIter(X, y, batch_size, self.classes, rng)
+        return X, y
 
     def fed_split(self, batch_sizes, mapping=None, rng=np.random.default_rng()):
         """
@@ -95,5 +65,5 @@ class Dataset:
         """
         if mapping is not None:
             distribution = mapping(*self.train(), len(batch_sizes), self.classes, rng)
-            return [self.get_iter("train", b, idx=d, rng=rng) for b, d in zip(batch_sizes, distribution)]
-        return [self.get_iter("train", b, rng=rng) for b in batch_sizes]
+            return [self.get_subset("train", b, idx=d, rng=rng) for b, d in zip(batch_sizes, distribution)]
+        return [self.get_subset("train", b, rng=rng) for b in batch_sizes]

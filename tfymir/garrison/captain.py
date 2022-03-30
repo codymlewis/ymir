@@ -5,30 +5,24 @@ There are two generic forms of servers defined here:
 """
 
 from abc import ABC, abstractmethod
-from typing import Iterable
+from typing import Iterable, List
 
-import jax
-import jaxlib
 import numpy as np
-import optax
 
-import ymir.path
-from ymir.mp.network import Network
+import tfymir.path
+from tfymir.mp.network import Network
 
 
 class ScaleCaptain(ABC):
     """A captain that algorithmically scales gradients by some factor, $p_i$"""
-    params: optax.Params
+    params: List
     network: Network
-    opt_state: optax.OptState
     rng: np.random.Generator
 
-    def __init__(self, params, opt, opt_state, network, rng):
+    def __init__(self, params, network, rng):
         self.params = params
-        self.opt_state = opt_state
         self.network = network
         self.rng = rng
-        self.update_params = update(opt)
 
     @abstractmethod
     def update(self, all_grads: Iterable):
@@ -36,7 +30,7 @@ class ScaleCaptain(ABC):
         pass
 
     @abstractmethod
-    def scale(self, all_grads: Iterable) -> jaxlib.xla_extension.DeviceArray:
+    def scale(self, all_grads: Iterable):
         """Calculate the amount by which to scale the gradients by ($p_i$), according the specified algorithm."""
         pass
 
@@ -60,17 +54,14 @@ class ScaleCaptain(ABC):
 
 class AggregateCaptain(ABC):
     """A captian that aggregates weights into a single global weight, $w_t$"""
-    params: optax.Params
+    params: List
     network: Network
-    opt_state: optax.OptState
     rng: np.random.Generator
 
-    def __init__(self, params, opt, opt_state, network, rng):
+    def __init__(self, params, network, rng):
         self.params = params
-        self.opt_state = opt_state
         self.network = network
         self.rng = rng
-        self.update_params = update(opt)
 
     @abstractmethod
     def update(self, all_weights: Iterable):
@@ -83,27 +74,11 @@ class AggregateCaptain(ABC):
         pass
 
 
-def update(opt):
-    """
-    Update the global model using client gradients.
-    This is a curried function, so first initialize with the selected optimizer.
-    The return function may then be used to update the global parameters based on the client gradients
-    """
-
-    @jax.jit
-    def _apply(params, opt_state, grads):
-        updates, opt_state = opt.update(grads, opt_state, params)
-        new_params = optax.apply_updates(params, updates)
-        return new_params, opt_state
-
-    return _apply
-
-
 def apply_scale(alpha, all_grads):
     """Scale a collection of gradients by the value of alpha"""
-    return [ymir.path.tree.scale(g, a) for g, a in zip(all_grads, alpha)]
+    return [tfymir.path.weights.scale(g, a) for g, a in zip(all_grads, alpha)]
 
 
 def sum_grads(all_grads):
     """Element-wise sum together a collection of gradients, simplifies boilerplate"""
-    return ymir.path.tree.add(*all_grads)
+    return tfymir.path.weights.add(*all_grads)

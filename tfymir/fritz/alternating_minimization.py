@@ -6,7 +6,7 @@ from functools import partial
 
 import jax
 
-from ymir.regiment import scout
+from tfymir.regiment import scout
 
 
 def convert(client, poison_epochs, stealth_epochs, stealth_data):

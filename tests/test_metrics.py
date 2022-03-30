@@ -4,8 +4,8 @@ import chex
 import jax.numpy as jnp
 import numpy as np
 
-import ymir
-from ymir.mp.metrics import Neurometer
+import tfymir
+from tfymir.mp.metrics import Neurometer
 
 
 class TestMetrics(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestMetrics(unittest.TestCase):
 
     def test_evaluator(self):
         y_true = np.array([1])
-        evaluator = ymir.mp.metrics.evaluator(self.net)
+        evaluator = tfymir.mp.metrics.evaluator(self.net)
         y, y_pred = evaluator(self.params, jnp.ones(2), y_true)
         chex.assert_trees_all_close(y, y_true)
         self.assertEqual(y_pred, 0)
@@ -30,7 +30,7 @@ class TestMetrics(unittest.TestCase):
     def test_accuracy_score(self):
         y_true = np.array([0, 0, 1, 1])
         y_pred = np.array([0, 1, 0, 1])
-        acc = ymir.mp.metrics.accuracy_score(y_true, y_pred)
+        acc = tfymir.mp.metrics.accuracy_score(y_true, y_pred)
         self.assertEqual(acc, 0.5)
 
     def test_neurometer(self):

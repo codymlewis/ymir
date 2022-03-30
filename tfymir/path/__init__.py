@@ -2,4 +2,4 @@
 General utility library for ymir
 """
 
-from . import functions, tree
+from . import functions, weights
