@@ -57,7 +57,7 @@
                                 <a class="function" href="#Captain.update">update</a>
                         </li>
                         <li>
-                                <a class="function" href="#Captain.scale">scale</a>
+                                <a class="function" href="#Captain.step">step</a>
                         </li>
                 </ul>
 
@@ -89,23 +89,32 @@ this simply scales received gradients, $\Delta$, by $\frac{1}{|\Delta|}$</p>
 <span class="sd">this simply scales received gradients, $\Delta$, by $\frac{1}{|\Delta|}$</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">ymir.path</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">captain</span>
 
 
-<span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">ScaleCaptain</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">Captain</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update the stored batch sizes ($n_i$).&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">all_grads</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">all_losses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+
+        <span class="c1"># Captain side aggregation scaling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
+        <span class="n">all_grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">all_grads</span><span class="p">]</span>
+
+        <span class="c1"># Captain side update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">all_losses</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -117,27 +126,35 @@ this simply scales received gradients, $\Delta$, by $\frac{1}{|\Delta|}$</p>
 
         
         <span class="def">class</span>
-        <span class="name">Captain</span><wbr>(<span class="base"><a href="captain.html#ScaleCaptain">ymir.garrison.captain.ScaleCaptain</a></span>):
+        <span class="name">Captain</span><wbr>(<span class="base"><a href="captain.html#Captain">ymir.garrison.captain.Captain</a></span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">ScaleCaptain</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">Captain</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update the stored batch sizes ($n_i$).&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">all_grads</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">all_losses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+
+        <span class="c1"># Captain side aggregation scaling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
+        <span class="n">all_grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">all_grads</span><span class="p">]</span>
+
+        <span class="c1"># Captain side update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">all_losses</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>A captain that algorithmically scales gradients by some factor, $p_i$</p>
+            <div class="docstring"><p>A captian that aggregates weights into a single global weight, $w_t$</p>
 </div>
 
 
@@ -145,19 +162,13 @@ this simply scales received gradients, $\Delta$, by $\frac{1}{|\Delta|}$</p>
                                         <div class="attr function"><a class="headerlink" href="#Captain.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">Captain</span><span class="signature">(
-    params,
-    opt,
-    opt_state,
-    network,
-    rng=Generator(PCG64) at 0x7F234AED9A80
-)</span>
+            <span class="name">Captain</span><span class="signature">(params, network, rng=Generator(PCG64) at 0x7F4C90DE4660)</span>
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -187,35 +198,34 @@ this simply scales received gradients, $\Delta$, by $\frac{1}{|\Delta|}$</p>
 
 
                             </div>
-                            <div id="Captain.scale" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#Captain.scale">#&nbsp;&nbsp</a>
+                            <div id="Captain.step" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Captain.step">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">scale</span><span class="signature">(self, all_grads)</span>:
+            <span class="name">step</span><span class="signature">(self)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">all_grads</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">all_losses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+
+        <span class="c1"># Captain side aggregation scaling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
+        <span class="n">all_grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_grads</span><span class="p">))</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">all_grads</span><span class="p">]</span>
+
+        <span class="c1"># Captain side update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">all_losses</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Calculate the amount by which to scale the gradients by ($p_i$), according the specified algorithm.</p>
+            <div class="docstring"><p>Perform a step involving getting weights from the network and aggregating them into the global weight.</p>
 </div>
 
 
-                            </div>
-                            <div class="inherited">
-                                <h5>Inherited Members</h5>
-                                <dl>
-                                    <div><dt><a href="captain.html#ScaleCaptain">ymir.garrison.captain.ScaleCaptain</a></dt>
-                                <dd id="Captain.step" class="function"><a href="captain.html#ScaleCaptain.step">step</a></dd>
-
-            </div>
-                                </dl>
                             </div>
                 </section>
     </main>

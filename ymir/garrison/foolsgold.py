@@ -3,29 +3,29 @@ The FoolsGold algorithm proposed in `https://arxiv.org/abs/1808.04866 <https://a
 it is designed to provide robustness to (Sybil) adversarial attacks within non-i.i.d. environments.
 """
 
-import jax
-import jax.numpy as jnp
 import numpy as np
 import sklearn.metrics.pairwise as smp
+
+import ymir.path
 
 from . import captain
 
 
-class Captain(captain.ScaleCaptain):
+class Captain(captain.Captain):
 
-    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), kappa=1.0):
+    def __init__(self, params, network, rng=np.random.default_rng(), kappa=1.0):
         """
         Construct the FoolsGold captain.
 
         Optional arguments:
         - kappa: value stating the distribution of classes across clients.
         """
-        super().__init__(params, opt, opt_state, network, rng)
-        self.histories = jnp.zeros((len(network), jax.flatten_util.ravel_pytree(params)[0].shape[0]))
+        super().__init__(params, network, rng)
+        self.histories = np.zeros((len(network), len(ymir.path.weights.ravel(params))))
         self.kappa = kappa
 
     def update(self, all_grads):
-        self.histories = update(self.histories, all_grads)
+        self.histories += np.array([ymir.path.weights.ravel(g) for g in all_grads])
 
     def scale(self, all_grads):
         """
@@ -56,8 +56,12 @@ class Captain(captain.ScaleCaptain):
         wv[(wv < 0)] = 0
         return wv
 
-
-@jax.jit
-def update(histories, all_grads):
-    """Perform histories + all_grads elementwise."""
-    return jnp.array([h + jax.flatten_util.ravel_pytree(g)[0] for h, g in zip(histories, all_grads)])
+    def step(self):
+        # Client side updates
+        all_grads, _, all_losses = self.network(self.params, self.rng)
+        # Captain side update
+        self.update(all_grads)
+        alpha = self.scale(all_grads)
+        all_grads = [ymir.path.weights.scale(g, a) for g, a in zip(all_grads, alpha)]
+        self.params = ymir.path.weights.sub(self.params, ymir.path.weights.add(*all_grads))
+        return np.mean(all_losses)

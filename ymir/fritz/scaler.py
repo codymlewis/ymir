@@ -6,8 +6,8 @@ import jax
 import numpy as np
 import optax
 
-import tfymir.path
-from tfymir import garrison
+import ymir.path
+from ymir import garrison
 
 
 def convert(client, num_clients):
@@ -18,9 +18,9 @@ def convert(client, num_clients):
 
 @jax.jit
 def _scale(scale, global_params, client_params, opt_state):
-    params = tfymir.path.tree.sub(client_params, global_params)
-    params = tfymir.path.tree.scale(params, scale)
-    return tfymir.path.tree.add(params, global_params), opt_state
+    params = ymir.path.tree.sub(client_params, global_params)
+    params = ymir.path.tree.scale(params, scale)
+    return ymir.path.tree.add(params, global_params), opt_state
 
 
 class GradientTransform:
@@ -52,5 +52,5 @@ class GradientTransform:
         idx = np.arange(len(alpha) - self.num_adv, len(alpha))[alpha[-self.num_adv:] > 0.0001]
         alpha[idx] = 1 / alpha[idx]
         for i in idx:
-            all_updates[i] = tfymir.path.tree.scale(all_updates[i], alpha[i])
+            all_updates[i] = ymir.path.tree.scale(all_updates[i], alpha[i])
         return all_updates

@@ -1,19 +1,19 @@
 import unittest
 
-import tfymir
+import ymir
 
 
 class TestNetwork(unittest.TestCase):
 
     def test_controller(self):
-        controller = tfymir.mp.network.Controller(0.1)
+        controller = ymir.mp.network.Controller(0.1)
         self.assertListEqual(controller.clients, [])
         self.assertListEqual(controller.switches, [])
         self.assertEqual(controller.C, 0.1)
         self.assertEqual(controller.K, 0)
 
     def test_network(self):
-        network = tfymir.mp.network.Network(0.1)
+        network = ymir.mp.network.Network(0.1)
         self.assertListEqual(network.clients, [])
         self.assertDictEqual(network.controllers, {})
         self.assertEqual(network.server_name, "")

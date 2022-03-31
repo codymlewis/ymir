@@ -7,7 +7,7 @@ from functools import partial
 import jax
 import numpy as np
 
-from tfymir.regiment import scout
+from ymir.regiment import scout
 
 
 class GradientTransform:

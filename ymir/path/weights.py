@@ -2,14 +2,12 @@
 General functions for dealing with model weights.
 """
 
-
 import numpy as np
 
 
 def uniform(weights, low=0.0, high=1.0, rng=np.random.default_rng()):
     """Create an equivalently shaped tree with random number elements in the range [low, high)"""
     return [rng.uniform(low=low, high=high, size=x.shape) for x in weights]
-
 
 
 def add_normal(weights, loc=0.0, scale=1.0, rng=np.random.default_rng()):
@@ -43,8 +41,23 @@ def sub(weights_a, weights_b):
 
 
 def ravel(weights):
-    """Flatten a pytree into a vector"""
-    return [np.ravel(x) for x in weights]
+    """Flatten weights into a vector"""
+    return np.concatenate([np.ravel(x) for x in weights])
+
+
+def unravel(weights, skeleton):
+    """Split the weights into a tree with the specified skeleton"""
+    i = 0
+    unravelled_weights = []
+    for shape, length in skeleton:
+        unravelled_weights.append(np.reshape(weights[i:i + length], shape))
+        i += length
+    return unravelled_weights
+
+
+def skeleton(weights):
+    """Return the shape of the weights"""
+    return [(x.shape, np.prod(x.shape)) for x in weights]
 
 
 def minimum(weights, val):

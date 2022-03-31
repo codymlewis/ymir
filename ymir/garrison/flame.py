@@ -5,17 +5,17 @@ heterogeneity environments.
 """
 
 import hdbscan
-import jax
-import jax.flatten_util
 import numpy as np
 import sklearn.metrics.pairwise as smp
+
+import ymir.path
 
 from . import captain
 
 
-class Captain(captain.AggregateCaptain):
+class Captain(captain.Captain):
 
-    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), eps=3705, delta=1):
+    def __init__(self, params, network, rng=np.random.default_rng(), eps=3705, delta=1):
         r"""
         Construct the FLAME captain.
 
@@ -23,13 +23,13 @@ class Captain(captain.AggregateCaptain):
         - eps: the epsilon parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP
         - delta: the delta parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP
         """
-        super().__init__(params, opt, opt_state, network, rng)
-        self.G_unraveller = jax.flatten_util.ravel_pytree(params)[1]
+        super().__init__(params, network, rng)
+        self.skeleton = ymir.path.weights.skeleton(params)
         self.lamb = (1 / eps) * np.sqrt(2 * np.log(1.25 / delta))
 
     def update(self, all_weights):
-        G = np.array(jax.flatten_util.ravel_pytree(self.params)[0])
-        Ws = np.array([jax.flatten_util.ravel_pytree(w)[0] for w in all_weights])
+        G = ymir.path.weights.ravel(self.params)
+        Ws = np.array([ymir.path.weights.ravel(w) for w in all_weights])
         n_clients = Ws.shape[0]
         cs = smp.cosine_distances(Ws).astype(np.double)
         clusters = hdbscan.HDBSCAN(
@@ -42,11 +42,12 @@ class Captain(captain.AggregateCaptain):
         G = Ws[bs].mean(axis=0)
         sigma = self.lamb * S
         G = G + self.rng.normal(0, sigma, G.shape)
-        return self.G_unraveller(G)
+        return ymir.path.weights.unravel(G, self.skeleton)
 
     def step(self):
         # Client side updates
-        all_weights = self.network(self.params, self.rng, return_weights=True)
+        all_weights, _, all_losses = self.network(self.params, self.rng, return_weights=True)
 
         # Captain side update
         self.params = self.update(all_weights)
+        return np.mean(all_losses)

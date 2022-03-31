@@ -7,7 +7,7 @@ import numpy as np
 import optax
 from parameterized import parameterized
 
-import tfymir
+import ymir
 
 
 @chex.dataclass
@@ -44,7 +44,7 @@ class TestAggregators(unittest.TestCase):
         [(server_name) for server_name in ["average", "fedavg", "foolsgold", "krum", "norm_clipping", "std_dagmm", "viceroy"]]
     )
     def test_scale_servers(self, server_name):
-        server = getattr(tfymir.garrison,
+        server = getattr(ymir.garrison,
                          server_name).Captain(self.params, self.opt, self.opt_state, self.network, self.rng)
         rngs = jax.random.split(jax.random.PRNGKey(0))
         all_grads = [
@@ -63,7 +63,7 @@ class TestAggregators(unittest.TestCase):
 
     @parameterized.expand([(server_name) for server_name in ["flame"]])
     def test_aggregate_servers(self, server_name):
-        server = getattr(tfymir.garrison,
+        server = getattr(ymir.garrison,
                          server_name).Captain(self.params, self.opt, self.opt_state, self.network, self.rng)
         rngs = jax.random.split(jax.random.PRNGKey(0))
         all_weights = [

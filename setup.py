@@ -4,10 +4,10 @@ with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 setuptools.setup(
-    name="tfymir",
-    version="0.1.0",
+    name="ymir",
+    version="0.2.0",
     author="Cody Lewis",
-    description="Jax-based federated learning library",
+    description="Just another federated learning library",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/codymlewis/ymir",
@@ -19,10 +19,8 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     install_requires=[
-        'chex',
-        'dm-haiku',
+        'tensorflow',
         'numpy',
-        'optax',
         'scikit-learn',
         'hdbscan',
     ],

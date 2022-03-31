@@ -1,10 +1,6 @@
-chex
-dm-haiku
+tensorflow
 numpy
-optax
 scikit-learn
 hdbscan
 tqdm
 parameterized
-git+https://github.com/codymlewis/hkzoo.git
-git+https://github.com/codymlewis/tenjin.git

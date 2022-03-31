@@ -4,7 +4,7 @@ Federated learning free rider attack proposed in `https://arxiv.org/abs/1911.125
 
 import numpy as np
 
-import tfymir.path
+import ymir.path
 
 
 def convert(client, attack_type, params, rng=np.random.default_rng()):
@@ -38,10 +38,10 @@ def step(self, params, return_weights=False):
     - return_weights: if True, return the weights of the clients else return the gradients from the local training
     """
     if self.attack_type == "random":
-        grad = tfymir.path.tree.uniform(params, low=-10e-3, high=10e-3, rng=self.rng)
+        grad = ymir.path.tree.uniform(params, low=-10e-3, high=10e-3, rng=self.rng)
     else:
-        grad = tfymir.path.tree.sub(params, self.prev_params)
+        grad = ymir.path.tree.sub(params, self.prev_params)
         if "advanced" in self.attack_type:
-            grad = tfymir.path.tree.add_normal(grad, loc=0.0, scale=10e-4, rng=self.rng)
+            grad = ymir.path.tree.add_normal(grad, loc=0.0, scale=10e-4, rng=self.rng)
     self.prev_params = params
-    return tfymir.path.tree.add(params, grad) if return_weights else grad
+    return ymir.path.tree.add(params, grad) if return_weights else grad

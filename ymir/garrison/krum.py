@@ -3,22 +3,23 @@ The multi-Krum algorithm proposed in `https://papers.nips.cc/paper/2017/hash/f4b
 it is designed to be robust to Byzantine faults with i.i.d. environments.
 """
 
-import jax
 import numpy as np
+
+import ymir.path
 
 from . import captain
 
 
-class Captain(captain.ScaleCaptain):
+class Captain(captain.Captain):
 
-    def __init__(self, params, opt, opt_state, network, rng=np.random.default_rng(), clip=3):
+    def __init__(self, params, network, rng=np.random.default_rng(), clip=3):
         """
         Construct the Krum captain.
 
         Optional arguments:
         - clip: the number of expected faults in each round.
         """
-        super().__init__(params, opt, opt_state, network, rng)
+        super().__init__(params, network, rng)
         self.clip = clip
 
     def update(self, all_grads):
@@ -26,7 +27,7 @@ class Captain(captain.ScaleCaptain):
 
     def scale(self, all_grads):
         n = len(all_grads)
-        X = np.array([jax.flatten_util.ravel_pytree(g)[0] for g in all_grads])
+        X = np.array([ymir.path.weights.ravel(g) for g in all_grads])
         scores = np.zeros(n)
         distances = np.sum(X**2, axis=1)[:, None] + np.sum(X**2, axis=1)[None] - 2 * np.dot(X, X.T)
         for i in range(len(X)):
@@ -35,3 +36,13 @@ class Captain(captain.ScaleCaptain):
         alpha = np.zeros(n)
         alpha[idx] = 1
         return alpha
+
+    def step(self):
+        # Client side updates
+        all_grads, _, all_losses = self.network(self.params, self.rng)
+        # Captain side update
+        self.update(all_grads)
+        alpha = self.scale(all_grads)
+        all_grads = [ymir.path.weights.scale(g, a) for g, a in zip(all_grads, alpha)]
+        self.params = ymir.path.weights.sub(self.params, ymir.path.weights.add(*all_grads))
+        return np.mean(all_losses)

@@ -2,7 +2,7 @@ import unittest
 
 import jax.numpy as jnp
 
-import tfymir
+import ymir
 
 
 class TestLosses(unittest.TestCase):
@@ -18,12 +18,12 @@ class TestLosses(unittest.TestCase):
         self.net = _Net()
 
     def test_cross_entropy_loss(self):
-        loss = tfymir.mp.losses.cross_entropy_loss(self.net, 2)
+        loss = ymir.mp.losses.cross_entropy_loss(self.net, 2)
         self.assertAlmostEqual(loss(self.params, jnp.ones(2), jnp.array([1])), 0.69, places=2)
         self.assertAlmostEqual(loss(self.params, jnp.ones(2), jnp.array([0])), 0.69, places=2)
 
     def test_ae_l2_loss(self):
-        loss = tfymir.mp.losses.ae_l2_loss(self.net)
+        loss = ymir.mp.losses.ae_l2_loss(self.net)
         self.assertAlmostEqual(loss(self.params, jnp.array([1, 1])), 2, places=1)
 
 
