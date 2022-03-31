@@ -10,7 +10,7 @@ import ymir.path
 class Scout:
     """A client for federated learning, holds its own data and personal learning variables."""
 
-    def __init__(self, model, data, opt, loss_fn, epochs):
+    def __init__(self, model, opt, loss_fn, data, epochs):
         """
         Constructor for a Scout.
 
@@ -25,7 +25,6 @@ class Scout:
         self.batch_size = data.batch_size
         self.epochs = epochs
         self.model = model
-        self.model.build()
         self.opt = opt
         self.loss_fn = loss_fn
         self.global_weights = None
@@ -39,7 +38,7 @@ class Scout:
         """Get the weights of the model."""
         if return_weights:
             return self.model.get_weights()
-        return ymir.path.weights.sub(self.global_weights, self.model.get_weights())
+        return ymir.path.weights.sub(self.model.get_weights(), self.global_weights)
 
     def get_data(self):
         """Get the data used for training."""

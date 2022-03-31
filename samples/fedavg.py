@@ -16,7 +16,10 @@ def create_model(input_shape, output_shape):
         tf.keras.layers.Dense(100, activation='relu'),
         tf.keras.layers.Dense(output_shape, activation='softmax')
     ])
-    return model
+    opt = tf.keras.optimizers.Adam(learning_rate=0.001)
+    loss_fn = tf.keras.losses.SparseCategoricalCrossentropy()
+    model.compile(loss=loss_fn, optimizer=opt, metrics=['accuracy'])
+    return model, opt, loss_fn
 
 
 if __name__ == "__main__":
@@ -34,25 +37,16 @@ if __name__ == "__main__":
     # Setup the network
     network = ymir.mp.network.Network()
     for d in data:
-        network.add_client(
-            ymir.regiment.Scout(
-                create_model(dataset.input_shape, dataset.classes), 
-                d,
-                tf.keras.optimizers.SGD(learning_rate=0.01),
-                tf.keras.losses.SparseCategoricalCrossentropy(),
-                1
-            )
-        )
+        network.add_client(ymir.regiment.Scout(*create_model(dataset.input_shape, dataset.classes), d, 1))
 
-    model = create_model(dataset.input_shape, dataset.classes)
-    model.build()
-    learner = ymir.garrison.fedavg.Captain(model.get_weights(), network, rng)
+    model, _, _ = create_model(dataset.input_shape, dataset.classes)
+    learner = ymir.garrison.norm_clipping.Captain(model.get_weights(), network, rng)
     print("Done, beginning training.")
 
     # Train/eval loop.
     for r in (pbar := trange(5000)):
         loss = learner.step()
-        if r % 100 == 0:
+        if r % 10 == 0:
             model.set_weights(learner.params)
-            acc = ymir.mp.metrics.accuracy(model, test_eval)
-            pbar.set_postfix({'loss': f"{loss:.3f}", 'ACC': f"{acc:.3f}"})
+            metrics = model.test_on_batch(*next(test_eval), return_dict=True)
+            pbar.set_postfix(metrics)

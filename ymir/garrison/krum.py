@@ -44,5 +44,5 @@ class Captain(captain.Captain):
         self.update(all_grads)
         alpha = self.scale(all_grads)
         all_grads = [ymir.path.weights.scale(g, a) for g, a in zip(all_grads, alpha)]
-        self.params = ymir.path.weights.sub(self.params, ymir.path.weights.add(*all_grads))
+        self.params = ymir.path.weights.add(self.params, ymir.path.weights.add(*all_grads))
         return np.mean(all_losses)

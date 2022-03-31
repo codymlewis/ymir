@@ -28,5 +28,5 @@ class Captain(captain.Captain):
         # Captain side update
         Ws = np.array([ymir.path.weights.ravel(w) for w in all_weights])
         median_weights = ymir.path.weights.unravel(np.median(Ws, axis=0), self.skeleton)
-        self.params = ymir.path.weights.sub(self.params, median_weights)
+        self.params = ymir.path.weights.add(self.params, median_weights)
         return np.mean(all_losses)

@@ -34,5 +34,5 @@ class Captain(captain.Captain):
         # Client side updates
         all_weights, _, all_losses = self.network(self.params, self.rng)
         # Captain side update
-        self.params = ymir.path.weights.sub(self.params, self.update(all_weights))
+        self.params = ymir.path.weights.add(self.params, self.update(all_weights))
         return np.mean(all_losses)

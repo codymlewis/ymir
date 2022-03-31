@@ -33,5 +33,5 @@ class Captain(captain.Captain):
         all_weights = [
             ymir.path.weights.scale(w, 1 / max(1, np.linalg.norm(s, ord=2))) for w, s in zip(all_weights, Ws)
         ]
-        self.params = ymir.path.weights.sub(self.params, ymir.path.weights.add(*all_weights))
+        self.params = ymir.path.weights.add(self.params, ymir.path.weights.add(*all_weights))
         return np.mean(all_losses)
