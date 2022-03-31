@@ -51,9 +51,8 @@ if __name__ == "__main__":
 
     # Train/eval loop.
     for r in (pbar := trange(5000)):
-        if r % 10 == 0:
+        loss = learner.step()
+        if r % 100 == 0:
             model.set_weights(learner.params)
             acc = ymir.mp.metrics.accuracy(model, test_eval)
-            pbar.set_postfix({'ACC': f"{acc:.3f}"})
-        loss = learner.step()
-        pbar.set_postfix({'loss': f"{loss:.3f}"})
+            pbar.set_postfix({'loss': f"{loss:.3f}", 'ACC': f"{acc:.3f}"})

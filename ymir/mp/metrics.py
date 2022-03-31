@@ -11,4 +11,4 @@ def accuracy(model, data):
     Get the accuracy score of the model on the data.
     """
     X, y = next(data)
-    return skm.accuracy_score(y, np.argmax(model.predict(X), axis=0))
+    return skm.accuracy_score(y, np.argmax(model.predict(X), axis=1))
