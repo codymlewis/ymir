@@ -14,12 +14,12 @@ from ymir.mp.network import Network
 
 class Captain(ABC):
     """A captian that aggregates weights into a single global weight, $w_t$"""
-    params: List
+    model: List
     network: Network
     rng: np.random.Generator
 
-    def __init__(self, params, network, rng):
-        self.params = params
+    def __init__(self, model, network, rng):
+        self.model = model
         self.network = network
         self.rng = rng
 

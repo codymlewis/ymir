@@ -3,7 +3,6 @@ Load a dataset, handle the subset distribution, and provide an iterator.
 """
 
 import numpy as np
-import tensorflow as tf
 
 
 class DataIter:

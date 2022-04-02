@@ -3,7 +3,6 @@ Defines the network architecture for the FL system.
 """
 
 import numpy as np
-import tensorflow as tf
 
 import ymir.path
 
@@ -45,20 +44,10 @@ class Network:
         - return_weights: if True, return the weights of the clients else return the gradients from the local training
         """
         idx = rng.choice(self.K, size=int(self.C * self.K), replace=False) if self.C < 1 else range(self.K)
-        for i in idx:
-            self.clients[i].set_updates(params)
-        losses = self.clients_step(idx)
-        data = [self.clients[i].get_data() for i in idx]
-        all_updates = [self.clients[i].get_updates(return_weights) for i in idx]
-        return ymir.path.functions.chain(self.update_transform_chain, all_updates), data, losses
+        losses, updates, data = zip(*[self.clients[i].step(params, return_weights) for i in idx])
+        return losses, ymir.path.functions.chain(self.update_transform_chain, updates), data
 
-    def analytics(self):
+    def analytics(self, rng=np.random.default_rng()):
         """Get the analytics for all clients in the network"""
-        return [client.analytics() for client in self.clients]
-
-    @tf.function
-    def clients_step(self, idx):
-        all_losses = []
-        for i in idx:
-            all_losses.append(self.clients[i].step())
-        return all_losses
+        idx = rng.choice(self.K, size=int(self.C * self.K), replace=False) if self.C < 1 else range(self.K)
+        return np.array([self.clients[i].analytics() for i in idx])
