@@ -24,11 +24,6 @@ class Captain(ABC):
         self.rng = rng
 
     @abstractmethod
-    def update(self, all_weights: Iterable):
-        """Update the global weight according to the specified algorithm."""
-        pass
-
-    @abstractmethod
     def step(self):
         """Perform a step involving getting weights from the network and aggregating them into the global weight."""
         pass

@@ -51,9 +51,6 @@
                     <a class="class" href="#Captain">Captain</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#Captain.update">update</a>
-                        </li>
-                        <li>
                                 <a class="function" href="#Captain.step">step</a>
                         </li>
                 </ul>
@@ -111,11 +108,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_weights</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Update the global weight according to the specified algorithm.&quot;&quot;&quot;</span>
-        <span class="k">pass</span>
-
-    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform a step involving getting weights from the network and aggregating them into the global weight.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
@@ -147,11 +139,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
 
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_weights</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Update the global weight according to the specified algorithm.&quot;&quot;&quot;</span>
-        <span class="k">pass</span>
-
-    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform a step involving getting weights from the network and aggregating them into the global weight.&quot;&quot;&quot;</span>
         <span class="k">pass</span>
@@ -163,30 +150,6 @@
 </div>
 
 
-                            <div id="Captain.update" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#Captain.update">#&nbsp;&nbsp</a>
-
-                <div class="decorator">@abstractmethod</div>
-
-            <span class="def">def</span>
-            <span class="name">update</span><span class="signature">(self, all_weights: Iterable)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_weights</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Update the global weight according to the specified algorithm.&quot;&quot;&quot;</span>
-        <span class="k">pass</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Update the global weight according to the specified algorithm.</p>
-</div>
-
-
-                            </div>
                             <div id="Captain.step" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#Captain.step">#&nbsp;&nbsp</a>
 

@@ -60,6 +60,10 @@ def skeleton(weights):
     return [(x.shape, np.prod(x.shape)) for x in weights]
 
 
+def get_names(model):
+    return [w.name for w in model.weights]
+
+
 def minimum(weights, val):
     """Element-wise minimum of the weights and a scalar"""
     return [np.minimum(x, val) for x in weights]
