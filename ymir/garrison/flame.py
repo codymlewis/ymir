@@ -24,7 +24,7 @@ class Captain(captain.Captain):
         - delta: the delta parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP
         """
         super().__init__(params, network, rng)
-        self.skeleton = ymir.path.weights.skeleton(params)
+        self.unraveller = ymir.path.weights.unraveller(params)
         self.lamb = (1 / eps) * np.sqrt(2 * np.log(1.25 / delta))
 
     def update(self, all_weights):
@@ -42,7 +42,7 @@ class Captain(captain.Captain):
         G = Ws[bs].mean(axis=0)
         sigma = self.lamb * S
         G = G + self.rng.normal(0, sigma, G.shape)
-        return ymir.path.weights.unravel(G, self.skeleton)
+        return ymir.path.weights.unravel(G, self.unraveller)
 
     def step(self):
         # Client side updates

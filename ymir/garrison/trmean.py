@@ -20,7 +20,7 @@ class Captain(captain.Captain):
         - beta: the beta parameter for the trimmed mean algorithm, states the half of the percentage of the client's updates to be removed
         """
         super().__init__(params, network, rng)
-        self.skeleton = ymir.path.weights.skeleton(params)
+        self.unraveller = ymir.path.weights.unraveller(params)
         self.beta = beta
 
     def update(self, all_weights):
@@ -28,7 +28,7 @@ class Captain(captain.Captain):
         n_clients = Ws.shape[0]
         n_Ws_use = round(self.beta * n_clients)
         update_weight = np.sort(Ws, axis=0)[n_Ws_use:n_clients - n_Ws_use].sum(axis=0)
-        return ymir.path.weights.unravel((1 / ((1 - 2 * self.beta) * n_clients)) * update_weight, self.skeleton)
+        return ymir.path.weights.unravel((1 / ((1 - 2 * self.beta) * n_clients)) * update_weight, self.unraveller)
 
     def step(self):
         # Client side updates

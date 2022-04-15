@@ -17,7 +17,7 @@ class Captain(captain.Captain):
         Construct the Median captain.
         """
         super().__init__(params, network, rng)
-        self.skeleton = ymir.path.weights.skeleton(params)
+        self.unraveller = ymir.path.weights.unraveller(params)
 
     def update(self, all_weights):
         pass
@@ -27,6 +27,6 @@ class Captain(captain.Captain):
         all_weights, _, all_losses = self.network(self.params, self.rng)
         # Captain side update
         Ws = np.array([ymir.path.weights.ravel(w) for w in all_weights])
-        median_weights = ymir.path.weights.unravel(np.median(Ws, axis=0), self.skeleton)
+        median_weights = ymir.path.weights.unravel(np.median(Ws, axis=0), self.unraveller)
         self.params = ymir.path.weights.add(self.params, median_weights)
         return np.mean(all_losses)

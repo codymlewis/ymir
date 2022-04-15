@@ -55,7 +55,7 @@ def unravel(weights, skeleton):
     return unravelled_weights
 
 
-def skeleton(weights):
+def unraveller(weights):
     """Return the shape of the weights"""
     return [(x.shape, np.prod(x.shape)) for x in weights]
 

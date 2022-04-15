@@ -75,7 +75,7 @@
                     <a class="function" href="#unravel">unravel</a>
             </li>
             <li>
-                    <a class="function" href="#skeleton">skeleton</a>
+                    <a class="function" href="#unraveller">unraveller</a>
             </li>
             <li>
                     <a class="function" href="#get_names">get_names</a>
@@ -164,7 +164,7 @@
     <span class="k">return</span> <span class="n">unravelled_weights</span>
 
 
-<span class="k">def</span> <span class="nf">skeleton</span><span class="p">(</span><span class="n">weights</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">unraveller</span><span class="p">(</span><span class="n">weights</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the shape of the weights&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">weights</span><span class="p">]</span>
 
@@ -191,7 +191,7 @@
 
         
             <span class="def">def</span>
-            <span class="name">uniform</span><span class="signature">(weights, low=0.0, high=1.0, rng=Generator(PCG64) at 0x7F4712643D80)</span>:
+            <span class="name">uniform</span><span class="signature">(weights, low=0.0, high=1.0, rng=Generator(PCG64) at 0x7FC7EFBFBD80)</span>:
     </div>
 
                 <details>
@@ -213,7 +213,7 @@
 
         
             <span class="def">def</span>
-            <span class="name">add_normal</span><span class="signature">(weights, loc=0.0, scale=1.0, rng=Generator(PCG64) at 0x7F4712643AE0)</span>:
+            <span class="name">add_normal</span><span class="signature">(weights, loc=0.0, scale=1.0, rng=Generator(PCG64) at 0x7FC7EFBFBAE0)</span>:
     </div>
 
                 <details>
@@ -389,17 +389,17 @@
 
 
                 </section>
-                <section id="skeleton">
-                            <div class="attr function"><a class="headerlink" href="#skeleton">#&nbsp;&nbsp</a>
+                <section id="unraveller">
+                            <div class="attr function"><a class="headerlink" href="#unraveller">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">skeleton</span><span class="signature">(weights)</span>:
+            <span class="name">unraveller</span><span class="signature">(weights)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">skeleton</span><span class="p">(</span><span class="n">weights</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">unraveller</span><span class="p">(</span><span class="n">weights</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the shape of the weights&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">weights</span><span class="p">]</span>
 </pre></div>
