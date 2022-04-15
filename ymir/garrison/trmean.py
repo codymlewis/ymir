@@ -12,27 +12,25 @@ from . import captain
 
 class Captain(captain.Captain):
 
-    def __init__(self, params, network, rng=np.random.default_rng(), beta=0.1):
+    def __init__(self, model, network, rng=np.random.default_rng(), beta=0.1):
         r"""
         Construct the Trimmed mean captain.
         
         Parameters:
         - beta: the beta parameter for the trimmed mean algorithm, states the half of the percentage of the client's updates to be removed
         """
-        super().__init__(params, network, rng)
-        self.unraveller = ymir.path.weights.unraveller(params)
+        super().__init__(model, network, rng)
+        self.unraveller = ymir.path.weights.unraveller(model.get_weights())
         self.beta = beta
-
-    def update(self, all_weights):
-        Ws = np.array([ymir.path.weights.ravel(w) for w in all_weights])
-        n_clients = Ws.shape[0]
-        n_Ws_use = round(self.beta * n_clients)
-        update_weight = np.sort(Ws, axis=0)[n_Ws_use:n_clients - n_Ws_use].sum(axis=0)
-        return ymir.path.weights.unravel((1 / ((1 - 2 * self.beta) * n_clients)) * update_weight, self.unraveller)
 
     def step(self):
         # Client side updates
-        all_weights, _, all_losses = self.network(self.params, self.rng)
+        all_losses, all_grads, _ = self.network(self.model.get_weights(), self.rng)
         # Captain side update
-        self.params = ymir.path.weights.add(self.params, self.update(all_weights))
+        Ws = np.array([ymir.path.weights.ravel(w) for w in all_grads])
+        n_clients = Ws.shape[0]
+        n_Ws_use = round(self.beta * n_clients)
+        update_grad = np.sort(Ws, axis=0)[n_Ws_use:n_clients - n_Ws_use].sum(axis=0)
+        gradients = ymir.path.weights.unravel((1 / ((1 - 2 * self.beta) * n_clients)) * update_grad, self.unraveller)
+        self.model.optimizer.apply_gradients(zip(gradients, self.model.weights))
         return np.mean(all_losses)

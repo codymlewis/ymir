@@ -12,18 +12,15 @@ from . import captain
 
 class Captain(captain.Captain):
 
-    def __init__(self, params, network, rng=np.random.default_rng(), clip=3):
+    def __init__(self, model, network, rng=np.random.default_rng(), clip=3):
         """
         Construct the Krum captain.
 
         Optional arguments:
         - clip: the number of expected faults in each round.
         """
-        super().__init__(params, network, rng)
+        super().__init__(model, network, rng)
         self.clip = clip
-
-    def update(self, all_grads):
-        pass
 
     def scale(self, all_grads):
         n = len(all_grads)
@@ -39,10 +36,8 @@ class Captain(captain.Captain):
 
     def step(self):
         # Client side updates
-        all_grads, _, all_losses = self.network(self.params, self.rng)
+        all_losses, all_grads, _ = self.network(self.model.get_weights(), self.rng)
         # Captain side update
-        self.update(all_grads)
-        alpha = self.scale(all_grads)
-        all_grads = [ymir.path.weights.scale(g, a) for g, a in zip(all_grads, alpha)]
-        self.params = ymir.path.weights.add(self.params, ymir.path.weights.add(*all_grads))
+        all_grads = [ymir.path.weights.scale(g, a) for g, a in zip(all_grads, self.scale(all_grads))]
+        self.model.optimizer.apply_gradients(zip(ymir.path.weights.add(*all_grads), self.model.weights))
         return np.mean(all_losses)

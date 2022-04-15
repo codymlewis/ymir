@@ -13,7 +13,7 @@ from . import captain
 
 class Captain(captain.Captain):
 
-    def __init__(self, params, network, rng=np.random.default_rng(), C=0.1, k=10, delta=0.1, t=0.5):
+    def __init__(self, model, network, rng=np.random.default_rng(), C=0.1, k=10, delta=0.1, t=0.5):
         """
         Construct the CONTRA captain.
 
@@ -24,8 +24,8 @@ class Captain(captain.Captain):
         - delta: Amount the increase/decrease the reputation (selection likelyhood) by.
         - t: Threshold for choosing when to increase the reputation.
         """
-        super().__init__(params, network, rng)
-        self.histories = np.zeros((len(network), len(ymir.path.weights.ravel(params))))
+        super().__init__(model, network, rng)
+        self.histories = np.zeros((len(network), len(ymir.path.weights.ravel(model.get_weights()))))
         self.C = C
         self.k = round(k * C)
         self.lamb = C * (1 - C)
@@ -34,11 +34,7 @@ class Captain(captain.Captain):
         self.reps = np.ones(len(network))
         self.J = round(self.C * len(network))
 
-    def update(self, all_grads):
-        """Update the stored collaborator histories, that is, perform $H_{i, t + 1} \gets H_{i, t} + \Delta_{i, t + 1} : \\forall i \in \mathcal{U}$"""
-        self.histories += np.array([ymir.path.weights.ravel(g) for g in all_grads])
-
-    def scale(self, all_grads):
+    def scale(self):
         n_clients = self.histories.shape[0]
         p = self.C + self.lamb * self.reps
         p[p <= 0] = 0
@@ -63,13 +59,10 @@ class Captain(captain.Captain):
         return lr
 
     def step(self):
-        all_grads, _, all_losses = self.network(self.params, self.rng)
-
-        # Captain side aggregation scaling
-        self.update(all_grads)
-        alpha = self.scale(all_grads)
-        all_grads = [ymir.path.weights.scale(g, a) for g, a in zip(all_grads, alpha)]
-
+        all_losses, all_grads, _ = self.network(self.model.get_weights(), self.rng)
+        # Scaling and updates
+        self.histories += np.array([ymir.path.weights.ravel(g) for g in all_grads])
+        all_grads = [ymir.path.weights.scale(g, a) for g, a in zip(all_grads, self.scale())]
         # Captain side update
-        self.params = ymir.path.weights.add(self.params, ymir.path.weights.add(*all_grads))
+        self.model.optimizer.apply_gradients(zip(ymir.path.weights.add(*all_grads), self.model.weights))
         return np.mean(all_losses)

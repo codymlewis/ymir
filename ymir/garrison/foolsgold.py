@@ -13,21 +13,18 @@ from . import captain
 
 class Captain(captain.Captain):
 
-    def __init__(self, params, network, rng=np.random.default_rng(), kappa=1.0):
+    def __init__(self, model, network, rng=np.random.default_rng(), kappa=1.0):
         """
         Construct the FoolsGold captain.
 
         Optional arguments:
         - kappa: value stating the distribution of classes across clients.
         """
-        super().__init__(params, network, rng)
-        self.histories = np.zeros((len(network), len(ymir.path.weights.ravel(params))))
+        super().__init__(model, network, rng)
+        self.histories = np.zeros((len(network), len(ymir.path.weights.ravel(model.get_weights()))))
         self.kappa = kappa
 
-    def update(self, all_grads):
-        self.histories += np.array([ymir.path.weights.ravel(g) for g in all_grads])
-
-    def scale(self, all_grads):
+    def scale(self):
         """
         Scale the gradients according to the FoolsGold algorithm.
 
@@ -58,10 +55,9 @@ class Captain(captain.Captain):
 
     def step(self):
         # Client side updates
-        all_grads, _, all_losses = self.network(self.params, self.rng)
+        all_losses, all_grads, all_data = self.network(self.model.get_weights(), self.rng)
         # Captain side update
-        self.update(all_grads)
-        alpha = self.scale(all_grads)
-        all_grads = [ymir.path.weights.scale(g, a) for g, a in zip(all_grads, alpha)]
-        self.params = ymir.path.weights.add(self.params, ymir.path.weights.add(*all_grads))
+        self.histories += np.array([ymir.path.weights.ravel(g) for g in all_grads])
+        all_grads = [ymir.path.weights.scale(g, a) for g, a in zip(all_grads, self.scale())]
+        self.model.optimizer.apply_gradients(zip(ymir.path.weights.add(*all_grads), self.model.weights))
         return np.mean(all_losses)

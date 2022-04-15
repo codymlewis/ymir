@@ -54,9 +54,6 @@
                                 <a class="function" href="#Captain.__init__">Captain</a>
                         </li>
                         <li>
-                                <a class="function" href="#Captain.update">update</a>
-                        </li>
-                        <li>
                                 <a class="function" href="#Captain.step">step</a>
                         </li>
                 </ul>
@@ -102,17 +99,11 @@ $\frac{n_i}{\sum_{i \in \mathcal{U}} n_i}$.</p>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
-
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
-        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">all_losses</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">,</span> <span class="n">all_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
         <span class="c1"># Captain-side aggregation scaling</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
-        <span class="n">N</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">all_data</span><span class="p">)</span>
-        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="o">/</span> <span class="n">N</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">all_data</span><span class="p">]</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">all_data</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">all_data</span><span class="p">]</span>
         <span class="n">all_grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_grads</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)]</span>
         <span class="c1"># Captain-side update</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">weights</span><span class="p">))</span>
@@ -137,17 +128,11 @@ $\frac{n_i}{\sum_{i \in \mathcal{U}} n_i}$.</p>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
-
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
-        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">all_losses</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">,</span> <span class="n">all_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
         <span class="c1"># Captain-side aggregation scaling</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
-        <span class="n">N</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">all_data</span><span class="p">)</span>
-        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="o">/</span> <span class="n">N</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">all_data</span><span class="p">]</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">all_data</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">all_data</span><span class="p">]</span>
         <span class="n">all_grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_grads</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)]</span>
         <span class="c1"># Captain-side update</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">weights</span><span class="p">))</span>
@@ -164,33 +149,13 @@ $\frac{n_i}{\sum_{i \in \mathcal{U}} n_i}$.</p>
                                         <div class="attr function"><a class="headerlink" href="#Captain.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">Captain</span><span class="signature">(model, network, rng=Generator(PCG64) at 0x7FC7EF790BA0)</span>
+            <span class="name">Captain</span><span class="signature">(model, network, rng=Generator(PCG64) at 0x7F5A88511FC0)</span>
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_sizes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">epochs</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">network</span><span class="o">.</span><span class="n">clients</span><span class="p">])</span>
-</pre></div>
-
-        </details>
-
-    
-
-                            </div>
-                            <div id="Captain.update" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#Captain.update">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">update</span><span class="signature">(self, all_grads)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
-        <span class="k">pass</span>
 </pre></div>
 
         </details>
@@ -211,9 +176,7 @@ $\frac{n_i}{\sum_{i \in \mathcal{U}} n_i}$.</p>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">all_losses</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">,</span> <span class="n">all_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
         <span class="c1"># Captain-side aggregation scaling</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">all_grads</span><span class="p">)</span>
-        <span class="n">N</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">all_data</span><span class="p">)</span>
-        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="o">/</span> <span class="n">N</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">all_data</span><span class="p">]</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">all_data</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">all_data</span><span class="p">]</span>
         <span class="n">all_grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_grads</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)]</span>
         <span class="c1"># Captain-side update</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">weights</span><span class="p">))</span>

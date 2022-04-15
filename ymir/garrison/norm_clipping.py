@@ -12,26 +12,21 @@ from . import captain
 
 class Captain(captain.Captain):
 
-    def __init__(self, params, network, rng=np.random.default_rng(), M=1.0):
+    def __init__(self, model, network, rng=np.random.default_rng(), M=1.0):
         """
         Construct the norm clipping aggregator.
 
         Optional arguments:
         - M: the radius of the $l_2$ sphere to scale according to.
         """
-        super().__init__(params, network, rng)
+        super().__init__(model, network, rng)
         self.M = M
-
-    def update(self, all_grads):
-        pass
 
     def step(self):
         # Client side updates
-        all_weights, _, all_losses = self.network(self.params, self.rng)
+        all_losses, all_grads, _ = self.network(self.model.get_weights(), self.rng)
         # Captain side update
-        Ws = [ymir.path.weights.ravel(w) for w in all_weights]
-        all_weights = [
-            ymir.path.weights.scale(w, 1 / max(1, np.linalg.norm(s, ord=2))) for w, s in zip(all_weights, Ws)
-        ]
-        self.params = ymir.path.weights.add(self.params, ymir.path.weights.add(*all_weights))
+        Ws = [ymir.path.weights.ravel(w) for w in all_grads]
+        all_grads = [ymir.path.weights.scale(w, 1 / max(1, np.linalg.norm(s, ord=2))) for w, s in zip(all_grads, Ws)]
+        self.model.optimizer.apply_gradients(zip(ymir.path.weights.add(*all_grads), self.model.weights))
         return np.mean(all_losses)

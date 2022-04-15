@@ -15,7 +15,7 @@ from . import captain
 
 class Captain(captain.Captain):
 
-    def __init__(self, params, network, rng=np.random.default_rng(), eps=3705, delta=1):
+    def __init__(self, model, network, rng=np.random.default_rng(), eps=3705, delta=1):
         r"""
         Construct the FLAME captain.
 
@@ -23,12 +23,12 @@ class Captain(captain.Captain):
         - eps: the epsilon parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP
         - delta: the delta parameter for the FLAME algorithm, respective to ($\epsilon, \delta$)-DP
         """
-        super().__init__(params, network, rng)
-        self.unraveller = ymir.path.weights.unraveller(params)
+        super().__init__(model, network, rng)
+        self.unraveller = ymir.path.weights.unraveller(model.get_weights())
         self.lamb = (1 / eps) * np.sqrt(2 * np.log(1.25 / delta))
 
     def update(self, all_weights):
-        G = ymir.path.weights.ravel(self.params)
+        G = ymir.path.weights.ravel(self.model.get_weights())
         Ws = np.array([ymir.path.weights.ravel(w) for w in all_weights])
         n_clients = Ws.shape[0]
         cs = smp.cosine_distances(Ws).astype(np.double)
@@ -46,8 +46,7 @@ class Captain(captain.Captain):
 
     def step(self):
         # Client side updates
-        all_weights, _, all_losses = self.network(self.params, self.rng, return_weights=True)
-
+        all_losses, all_weights, _ = self.network(self.model.get_weights(), self.rng, return_weights=True)
         # Captain side update
-        self.params = self.update(all_weights)
+        self.model.set_weights(self.update(all_weights))
         return np.mean(all_losses)

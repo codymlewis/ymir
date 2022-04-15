@@ -15,17 +15,8 @@ class Captain(captain.Captain):
     def __init__(self, params, network, rng=np.random.default_rng()):
         super().__init__(params, network, rng)
 
-    def update(self, all_grads):
-        """Update the stored batch sizes ($n_i$)."""
-        pass
-
     def step(self):
-        all_grads, _, all_losses = self.network(self.params, self.rng)
-
-        # Captain side aggregation scaling
-        self.update(all_grads)
+        all_losses, all_grads, _ = self.network(self.model.get_weights(), self.rng)
         all_grads = [ymir.path.weights.scale(g, 1 / len(all_grads)) for g in all_grads]
-
-        # Captain side update
-        self.params = ymir.path.weights.add(self.params, ymir.path.weights.add(*all_grads))
+        self.model.optimizer.apply_gradients(zip(ymir.path.weights.add(*all_grads), self.model.weights))
         return np.mean(all_losses)

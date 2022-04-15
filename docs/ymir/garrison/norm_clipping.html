@@ -54,9 +54,6 @@
                                 <a class="function" href="#Captain.__init__">Captain</a>
                         </li>
                         <li>
-                                <a class="function" href="#Captain.update">update</a>
-                        </li>
-                        <li>
                                 <a class="function" href="#Captain.step">step</a>
                         </li>
                 </ul>
@@ -98,28 +95,23 @@ scales down any updates that sit out side of the $l_2$ sphere of radius $M$.</p>
 
 <span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">Captain</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">M</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">M</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the norm clipping aggregator.</span>
 
 <span class="sd">        Optional arguments:</span>
 <span class="sd">        - M: the radius of the $l_2$ sphere to scale according to.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="n">M</span>
-
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
-        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Client side updates</span>
-        <span class="n">all_weights</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">all_losses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+        <span class="n">all_losses</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
         <span class="c1"># Captain side update</span>
-        <span class="n">Ws</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">all_weights</span><span class="p">]</span>
-        <span class="n">all_weights</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)))</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_weights</span><span class="p">,</span> <span class="n">Ws</span><span class="p">)</span>
-        <span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_weights</span><span class="p">))</span>
+        <span class="n">Ws</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">all_grads</span><span class="p">]</span>
+        <span class="n">all_grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)))</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_grads</span><span class="p">,</span> <span class="n">Ws</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">weights</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">all_losses</span><span class="p">)</span>
 </pre></div>
 
@@ -139,28 +131,23 @@ scales down any updates that sit out side of the $l_2$ sphere of radius $M$.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Captain</span><span class="p">(</span><span class="n">captain</span><span class="o">.</span><span class="n">Captain</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">M</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">M</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the norm clipping aggregator.</span>
 
 <span class="sd">        Optional arguments:</span>
 <span class="sd">        - M: the radius of the $l_2$ sphere to scale according to.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="n">M</span>
-
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
-        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Client side updates</span>
-        <span class="n">all_weights</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">all_losses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+        <span class="n">all_losses</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
         <span class="c1"># Captain side update</span>
-        <span class="n">Ws</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">all_weights</span><span class="p">]</span>
-        <span class="n">all_weights</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)))</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_weights</span><span class="p">,</span> <span class="n">Ws</span><span class="p">)</span>
-        <span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_weights</span><span class="p">))</span>
+        <span class="n">Ws</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">all_grads</span><span class="p">]</span>
+        <span class="n">all_grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)))</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_grads</span><span class="p">,</span> <span class="n">Ws</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">weights</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">all_losses</span><span class="p">)</span>
 </pre></div>
 
@@ -174,19 +161,19 @@ scales down any updates that sit out side of the $l_2$ sphere of radius $M$.</p>
                                         <div class="attr function"><a class="headerlink" href="#Captain.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">Captain</span><span class="signature">(params, network, rng=Generator(PCG64) at 0x7FC7EF791620, M=1.0)</span>
+            <span class="name">Captain</span><span class="signature">(model, network, rng=Generator(PCG64) at 0x7F5A87D19000, M=1.0)</span>
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">M</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(),</span> <span class="n">M</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the norm clipping aggregator.</span>
 
 <span class="sd">        Optional arguments:</span>
 <span class="sd">        - M: the radius of the $l_2$ sphere to scale according to.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="n">M</span>
 </pre></div>
 
@@ -203,25 +190,6 @@ scales down any updates that sit out side of the $l_2$ sphere of radius $M$.</p>
 
 
                             </div>
-                            <div id="Captain.update" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#Captain.update">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">update</span><span class="signature">(self, all_grads)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">):</span>
-        <span class="k">pass</span>
-</pre></div>
-
-        </details>
-
-    
-
-                            </div>
                             <div id="Captain.step" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#Captain.step">#&nbsp;&nbsp</a>
 
@@ -234,13 +202,11 @@ scales down any updates that sit out side of the $l_2$ sphere of radius $M$.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Client side updates</span>
-        <span class="n">all_weights</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">all_losses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+        <span class="n">all_losses</span><span class="p">,</span> <span class="n">all_grads</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
         <span class="c1"># Captain side update</span>
-        <span class="n">Ws</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">all_weights</span><span class="p">]</span>
-        <span class="n">all_weights</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)))</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_weights</span><span class="p">,</span> <span class="n">Ws</span><span class="p">)</span>
-        <span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_weights</span><span class="p">))</span>
+        <span class="n">Ws</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">all_grads</span><span class="p">]</span>
+        <span class="n">all_grads</span> <span class="o">=</span> <span class="p">[</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)))</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">all_grads</span><span class="p">,</span> <span class="n">Ws</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="o">*</span><span class="n">all_grads</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">weights</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">all_losses</span><span class="p">)</span>
 </pre></div>
 
