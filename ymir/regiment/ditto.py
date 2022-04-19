@@ -2,10 +2,9 @@
 A client for the Ditto FL personalization algorithm proposed in `https://arxiv.org/abs/2012.04221 <https://arxiv.org/abs/2012.04221>`_
 """
 
-from functools import partial
+import copy
 
-import jax
-import optax
+import tensorflow as tf
 
 import ymir.path
 
@@ -15,7 +14,7 @@ from . import scout
 class Scout(scout.Scout):
     """A federated learning client which performs personalization according to the Ditto algorithm."""
 
-    def __init__(self, params, opt, opt_state, loss, data, epochs, lamb=0.1):
+    def __init__(self, model, data, epochs, lamb=0.1, test_data=None):
         """
         Constructor for a Ditto Scout.
 
@@ -28,10 +27,8 @@ class Scout(scout.Scout):
         - epochs: number of epochs to train for per round
         - lamb: lambda parameter for the Ditto algorithm
         """
-        super().__init__(opt, opt_state, loss, data, epochs)
-        self.params = params
-        self.local_opt_state = opt_state
-        self.local_update = partial(update, opt, loss)
+        super().__init__(model, data, epochs, test_data)
+        self.global_model = copy.deepcopy(model)
         self.lamb = lamb
 
     def step(self, params, return_weights=False):
@@ -49,28 +46,37 @@ class Scout(scout.Scout):
             )
         return p if return_weights else ymir.path.tree.sub(params, p)
 
+    def step(self, weights, return_weights=False):
+        """
+        Perform a single local training loop.
+        """
+        self.global_model.set_weights(weights)
+        for _ in range(self.epochs):
+            x, y = next(self.data)
+            loss = self._local_step(x, y)
+        self._global_step(*next(self.data))
+        updates = self.global_model.get_weights(
+        ) if return_weights else ymir.path.weights.sub(weights, self.global_model.get_weights())
+        return loss, updates, self.batch_size
 
-@partial(jax.jit, static_argnums=(
-    0,
-    1,
-))
-def update(opt, loss, local_params, global_params, opt_state, lamb, X, y):
-    """
-    Local learning step.
+    @tf.function
+    def _local_step(self, x, y):
+        with tf.GradientTape() as tape:
+            logits = self.model(x, training=True)
+            loss = self.model.loss(y, logits)
+        gradients = ymir.path.weights.add(
+            tape.gradient(loss, self.model.trainable_weights),
+            ymir.path.weights.scale(
+                ymir.path.weights.sub(self.model.trainable_weights, self.global_model.trainable_weights), self.lamb
+            )
+        )
+        self.model.optimizer.apply_gradients(zip(gradients, self.model.trainable_weights))
+        return loss
 
-    Arguments:
-    - opt: optimizer
-    - loss: loss function
-    - local_params: local model parameters
-    - global_params: global model parameters
-    - opt_state: optimizer state
-    - lamb: lambda parameter, scales the amount of regularization
-    - X: samples
-    - y: labels
-    """
-    grads = ymir.path.tree.add(
-        jax.grad(loss)(local_params, X, y), ymir.path.tree.scale(ymir.path.tree.sub(local_params, global_params), lamb)
-    )
-    updates, opt_state = opt.update(grads, opt_state, local_params)
-    local_params = optax.apply_updates(local_params, updates)
-    return local_params, opt_state
+    @tf.function
+    def _global_step(self, x, y):
+        with tf.GradientTape() as tape:
+            logits = self.global_model(x, training=True)
+            loss = self.global_model.loss(y, logits)
+        self.global_model.optimizer.minimize(loss, self.global_model.trainable_weights, tape=tape)
+        return loss
