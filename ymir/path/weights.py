@@ -7,12 +7,12 @@ import numpy as np
 
 def uniform(weights, low=0.0, high=1.0, rng=np.random.default_rng()):
     """Create an equivalently shaped tree with random number elements in the range [low, high)"""
-    return [rng.uniform(low=low, high=high, size=x.shape) for x in weights]
+    return [rng.uniform(low=low, high=high, size=x.shape).astype(x.dtype) for x in weights]
 
 
 def add_normal(weights, loc=0.0, scale=1.0, rng=np.random.default_rng()):
     """Add normally distributed noise to each element of the tree, (mu=loc, sigma=scale)"""
-    return [x + rng.normal(loc=loc, scale=scale, size=x.shape) for x in weights]
+    return [x + rng.normal(loc=loc, scale=scale, size=x.shape).astype(x.dtype) for x in weights]
 
 
 def mul(weights_a, weights_b):

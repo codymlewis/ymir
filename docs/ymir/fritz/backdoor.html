@@ -53,9 +53,6 @@
             <li>
                     <a class="function" href="#backdoor_map">backdoor_map</a>
             </li>
-            <li>
-                    <a class="function" href="#update">update</a>
-            </li>
     </ul>
 
 
@@ -83,12 +80,10 @@
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
-<span class="kn">import</span> <span class="nn">jax</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">optax</span>
 
 
-<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a client into a backdoor adversary.</span>
 
@@ -99,13 +94,7 @@
 <span class="sd">    - attack_to: the label to replace the attack_from label with</span>
 <span class="sd">    - trigger: the trigger to use</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span>
-        <span class="s2">&quot;train&quot;</span><span class="p">,</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
-        <span class="nb">filter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span><span class="p">,</span>
-        <span class="nb">map</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">backdoor_map</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">backdoor_map</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">))</span>
 
 
 <span class="k">def</span> <span class="nf">backdoor_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">no_label</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -126,15 +115,6 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">no_label</span><span class="p">:</span>
         <span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">attack_to</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-
-
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Backdoor update function for clients.&quot;&quot;&quot;</span>
-    <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-    <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-    <span class="n">params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span>
 </pre></div>
 
         </details>
@@ -145,12 +125,12 @@
 
         
             <span class="def">def</span>
-            <span class="name">convert</span><span class="signature">(client, dataset, attack_from, attack_to, trigger)</span>:
+            <span class="name">convert</span><span class="signature">(client, attack_from, attack_to, trigger)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a client into a backdoor adversary.</span>
 
@@ -161,13 +141,7 @@
 <span class="sd">    - attack_to: the label to replace the attack_from label with</span>
 <span class="sd">    - trigger: the trigger to use</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span>
-        <span class="s2">&quot;train&quot;</span><span class="p">,</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
-        <span class="nb">filter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span><span class="p">,</span>
-        <span class="nb">map</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">backdoor_map</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">backdoor_map</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">trigger</span><span class="p">))</span>
 </pre></div>
 
         </details>
@@ -232,33 +206,6 @@ X and the trigger are in the range [0, 1].</p>
 <li>y: the labels to map</li>
 <li>no_label: whether to apply the map to the label</li>
 </ul>
-</div>
-
-
-                </section>
-                <section id="update">
-                            <div class="attr function"><a class="headerlink" href="#update">#&nbsp;&nbsp</a>
-
-                <div class="decorator">@partial(jax.jit, static_argnums=(0, 1, 2))</div>
-
-            <span class="def">def</span>
-            <span class="name">update</span><span class="signature">(opt, loss, data, params, opt_state, X, y)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Backdoor update function for clients.&quot;&quot;&quot;</span>
-    <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-    <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-    <span class="n">params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Backdoor update function for clients.</p>
 </div>
 
 

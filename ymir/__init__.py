@@ -2,4 +2,4 @@
 .. include:: README.md
 """
 
-from ymir import garrison, mp, regiment
+from ymir import fritz, garrison, mp, path, regiment

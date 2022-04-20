@@ -51,9 +51,6 @@
                     <a class="function" href="#convert">convert</a>
             </li>
             <li>
-                    <a class="function" href="#update">update</a>
-            </li>
-            <li>
                     <a class="function" href="#step">step</a>
             </li>
     </ul>
@@ -86,44 +83,38 @@
 <span class="kn">import</span> <span class="nn">ymir.path</span>
 
 
-<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">attack_type</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
+<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">attack_type</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a client into a free rider adversary.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">    - client: the client to convert</span>
 <span class="sd">    - attack_type: the attack type to use, options are &quot;random&quot;, &quot;delta, and &quot;advanced delta&quot;</span>
-<span class="sd">    - params: the parameters of the starting model</span>
+<span class="sd">    - weights: the parameters of the starting model</span>
 <span class="sd">    - rng: the random number generator to use</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">client</span><span class="o">.</span><span class="n">attack_type</span> <span class="o">=</span> <span class="n">attack_type</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">prev_params</span> <span class="o">=</span> <span class="n">params</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">prev_weights</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
     <span class="n">client</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">update</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Stub for non-existent free-rider update function.&quot;&quot;&quot;</span>
-    <span class="k">pass</span>
-
-
-<span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a single local training loop.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">    - params: the parameters of the global model from the most recent round</span>
+<span class="sd">    - weights: the parameters of the global model from the most recent round</span>
 <span class="sd">    - return_weights: if True, return the weights of the clients else return the gradients from the local training</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">attack_type</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
-        <span class="n">grad</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">low</span><span class="o">=-</span><span class="mf">10e-3</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">10e-3</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">low</span><span class="o">=-</span><span class="mf">10e-3</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">10e-3</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">grad</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prev_params</span><span class="p">)</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prev_weights</span><span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;advanced&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attack_type</span><span class="p">:</span>
-            <span class="n">grad</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">add_normal</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">10e-4</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">prev_params</span> <span class="o">=</span> <span class="n">params</span>
-    <span class="k">return</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span> <span class="k">if</span> <span class="n">return_weights</span> <span class="k">else</span> <span class="n">grad</span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add_normal</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">10e-4</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">prev_weights</span> <span class="o">=</span> <span class="n">weights</span>
+    <span class="k">return</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span> <span class="k">if</span> <span class="n">return_weights</span> <span class="k">else</span> <span class="n">grad</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
 </pre></div>
 
         </details>
@@ -134,25 +125,24 @@
 
         
             <span class="def">def</span>
-            <span class="name">convert</span><span class="signature">(client, attack_type, params, rng=Generator(PCG64) at 0x7F6A263F98C0)</span>:
+            <span class="name">convert</span><span class="signature">(client, attack_type, rng=Generator(PCG64) at 0x7F9F477A3300)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">attack_type</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">attack_type</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a client into a free rider adversary.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">    - client: the client to convert</span>
 <span class="sd">    - attack_type: the attack type to use, options are &quot;random&quot;, &quot;delta, and &quot;advanced delta&quot;</span>
-<span class="sd">    - params: the parameters of the starting model</span>
+<span class="sd">    - weights: the parameters of the starting model</span>
 <span class="sd">    - rng: the random number generator to use</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">client</span><span class="o">.</span><span class="n">attack_type</span> <span class="o">=</span> <span class="n">attack_type</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">prev_params</span> <span class="o">=</span> <span class="n">params</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">prev_weights</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span>
     <span class="n">client</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">update</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
 </pre></div>
 
@@ -165,31 +155,9 @@
 <ul>
 <li>client: the client to convert</li>
 <li>attack_type: the attack type to use, options are "random", "delta, and "advanced delta"</li>
-<li>params: the parameters of the starting model</li>
+<li>weights: the parameters of the starting model</li>
 <li>rng: the random number generator to use</li>
 </ul>
-</div>
-
-
-                </section>
-                <section id="update">
-                            <div class="attr function"><a class="headerlink" href="#update">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">update</span><span class="signature">(self, *_)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Stub for non-existent free-rider update function.&quot;&quot;&quot;</span>
-    <span class="k">pass</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Stub for non-existent free-rider update function.</p>
 </div>
 
 
@@ -199,27 +167,27 @@
 
         
             <span class="def">def</span>
-            <span class="name">step</span><span class="signature">(self, params, return_weights=False)</span>:
+            <span class="name">step</span><span class="signature">(self, weights, return_weights=False)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a single local training loop.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">    - params: the parameters of the global model from the most recent round</span>
+<span class="sd">    - weights: the parameters of the global model from the most recent round</span>
 <span class="sd">    - return_weights: if True, return the weights of the clients else return the gradients from the local training</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">attack_type</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
-        <span class="n">grad</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">low</span><span class="o">=-</span><span class="mf">10e-3</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">10e-3</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">low</span><span class="o">=-</span><span class="mf">10e-3</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">10e-3</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">grad</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prev_params</span><span class="p">)</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prev_weights</span><span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;advanced&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attack_type</span><span class="p">:</span>
-            <span class="n">grad</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">add_normal</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">10e-4</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">prev_params</span> <span class="o">=</span> <span class="n">params</span>
-    <span class="k">return</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span> <span class="k">if</span> <span class="n">return_weights</span> <span class="k">else</span> <span class="n">grad</span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add_normal</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">10e-4</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">prev_weights</span> <span class="o">=</span> <span class="n">weights</span>
+    <span class="k">return</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span> <span class="k">if</span> <span class="n">return_weights</span> <span class="k">else</span> <span class="n">grad</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
 </pre></div>
 
         </details>
@@ -229,7 +197,7 @@
 <p>Arguments:</p>
 
 <ul>
-<li>params: the parameters of the global model from the most recent round</li>
+<li>weights: the parameters of the global model from the most recent round</li>
 <li>return_weights: if True, return the weights of the clients else return the gradients from the local training</li>
 </ul>
 </div>

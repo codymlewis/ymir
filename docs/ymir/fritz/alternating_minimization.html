@@ -51,7 +51,7 @@
                     <a class="function" href="#convert">convert</a>
             </li>
             <li>
-                    <a class="function" href="#update">update</a>
+                    <a class="function" href="#step">step</a>
             </li>
     </ul>
 
@@ -78,10 +78,7 @@
 <span class="sd">Alternating minimization model poisoning, proposed in `https://arxiv.org/abs/1811.12470 &lt;https://arxiv.org/abs/1811.12470&gt;`_</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-
-<span class="kn">import</span> <span class="nn">jax</span>
-
+<span class="kn">import</span> <span class="nn">ymir.path</span>
 <span class="kn">from</span> <span class="nn">ymir.regiment</span> <span class="kn">import</span> <span class="n">scout</span>
 
 
@@ -95,21 +92,25 @@
 <span class="sd">    - stealth_epochs: the number of epochs to run the stealth training for</span>
 <span class="sd">    - stealth_data: a generator that yields the stealth data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">poison_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">update</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">stealth_update</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">scout</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">),</span> <span class="n">backend</span><span class="o">=</span><span class="n">client</span><span class="o">.</span><span class="n">backend</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">poison_step</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">step</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">stealth_step</span> <span class="o">=</span> <span class="n">scout</span><span class="o">.</span><span class="n">Scout</span><span class="o">.</span><span class="n">step</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">poison_epochs</span> <span class="o">=</span> <span class="n">poison_epochs</span>
     <span class="n">client</span><span class="o">.</span><span class="n">stealth_epochs</span> <span class="o">=</span> <span class="n">stealth_epochs</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">poison_data</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">data</span>
     <span class="n">client</span><span class="o">.</span><span class="n">stealth_data</span> <span class="o">=</span> <span class="n">stealth_data</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">update</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Alternating minimization update function for clients.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poison_epochs</span><span class="p">):</span>
-        <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poison_update</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poison_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poison_update</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stealth_epochs</span><span class="p">):</span>
-        <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stealth_update</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stealth_data</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stealth_data</span>
+        <span class="n">loss</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stealth_update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">(),</span> <span class="n">return_weights</span><span class="p">)</span>
+    <span class="n">updates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span> <span class="k">if</span> <span class="n">return_weights</span> <span class="k">else</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">loss</span><span class="p">,</span> <span class="n">updates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
 </pre></div>
 
         </details>
@@ -135,12 +136,13 @@
 <span class="sd">    - stealth_epochs: the number of epochs to run the stealth training for</span>
 <span class="sd">    - stealth_data: a generator that yields the stealth data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">poison_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">update</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">stealth_update</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">scout</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">),</span> <span class="n">backend</span><span class="o">=</span><span class="n">client</span><span class="o">.</span><span class="n">backend</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">poison_step</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">step</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">stealth_step</span> <span class="o">=</span> <span class="n">scout</span><span class="o">.</span><span class="n">Scout</span><span class="o">.</span><span class="n">step</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">poison_epochs</span> <span class="o">=</span> <span class="n">poison_epochs</span>
     <span class="n">client</span><span class="o">.</span><span class="n">stealth_epochs</span> <span class="o">=</span> <span class="n">stealth_epochs</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">poison_data</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">data</span>
     <span class="n">client</span><span class="o">.</span><span class="n">stealth_data</span> <span class="o">=</span> <span class="n">stealth_data</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">update</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="fm">__get__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -159,23 +161,26 @@
 
 
                 </section>
-                <section id="update">
-                            <div class="attr function"><a class="headerlink" href="#update">#&nbsp;&nbsp</a>
+                <section id="step">
+                            <div class="attr function"><a class="headerlink" href="#step">#&nbsp;&nbsp</a>
 
         
             <span class="def">def</span>
-            <span class="name">update</span><span class="signature">(self, params, opt_state, X, y)</span>:
+            <span class="name">step</span><span class="signature">(self, weights, return_weights=False)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">return_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Alternating minimization update function for clients.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poison_epochs</span><span class="p">):</span>
-        <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poison_update</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poison_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poison_update</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">return_weights</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stealth_epochs</span><span class="p">):</span>
-        <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stealth_update</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stealth_data</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stealth_data</span>
+        <span class="n">loss</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stealth_update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">(),</span> <span class="n">return_weights</span><span class="p">)</span>
+    <span class="n">updates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">()</span> <span class="k">if</span> <span class="n">return_weights</span> <span class="k">else</span> <span class="n">ymir</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">loss</span><span class="p">,</span> <span class="n">updates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
 </pre></div>
 
         </details>

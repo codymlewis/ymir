@@ -53,9 +53,6 @@
             <li>
                     <a class="function" href="#labelflip_map">labelflip_map</a>
             </li>
-            <li>
-                    <a class="function" href="#update">update</a>
-            </li>
     </ul>
 
 
@@ -83,11 +80,8 @@
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
-<span class="kn">import</span> <span class="nn">jax</span>
-<span class="kn">import</span> <span class="nn">optax</span>
 
-
-<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a client into a label flipping adversary.</span>
 
@@ -97,13 +91,7 @@
 <span class="sd">    - attack_from: the label to attack</span>
 <span class="sd">    - attack_to: the label to replace the attack_from label with</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span>
-        <span class="s2">&quot;train&quot;</span><span class="p">,</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
-        <span class="nb">filter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span><span class="p">,</span>
-        <span class="nb">map</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">labelflip_map</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">labelflip_map</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">))</span>
 
 
 <span class="k">def</span> <span class="nf">labelflip_map</span><span class="p">(</span><span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
@@ -111,19 +99,6 @@
     <span class="n">idfrom</span> <span class="o">=</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span>
     <span class="n">y</span><span class="p">[</span><span class="n">idfrom</span><span class="p">]</span> <span class="o">=</span> <span class="n">attack_to</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-
-
-<span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span>
-    <span class="mi">0</span><span class="p">,</span>
-    <span class="mi">1</span><span class="p">,</span>
-    <span class="mi">2</span><span class="p">,</span>
-<span class="p">))</span>
-<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Label flipping update function for clients.&quot;&quot;&quot;</span>
-    <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-    <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-    <span class="n">params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span>
 </pre></div>
 
         </details>
@@ -134,12 +109,12 @@
 
         
             <span class="def">def</span>
-            <span class="name">convert</span><span class="signature">(client, dataset, attack_from, attack_to)</span>:
+            <span class="name">convert</span><span class="signature">(client, attack_from, attack_to)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a client into a label flipping adversary.</span>
 
@@ -149,13 +124,7 @@
 <span class="sd">    - attack_from: the label to attack</span>
 <span class="sd">    - attack_to: the label to replace the attack_from label with</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">get_iter</span><span class="p">(</span>
-        <span class="s2">&quot;train&quot;</span><span class="p">,</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
-        <span class="nb">filter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span><span class="p">,</span>
-        <span class="nb">map</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">labelflip_map</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">opt</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span> <span class="o">==</span> <span class="n">attack_from</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">labelflip_map</span><span class="p">,</span> <span class="n">attack_from</span><span class="p">,</span> <span class="n">attack_to</span><span class="p">))</span>
 </pre></div>
 
         </details>
@@ -194,37 +163,6 @@
         </details>
 
             <div class="docstring"><p>Map function for converting a dataset to a label flipping dataset.</p>
-</div>
-
-
-                </section>
-                <section id="update">
-                            <div class="attr function"><a class="headerlink" href="#update">#&nbsp;&nbsp</a>
-
-                <div class="decorator">@partial(jax.jit, static_argnums=(0, 1, 2))</div>
-
-            <span class="def">def</span>
-            <span class="name">update</span><span class="signature">(opt, loss, data, params, opt_state, X, y)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="nd">@partial</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">,</span> <span class="n">static_argnums</span><span class="o">=</span><span class="p">(</span>
-    <span class="mi">0</span><span class="p">,</span>
-    <span class="mi">1</span><span class="p">,</span>
-    <span class="mi">2</span><span class="p">,</span>
-<span class="p">))</span>
-<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Label flipping update function for clients.&quot;&quot;&quot;</span>
-    <span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="o">*</span><span class="nb">next</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-    <span class="n">updates</span><span class="p">,</span> <span class="n">opt_state</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-    <span class="n">params</span> <span class="o">=</span> <span class="n">optax</span><span class="o">.</span><span class="n">apply_updates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">params</span><span class="p">,</span> <span class="n">opt_state</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Label flipping update function for clients.</p>
 </div>
 
 

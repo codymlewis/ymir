@@ -37,10 +37,15 @@ class DataIter:
 
     def map(self, f):
         self.X, self.y = f(self.X, self.y)
+        self.idx = np.arange(self.y.shape[0])
+        self.batch_size = self.y.shape[0] if self.batch_size is None else min(self.batch_size, self.y.shape[0])
         return self
 
     def filter(self, f):
-        self.idx = self.idx[f(self.y)]
+        idx = f(self.y)
+        self.X, self.y = self.X[idx], self.y[idx]
+        self.idx = np.arange(self.y.shape[0])
+        self.batch_size = self.y.shape[0] if self.batch_size is None else min(self.batch_size, self.y.shape[0])
         return self
 
 
