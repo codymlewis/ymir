@@ -48,12 +48,6 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
-                    <a class="function" href="#cross_entropy_loss">cross_entropy_loss</a>
-            </li>
-            <li>
-                    <a class="function" href="#ae_l2_loss">ae_l2_loss</a>
-            </li>
-            <li>
                     <a class="function" href="#fedmax_loss">fedmax_loss</a>
             </li>
             <li>
@@ -99,34 +93,6 @@ the input data, and the target labels, and return the specified loss value.</p>
 <span class="kn">import</span> <span class="nn">optax</span>
 
 <span class="kn">import</span> <span class="nn">ymir.path</span>
-
-
-<span class="k">def</span> <span class="nf">cross_entropy_loss</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">classes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Cross entropy/log loss, best suited for softmax models</span>
-<span class="sd">    </span>
-<span class="sd">    Additional arguments:</span>
-<span class="sd">    - classes: the number of classes in the dataset</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
-    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">classes</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">optax</span><span class="o">.</span><span class="n">softmax_cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">_apply</span>
-
-
-<span class="k">def</span> <span class="nf">ae_l2_loss</span><span class="p">(</span><span class="n">net</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Autoencoder L2 loss, internal function only takes the neural network parameters and input data&quot;&quot;&quot;</span>
-
-    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
-    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">optax</span><span class="o">.</span><span class="n">l2_loss</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">_apply</span>
 
 
 <span class="k">def</span> <span class="nf">fedmax_loss</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">net_act</span><span class="p">,</span> <span class="n">classes</span><span class="p">):</span>
@@ -222,74 +188,6 @@ the input data, and the target labels, and return the specified loss value.</p>
         </details>
 
             </section>
-                <section id="cross_entropy_loss">
-                            <div class="attr function"><a class="headerlink" href="#cross_entropy_loss">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">cross_entropy_loss</span><span class="signature">(net, classes)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">cross_entropy_loss</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">classes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Cross entropy/log loss, best suited for softmax models</span>
-<span class="sd">    </span>
-<span class="sd">    Additional arguments:</span>
-<span class="sd">    - classes: the number of classes in the dataset</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
-    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">classes</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">optax</span><span class="o">.</span><span class="n">softmax_cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">_apply</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Cross entropy/log loss, best suited for softmax models</p>
-
-<p>Additional arguments:</p>
-
-<ul>
-<li>classes: the number of classes in the dataset</li>
-</ul>
-</div>
-
-
-                </section>
-                <section id="ae_l2_loss">
-                            <div class="attr function"><a class="headerlink" href="#ae_l2_loss">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">ae_l2_loss</span><span class="signature">(net)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">ae_l2_loss</span><span class="p">(</span><span class="n">net</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Autoencoder L2 loss, internal function only takes the neural network parameters and input data&quot;&quot;&quot;</span>
-
-    <span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
-    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">optax</span><span class="o">.</span><span class="n">l2_loss</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">_apply</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Autoencoder L2 loss, internal function only takes the neural network parameters and input data</p>
-</div>
-
-
-                </section>
                 <section id="fedmax_loss">
                             <div class="attr function"><a class="headerlink" href="#fedmax_loss">#&nbsp;&nbsp</a>
 

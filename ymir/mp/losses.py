@@ -11,34 +11,6 @@ import optax
 import ymir.path
 
 
-def cross_entropy_loss(net, classes):
-    """
-    Cross entropy/log loss, best suited for softmax models
-    
-    Additional arguments:
-    - classes: the number of classes in the dataset
-    """
-
-    @jax.jit
-    def _apply(params, X, y):
-        logits = net.apply(params, X)
-        labels = jax.nn.one_hot(y, classes)
-        return jnp.mean(optax.softmax_cross_entropy(logits, labels))
-
-    return _apply
-
-
-def ae_l2_loss(net):
-    """Autoencoder L2 loss, internal function only takes the neural network parameters and input data"""
-
-    @jax.jit
-    def _apply(params, x):
-        z = net.apply(params, x)
-        return jnp.mean(optax.l2_loss(z, x))
-
-    return _apply
-
-
 def fedmax_loss(net, net_act, classes):
     """
     Loss function used for the FedMAX algorithm proposed in `https://arxiv.org/abs/2004.03657 <https://arxiv.org/abs/2004.03657>`_

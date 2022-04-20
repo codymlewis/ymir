@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ymir",
-    version="0.2.0",
+    version="1.0.0",
     author="Cody Lewis",
     description="Just another federated learning library",
     long_description=LONG_DESCRIPTION,
