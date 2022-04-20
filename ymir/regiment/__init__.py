@@ -2,5 +2,5 @@
 .. include:: README.md
 """
 
-from . import ditto
+from . import ditto, fedmax, fedprox, local
 from .scout import Scout

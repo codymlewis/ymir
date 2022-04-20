@@ -31,21 +31,6 @@ class Scout(scout.Scout):
         self.global_model = copy.deepcopy(model)
         self.lamb = lamb
 
-    def step(self, params, return_weights=False):
-        """
-        Perform a single local training loop.
-
-        Arguments:
-        - params: the parameters of the global model from the most recent round
-        - return_weights: if True, return the weights of the clients else return the gradients from the local training
-        """
-        p, self.opt_state = self.update(params, self.opt_state, *next(self.data))
-        for _ in range(self.epochs):
-            self.params, self.opt_state = self.local_update(
-                self.params, params, self.opt_state, self.lamb, *next(self.data)
-            )
-        return p if return_weights else ymir.path.tree.sub(params, p)
-
     def step(self, weights, return_weights=False):
         """
         Perform a single local training loop.
