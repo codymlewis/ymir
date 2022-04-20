@@ -35,6 +35,14 @@ class DataIter:
         idx = self.rng.choice(self.idx, self.batch_size, replace=False)
         return self.X[idx], self.y[idx]
 
+    def map(self, f):
+        self.X, self.y = f(self.X, self.y)
+        return self
+
+    def filter(self, f):
+        self.idx = self.idx[f(self.y)]
+        return self
+
 
 class Dataset:
     """Object that contains the full dataset, primarily to prevent the need for reloading for each client."""

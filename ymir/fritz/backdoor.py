@@ -4,12 +4,10 @@ Federated learning backdoor attack proposed in `https://arxiv.org/abs/1807.00459
 
 from functools import partial
 
-import jax
 import numpy as np
-import optax
 
 
-def convert(client, dataset, attack_from, attack_to, trigger):
+def convert(client, attack_from, attack_to, trigger):
     """
     Convert a client into a backdoor adversary.
 
@@ -20,13 +18,7 @@ def convert(client, dataset, attack_from, attack_to, trigger):
     - attack_to: the label to replace the attack_from label with
     - trigger: the trigger to use
     """
-    data = dataset.get_iter(
-        "train",
-        client.batch_size,
-        filter=lambda y: y == attack_from,
-        map=partial(backdoor_map, attack_from, attack_to, trigger)
-    )
-    client.update = partial(update, client.opt, client.loss, data)
+    client.data.filter(lambda y: y == attack_from).map(partial(backdoor_map, attack_from, attack_to, trigger))
 
 
 def backdoor_map(attack_from, attack_to, trigger, X, y, no_label=False):
@@ -47,12 +39,3 @@ def backdoor_map(attack_from, attack_to, trigger, X, y, no_label=False):
     if not no_label:
         y[idx] = attack_to
     return (X, y)
-
-
-@partial(jax.jit, static_argnums=(0, 1, 2))
-def update(opt, loss, data, params, opt_state, X, y):
-    """Backdoor update function for clients."""
-    grads = jax.grad(loss)(params, *next(data))
-    updates, opt_state = opt.update(grads, opt_state, params)
-    params = optax.apply_updates(params, updates)
-    return params, opt_state
