@@ -5,16 +5,16 @@ There are two generic forms of servers defined here:
 """
 
 from abc import ABC, abstractmethod
-from typing import Iterable, List
 
 import numpy as np
+import tensorflow as tf
 
 from ymir.mp.network import Network
 
 
 class Captain(ABC):
     """A captian that aggregates weights into a single global weight, $w_t$"""
-    model: List
+    model: tf.keras.Model
     network: Network
     rng: np.random.Generator
 
