@@ -85,21 +85,53 @@ class TestDistributions(unittest.TestCase):
         for i, d in enumerate(dist):
             np.testing.assert_allclose(np.unique(self.y[d]), i)
 
-# class TestNetwork(unittest.TestCase):
+class Client:
+    def step(self, weights, return_weights=False):
+        return 0.0, weights, 2
 
-#     def test_controller(self):
-#         controller = ymir.mp.network.Controller(0.1)
-#         self.assertListEqual(controller.clients, [])
-#         self.assertListEqual(controller.switches, [])
-#         self.assertEqual(controller.C, 0.1)
-#         self.assertEqual(controller.K, 0)
+    def analytics(self):
+        return [0.3, 0.4]
 
-#     def test_network(self):
-#         network = ymir.mp.network.Network(0.1)
-#         self.assertListEqual(network.clients, [])
-#         self.assertDictEqual(network.controllers, {})
-#         self.assertEqual(network.server_name, "")
-#         self.assertEqual(network.C, 0.1)
+class TestNetwork(unittest.TestCase):
+    def setUp(self):
+        self.network = ymir.mp.network.Network()
+        self.clients = [Client() for _ in range(10)]
+
+    def test_member_variables(self):
+        self.assertEqual(self.network.clients, [])
+        self.assertEqual(self.network.C, 1.0)
+        self.assertEqual(self.network.K, 0)
+        self.assertEqual(self.network.update_transform_chain, [])
+    
+    def test_len(self):
+        self.assertEqual(len(self.network), 0)
+        self.network.add_client(self.clients[0])
+        self.assertEqual(len(self.network), 1)
+        self.network = ymir.mp.network.Network()
+
+    def test_add_client(self):
+        self.network.add_client(self.clients[0])
+        self.assertEqual(self.network.clients[0], self.clients[0])
+        self.network = ymir.mp.network.Network()
+
+    def test_add_update_transform(self):
+        f = lambda x: x
+        self.network.add_update_transform(f)
+        self.assertEqual(self.network.update_transform_chain[0], f)
+
+    def test_call(self):
+        for client in self.clients:
+            self.network.add_client(client)
+        losses, weights, data = self.network(1.0)
+        self.assertEqual(losses, (0.0,) * len(self.clients))
+        self.assertEqual(weights, (1.0,) * len(self.clients))
+        self.assertEqual(data, (2,) * len(self.clients))
+    
+    def test_analytics(self):
+        for client in self.clients:
+            self.network.add_client(client)
+        np.testing.assert_array_equal(self.network.analytics(), [[0.3, 0.4]] * len(self.clients))
+
 
 if __name__ == '__main__':
     unittest.main()

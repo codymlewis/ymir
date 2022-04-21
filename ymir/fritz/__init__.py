@@ -5,4 +5,4 @@ The `GradientTransform` classes perform the adversarial activity at the network 
 and are to be added to the network controller.
 """
 
-from . import (alternating_minimization, backdoor, constrain_and_scale, freerider, labelflipper, mouther, scaler, smp)
+from . import (alternating_minimization, backdoor, constrain_and_scale, freerider, labelflipper, scaler, smp)
