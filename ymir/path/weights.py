@@ -57,7 +57,7 @@ def unravel(weights, skeleton):
 
 def unraveller(weights):
     """Return the shape of the weights"""
-    return [(x.shape, np.prod(x.shape)) for x in weights]
+    return [(x.shape, x.size) for x in weights]
 
 
 def get_names(model):

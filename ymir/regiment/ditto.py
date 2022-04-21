@@ -19,10 +19,7 @@ class Scout(scout.Scout):
         Constructor for a Ditto Scout.
 
         Arguments:
-        - params: initial model parameters
-        - opt: optimizer to use for training
-        - opt_state: initial optimizer state
-        - loss: loss function to use for training
+        - model: The model to be trained.
         - data: data to use for training
         - epochs: number of epochs to train for per round
         - lamb: lambda parameter for the Ditto algorithm
