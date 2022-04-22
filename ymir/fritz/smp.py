@@ -17,7 +17,7 @@ def convert(client, lamb, rho, val_data):
     client.rho = rho
     client.global_weights = client.model.get_weights()
     client.step = step.__get__(client)
-    client._step = _step.__get__(client)
+    client._step = tf.function(_step.__get__(client))
 
 
 def step(self, weights, return_weights=False):
@@ -34,7 +34,6 @@ def step(self, weights, return_weights=False):
     return loss, updates, self.batch_size
 
 
-@tf.function
 def _step(self, x, y, penalty):
     val_x, val_y = next(self.val_data)
     with tf.GradientTape() as tape:

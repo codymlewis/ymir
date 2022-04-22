@@ -34,6 +34,7 @@ def backdoor_map(attack_from, attack_to, trigger, X, y, no_label=False):
     - y: the labels to map
     - no_label: whether to apply the map to the label
     """
+    X, y = X.copy(), y.copy()
     idx = y == attack_from
     X[idx, :trigger.shape[0], :trigger.shape[1]] = np.minimum(1, X[idx, :trigger.shape[0], :trigger.shape[1]] + trigger)
     if not no_label:

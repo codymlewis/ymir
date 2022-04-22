@@ -14,7 +14,7 @@ def convert(client, alpha, defense_type):
     client.alpha = alpha
     client.global_weights = client.model.get_weights()
     client.step = step.__get__(client)
-    client._step = _step.__get__(client)
+    client._step = tf.function(_step.__get__(client))
     client.compute_penalty = _distance_penalty.__get__(
         client
     ) if defense_type == 'distance' else _cosine_penalty.__get__(client)
@@ -44,7 +44,6 @@ def _cosine_penalty(self):
     )
 
 
-@tf.function
 def _step(self, x, y, penalty):
     with tf.GradientTape() as tape:
         logits = self.model(x, training=True)

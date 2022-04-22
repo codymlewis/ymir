@@ -20,6 +20,7 @@ def convert(client, attack_from, attack_to):
 
 def labelflip_map(attack_from, attack_to, X, y):
     """Map function for converting a dataset to a label flipping dataset."""
+    X, y = X.copy(), y.copy()
     idfrom = y == attack_from
     y[idfrom] = attack_to
     return (X, y)

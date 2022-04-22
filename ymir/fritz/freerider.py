@@ -32,10 +32,10 @@ def step(self, weights, return_weights=False):
     - return_weights: if True, return the weights of the clients else return the gradients from the local training
     """
     if self.attack_type == "random":
-        grad = ymir.path.weights.uniform(weights, low=-10e-3, high=10e-3, rng=self.rng)
+        grad = ymir.path.weights.uniform(weights, low=-1e-3, high=1e-3, rng=self.rng)
     else:
         grad = ymir.path.weights.sub(weights, self.prev_weights)
         if "advanced" in self.attack_type:
-            grad = ymir.path.weights.add_normal(grad, loc=0.0, scale=10e-4, rng=self.rng)
+            grad = ymir.path.weights.add_normal(grad, loc=0.0, scale=1e-4, rng=self.rng)
     self.prev_weights = weights
     return 0.1, ymir.path.weights.add(weights, grad) if return_weights else grad, self.batch_size
