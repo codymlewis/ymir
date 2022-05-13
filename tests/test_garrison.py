@@ -67,8 +67,8 @@ class TestAggregator(tf.test.TestCase):
         [
             (aggregator, ) for aggregator in [
                 ymir.garrison.contra, ymir.garrison.fedavg, ymir.garrison.flame, ymir.garrison.foolsgold,
-                ymir.garrison.krum, ymir.garrison.median, ymir.garrison.norm_clipping, ymir.garrison.trmean,
-                ymir.garrison.viceroy 
+                ymir.garrison.krum, ymir.garrison.median, ymir.garrison.norm_clipping, ymir.garrison.phocas,
+                ymir.garrison.trmean, ymir.garrison.viceroy 
             ]
         ]
     )
