@@ -9,8 +9,8 @@ echo "$FILES" | xargs isort -q
 echo "$FILES" | xargs yapf -i -p -r
 
 # Update docs if any python files in the ymir module were changed
-ROOT=$(git rev-parse --show-toplevel)
-echo "$FILES" | grep '^ymir' && pdoc --math -d restructuredtext -o "$ROOT/docs" "$ROOT/ymir" && git add "$ROOT/docs"
+# ROOT=$(git rev-parse --show-toplevel)
+# echo "$FILES" | grep '^ymir' && pdoc --math -d restructuredtext -o "$ROOT/docs" "$ROOT/ymir" && git add "$ROOT/docs"
 
 # Add the updated files
 echo "$FILES" | xargs git add

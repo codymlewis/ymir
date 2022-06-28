@@ -1,6 +1,7 @@
-tensorflow
-numpy
+einops
 scikit-learn
+numpy
 hdbscan
 tqdm
+datasets
 parameterized

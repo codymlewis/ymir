@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ymir",
-    version="1.0.0",
+    version="1.1.0",
     author="Cody Lewis",
     description="Just another federated learning library",
     long_description=LONG_DESCRIPTION,
@@ -19,9 +19,9 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     install_requires=[
-        'tensorflow',
-        'numpy',
+        'einops',
         'scikit-learn',
+        'numpy',
         'hdbscan',
     ],
     include_package_data=True,

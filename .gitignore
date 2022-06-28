@@ -9,3 +9,6 @@ __pycache__/
 data/
 dist/
 build/
+tags
+Session.vim
+.ipynb_checkpoints/
