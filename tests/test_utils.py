@@ -8,39 +8,6 @@ import chex
 import ymir
 
 
-class TestDatasets(unittest.TestCase):
-
-    def setUp(self):
-        self.rng = np.random.default_rng(0)
-        self.X = self.rng.random((50, 1))
-        self.y = np.sin(self.X).round().reshape(-1)
-
-    def test_DataIter(self):
-        dataiter = ymir.utils.datasets.DataIter(self.X, self.y, 8, 2, self.rng)
-        np.testing.assert_allclose(dataiter.X, self.X)
-        np.testing.assert_allclose(dataiter.y, self.y)
-        self.assertEqual(dataiter.batch_size, 8)
-        self.assertEqual(dataiter.classes, 2)
-        self.assertEqual(dataiter.idx.shape, (len(self.X), ))
-        dataiter = ymir.utils.datasets.DataIter(self.X, self.y, 500, 2, self.rng)
-        self.assertEqual(dataiter.batch_size, len(self.X))
-
-    def test_Dataset(self):
-        dataset = ymir.utils.datasets.Dataset(
-            self.X, self.y,
-            np.concatenate((np.full(int(len(self.X) * 0.5), True), np.full(int(len(self.X) * 0.5), False)))
-        )
-        np.testing.assert_allclose(dataset.X, self.X)
-        np.testing.assert_allclose(dataset.y, self.y)
-        self.assertEqual(dataset.classes, 2)
-        X, y = dataset.train()
-        np.testing.assert_allclose(X, self.X[:int(len(self.X) * 0.5)])
-        np.testing.assert_allclose(y, self.y[:int(len(self.X) * 0.5)])
-        X, y = dataset.test()
-        np.testing.assert_allclose(X, self.X[int(len(self.X) * 0.5):])
-        np.testing.assert_allclose(y, self.y[int(len(self.X) * 0.5):])
-
-
 class TestDistributions(unittest.TestCase):
 
     def setUp(self):
@@ -50,39 +17,39 @@ class TestDistributions(unittest.TestCase):
 
     @parameterized.expand([(nclients, ) for nclients in range(1, 10)])
     def test_homogeneous(self, nclients):
-        dist = ymir.utils.distributions.homogeneous(self.X, self.y, nclients, 2, self.rng)
+        dist = ymir.utils.distributions.homogeneous(self.y, nclients, 2, self.rng)
         self.assertEqual(len(dist), nclients)
         for d in dist:
             np.testing.assert_allclose(np.unique(self.y[d]), np.unique(self.y))
 
     @parameterized.expand([(nclients, ) for nclients in range(1, 10)])
     def test_extreme_heterogeneous(self, nclients):
-        dist = ymir.utils.distributions.extreme_heterogeneous(self.X, self.y, nclients, 2, self.rng)
+        dist = ymir.utils.distributions.extreme_heterogeneous(self.y, nclients, 2, self.rng)
         self.assertEqual(len(dist), nclients)
         for i, d in enumerate(dist):
             self.assertEqual(np.unique(self.y[d]), i % 2)
 
     @parameterized.expand([(nclients, ) for nclients in range(1, 5)])
     def test_lda(self, nclients):
-        dist = ymir.utils.distributions.lda(self.X, self.y, nclients, 2, self.rng)
+        dist = ymir.utils.distributions.lda(self.y, nclients, 2, self.rng)
         self.assertEqual(len(dist), nclients)
         for d in dist:
             np.testing.assert_allclose(np.unique(self.y[d]), np.unique(self.y))
 
     def test_iid_partition(self):
-        dist = ymir.utils.distributions.iid_partition(self.X, self.y, 2, 2, self.rng)
+        dist = ymir.utils.distributions.iid_partition(self.y, 2, 2, self.rng)
         self.assertEqual(len(dist), 2)
         for d in dist:
             np.testing.assert_allclose(np.unique(self.y[d]), np.unique(self.y))
 
     def test_shard(self):
-        dist = ymir.utils.distributions.shard(self.X, self.y, 2, 2, self.rng)
+        dist = ymir.utils.distributions.shard(self.y, 2, 2, self.rng)
         self.assertEqual(len(dist), 2)
         for d in dist:
             np.testing.assert_allclose(np.unique(self.y[d]), np.unique(self.y))
 
     def test_assign_classes(self):
-        dist = ymir.utils.distributions.assign_classes(self.X, self.y, 2, 2, self.rng, classes=[0, 1])
+        dist = ymir.utils.distributions.assign_classes(self.y, 2, 2, self.rng, classes=[0, 1])
         self.assertEqual(len(dist), 2)
         for i, d in enumerate(dist):
             np.testing.assert_allclose(np.unique(self.y[d]), i)

@@ -1,8 +1,8 @@
-# aesir
+# ymir
 
-[![Tests status](https://github.com/codymlewis/aesir/actions/workflows/main.yml/badge.svg)](https://github.com/codymlewis/aesir/actions/workflows/main.yml)
-[![License](https://img.shields.io/github/license/codymlewis/aesir?color=blue)](LICENSE)
-![Commit activity](https://img.shields.io/github/commit-activity/m/codymlewis/aesir?color=red)
+[![Tests status](https://github.com/codymlewis/ymir/actions/workflows/main.yml/badge.svg)](https://github.com/codymlewis/ymir/actions/workflows/main.yml)
+[![License](https://img.shields.io/github/license/codymlewis/ymir?color=blue)](LICENSE)
+![Commit activity](https://img.shields.io/github/commit-activity/m/codymlewis/ymir?color=red)
 
 JAX-based Federated learning library focusing on its security.
 
@@ -15,7 +15,7 @@ to first follow https://github.com/google/jax#installation then proceed with thi
 You can either quickly install the package with
 
 ```sh
-pip install git+https://github.com/codymlewis/aesir.git
+pip install git+https://github.com/codymlewis/ymir.git
 ```
 
 or build it from source with
