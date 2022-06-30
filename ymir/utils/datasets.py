@@ -21,6 +21,16 @@ class HFDataIter:
         """Return this as an iterator."""
         return self
 
+    def filter(self, filter_fn):
+        self.ds = self.ds.filter(filter_fn)
+        self.len = len(self.ds)
+        return self
+
+    def map(self, map_fn):
+        self.ds = self.ds.map(map_fn)
+        self.len = len(self.Y)
+        return self
+
     def __next__(self):
         """Get a random batch."""
         idx = self.rng.choice(self.len, self.batch_size, replace=False)
@@ -49,6 +59,17 @@ class DataIter:
         self.len = len(Y)
         self.classes = classes
         self.rng = rng
+
+    def filter(self, filter_fn):
+        idx = filter_fn(self.Y)
+        self.X, self.Y = self.X[idx], self.Y[idx]
+        self.len = len(self.Y)
+        return self
+
+    def map(self, map_fn):
+        self.X, self.Y = map_fn(self.X, self.Y)
+        self.len = len(self.Y)
+        return self
 
     def __iter__(self):
         """Return this as an iterator."""
